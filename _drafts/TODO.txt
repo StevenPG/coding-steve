@@ -1,0 +1,4 @@
+- [ ] Copy posts from old dev blog
+- [ ] link old dev blog to new dev blog
+- [ ] Lemur Pro Review - add images throughout
+- [ ] Start working on benchmark post
