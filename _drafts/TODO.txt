@@ -2,3 +2,7 @@
 - [ ] link old dev blog to new dev blog
 - [ ] Lemur Pro Review - add images throughout
 - [ ] Start working on benchmark post
+- [x] section page on tutorials vs personal posts
+- [ ] cesium page with little example and gifs
+- [ ] how to cut text into something while 3d printing
+- [ ] how to do boolean removes
