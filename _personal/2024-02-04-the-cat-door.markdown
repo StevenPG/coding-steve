@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Freedom for the Three Legged Boy"
+title:  "Freedom of Travel for the Three Legged Boy"
 date:   2024-02-06 12:00:00 -0500
 categories: 
   - story

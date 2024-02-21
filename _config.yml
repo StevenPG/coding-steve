@@ -20,7 +20,7 @@ github_username:  StevenPG
 linkedin_username: test
 
 # For now until I get a dedicated site up and running
-baseurl: "/coding-steve" # the subpath of your site, e.g. /blog
+baseurl: "/" # the subpath of your site, e.g. /blog
 url: "https://stevenpg.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 
 # Google Analytics
