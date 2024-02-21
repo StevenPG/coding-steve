@@ -74,6 +74,62 @@ We can look at our `build.gradle` file and update the following components:
 That should be it! You may need to make updates to your IDE or environment to account
 for JDK21, but otherwise reloading the gradle project will get the ball rolling!
 
+### Gradle Plugin Updates
+
+To support native compilation, we're going to need to add a gradle plugin. Use your existing configuration (single or
+multi module) to add the following plugin:
+
+`id 'org.graalvm.buildtools.native' version '0.9.28'`
+
+Grab the latest version! This is the latest as of early 2024.
+
+Next we have 2 sections to configure, one will be explained later.
+
+The first is `bootBuildImage`. This may be different, but the instructions here will be
+in Gradle - Groovy.
+
+Add the following sections to your `build.gradle`
+
+    bootJar {
+        enabled = true
+    }
+    
+    bootBuildImage {
+        builder = "paketobuildpacks/builder-jammy-full:0.3.331"
+        environment = [
+            "BP_NATIVE_IMAGE": "true",
+            "BP_JVM_VERSION": "21"
+        ]
+    }
+    
+    graalvmNative {
+        testSupport = false
+        metadataRepository {
+        enabled = true
+    }
+    
+        binaries {
+            configureEach {
+                resources.autodetect()
+            }
+        }
+    }
+
+The `bootJar` section is for enabling our runnable jar that'll be used for building the native image.
+
+Second is the `bootBuildImage`. This is what we'll use to build runnable images that can be deployed.
+We include the configuration for native images and Java 21, but you can change these to the values needed
+for your project.
+
+Lastly, the `graalvmNative` section is where we'll add in our support for AoT tests and the metadata repository.
+
+The details around the metadata repository are included in the above Spring documentation, but suffice to say we'll want
+to enable the metadata repository in our project to avoid as many native issues as possible.
+
+These types of issues are explained in the documentation, with a deeper explanation available here:
+
+https://www.graalvm.org/22.0/reference-manual/native-image/
+
 ### Javax to Jakarta
 
 We're starting with an interesting change that occurred in 2020 around Jakarta EE. If you haven't
@@ -144,6 +200,27 @@ the converter() above across the two different examples.
 
 With that (and some nuanced changes that can be found in the official documentation); we've migrated
 the spring security configuration.
+
+At this point, we can take some time to review the documentation spring has made available
+to try to understand what's happening when we're creating these native images.
+
+Check out the documentation below. It doesn't attempt to go into detail like this guide does about individual changes,
+but it's invaluable to understand the information they've provided to be able to update our application
+to be a functional native image.
+
+https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#native-image
+
+### GraalVM and Building for the Tracing Agent
+
+### Running the Tracing Agent
+
+### How to run our Native Image
+
+- nativeCompile and nativeRun
+
+### Building Docker Containers
+
+- boot build image
 
 ## TODO
 - spring native updates
