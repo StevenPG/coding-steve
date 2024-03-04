@@ -212,6 +212,134 @@ https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#native-ima
 
 ### GraalVM and Building for the Tracing Agent
 
+Now for the most confusing but interesting part of this
+whole GraalVM process.
+
+It's mentioned in the documentation, but I hope here to summarize this complicated part of the native-image process.
+
+When you do a nativeCompile (for example), the GraalVM
+compilation process attempts to locate and mark down all
+of the places in the code things that aren't supported
+by native images are done. Things like reflection, dynamic property configuration, classloading, reading
+files off of the filesystem dynamically, etc.
+
+However, it's not perfect (far from it!), so we have to help out the process.
+
+The documentation on the tracing agent is available here:
+https://www.graalvm.org/latest/reference-manual/native-image/metadata/AutomaticMetadataCollection/
+
+There's a set of files that contain each a very specific chunk of data
+that together, informs the native-image what needs to be included in the compilation.
+
+These files are generated and then placed in the src/main/resources/META-INF/native-image folder.
+
+Trying to write these files by hand would be CRAZY difficult, so the tracing agent allows us to execute our application via the JVM, and the agent will write out the files for us.
+
+The methodology will be explained in the how-to-run section coming up!
+
+Until then, here are the files you can expect to generate (and sometimes manually update!)
+
+These files are (with examples!):
+
+1. jni-config.json
+
+    Any JNI references the application needs to know about
+
+        [{
+            "name":"java.util.Arrays",
+            "methods":[{"name":"asList","parameterTypes":["java.lang.Object[]"] }]
+        }]
+
+2. predefined-classes-config.json
+
+    Bytecode references to existing, predefined classes. (I've never seen this populated across the dozen applications I've migrated to native-image!)
+
+        [{
+            "type": "agent-extracted",
+            "classes": [
+                {
+                    "hash": "<class-bytecodes-hash>",
+                    "nameInfo": "<class-name"
+                }
+            ]
+        }]
+
+
+3. proxy-config.json
+
+    This file allows for pre-defining classes that will be generated at runtime. This isn't supported by native-image, so it'll need to be known in advance.
+
+    There are a handful of spring classes that the tracing agent will provide here that are managed via proxy!
+
+        [
+            {
+                "interfaces":["org.springframework.beans.factory.annotation.Qualifier"]
+            },
+            {
+                "interfaces":["org.springframework.boot.actuate.endpoint.annotation.Endpoint"]
+            },
+            {
+                "interfaces":["org.springframework.boot.actuate.endpoint.annotation.EndpointExtension"]
+            },
+            {
+                "interfaces":["org.springframework.boot.context.properties.ConfigurationProperties"]
+            },
+            {
+                "interfaces":["org.springframework.web.bind.annotation.ControllerAdvice"]
+            },
+            {
+                "interfaces":["org.springframework.web.bind.annotation.RequestMapping"]
+            }
+        ]
+
+4. reflect-config.json
+
+5. resource-config.json
+
+    This file specifies all of the known files and resource bundles to roll into the native-image to be referenced directly.
+
+    The tracing agent will add any file that must be included into the native-image, not just external resource bundles.
+
+        "resources":{
+            "includes":[{
+                "pattern":"\\QMETA-INF/resources/index.html\\E"
+            }, {
+                "pattern":"\\QMETA-INF/services/ch.qos.logback.classic.spi.Configurator\\E"
+            }, {
+                "pattern":"\\QMETA-INF/services/jakarta.el.ExpressionFactory\\E"
+            }, {
+                "pattern":"\\QMETA-INF/services/jakarta.persistence.spi.PersistenceProvider\\E"
+            }, {
+                "pattern":"\\QMETA-INF/services/jakarta.validation.ConstraintValidator\\E"
+            }]
+        }
+
+6. serialization-config.json
+
+    Serialization generally utilizes reflection in some way to retrieve information for the serialization process. This file is where those additional pieces of information can be provided.
+
+        {
+            "types": [
+                {
+                "condition": {
+                    "typeReachable": "<condition-class>"
+                },
+                "name": "<fully-qualified-class-name>",
+                "customTargetConstructorClass": "<custom-target-constructor-class>"
+                }
+            ],
+            "lambdaCapturingTypes": [
+                {
+                "condition": {
+                    "typeReachable": "<condition-class>"
+                },
+                "name": "<fully-qualified-class-name>",
+                "customTargetConstructorClass": "<custom-target-constructor-class>"
+                }
+            ]
+        }
+
+
 ### Running the Tracing Agent
 
 ### How to run our Native Image
