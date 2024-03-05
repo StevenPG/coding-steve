@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "A FULL guide to converting Spring Boot 2 app to Spring Boot 3 Native Image"
+title:  "Converting Spring Boot 2 to Spring Boot 3 Native Image w/ GraalVM"
 toc: true
-date:   2024-02-06 12:00:00 -0500
+date:   2024-03-04 12:00:00 -0500
 categories: 
   - software
   - spring boot
@@ -128,7 +128,7 @@ to enable the metadata repository in our project to avoid as many native issues 
 
 These types of issues are explained in the documentation, with a deeper explanation available here:
 
-https://www.graalvm.org/22.0/reference-manual/native-image/
+[GraalVM Native Image Documentation](https://www.graalvm.org/22.0/reference-manual/native-image/)
 
 ### Javax to Jakarta
 
@@ -147,7 +147,7 @@ add them into the project. For example, some older dependencies may require `jav
 
 That dependency can be found here:
 
-https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api
+[Maven Central: javax.servlet/javax.servlet-api](https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api)
 
 ### Spring Security
 
@@ -294,6 +294,10 @@ These files are (with examples!):
 
 4. reflect-config.json
 
+    Reflection is not supported within native-images! All the classes dynamically managed via reflection need to be configured here to be found in the native-image
+
+
+
 5. resource-config.json
 
     This file specifies all of the known files and resource bundles to roll into the native-image to be referenced directly.
@@ -342,17 +346,52 @@ These files are (with examples!):
 
 ### Running the Tracing Agent
 
+The tracing agent is an agent-lib we're going to attach to our jar execution. It's going to generate the files from the previous section.
+
+The goal of the tracing agent, is to exercise the application. Each time a new reflection activity occurs, or a new file is loaded, the agent will populate the file.
+
+We have two options, specifying the directory to write these files to, or merging to an existing directory.
+
+The latter makes it easier to test your application holistically and with multiple passthroughs.
+
+We'll first build the application using `./gradlew clean build`
+
+The first option, is simply providing a folder to the agent:
+
+    $JAVA_HOME/bin/java -agentlib:native-image-agent=config-merge-dir=/config -jar /build/libs/app.jar
+
+The merge option is 
+
+    $JAVA_HOME/bin/java -agentlib:native-image-agent=config-merge-dir=/config -jar /build/libs/app.jar
+
 ### How to run our Native Image
 
-- nativeCompile and nativeRun
+Now that we have our native-image metadata files that should help guarantee our application runs correctly, we can focus on the two initial ways to run out native-image.
+
+The first, manually compiling our executable and running it by hand.
+
+This is a simple process. First we run `./gradlew clean build nativeCompile`
+
+From there, you'll find a file called `app` in the ./build/native folder structure.
+
+You can run this simply using `./app`.
+
+Our second option, is a one-step process. We simply execute `./gradlew clean build nativeRun`
+
+This will nativeCompile and execute the application.
 
 ### Building Docker Containers
 
-- boot build image
+Our final (and most useful) native-image option is `bootBuildImage`.
 
-## TODO
-- spring native updates
-- requirements for spring native
-- running the tracing agent
-- running in gradle or maven
-- boot build image, with run command
+This command will perform a native compilation and embed the executable in a Docker image.
+
+This image can be run anywhere that supports Docker, making this command immensely powerful.
+
+There are plenty of configurations available with building this image as well; different base images, pre-named images, hard coded values like JVM_VERSION, etc.
+
+### Final Thoughts
+
+This is far from an all inclusive guide on GraalVM native-images using Spring Boot 3, but I hope anyone who stumbles across this page gains some value from it.
+
+I've filled this page will all of the things that slowed me down during my own journey to convert a handful of my company's applications into native-images.
