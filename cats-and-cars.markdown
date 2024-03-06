@@ -4,15 +4,8 @@ title: Cars and Cats
 permalink: /cars-and-cats/
 ---
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
+It's a little bare here, but I plan on adding some content specifically around my few cars and many cats.
 
-You can find the source code for Minima at GitHub:
-[jekyll][jekyll-organization] /
-[minima](https://github.com/jekyll/minima)
+If you feel so inclined, my cats have their own website. Originally created so I didn't have to keep track mentally of their birthdays and how old they all were.
 
-You can find the source code for Jekyll at GitHub:
-[jekyll][jekyll-organization] /
-[jekyll](https://github.com/jekyll/jekyll)
-
-
-[jekyll-organization]: https://github.com/jekyll
+[HowOldAreMyCats.com](https://howoldaremycats.com)
