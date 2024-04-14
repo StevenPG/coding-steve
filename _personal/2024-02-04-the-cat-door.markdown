@@ -1,17 +1,17 @@
 ---
 layout: post
-title:  "Freedom of Travel for the Three Legged Boy"
+title:  "Freedom of Travel for the Three Legged Cat"
 date:   2024-02-06 12:00:00 -0500
 categories: 
   - story
   - personal
 ---
 
-## Eli, the three legged boy
+## Eli, the three legged cat
 
 ![Image of Eli]({{site.url}}{{site.baseurl}}/assets/jVNLPaR.jpg)
 
-My wife and I have a BUNCH of cats, but our oldest boy is 14
+My wife and I have a BUNCH of cats, but our oldest boy cat is 14
 and just survived a battle with a cancerous tumor in his leg.
 
 A month of late night vet visits and over a year of secondary chemotherapy
