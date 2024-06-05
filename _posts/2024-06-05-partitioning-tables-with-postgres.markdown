@@ -99,24 +99,25 @@ Now that we have our database configured, we'll start reviewing some queries:
 
     explain select * from public.traffic_data
 
-![img_1.png](img_1.png)
+![Full Table Scan]({{site.url}}{{site.baseurl}}/assets/a368fd78-2be5-412b-b744-265e20ef4aef.png)
+
 
 We can see that when we query the entire table, we do a sequential scan across the
 entire database. Now lets throw a `where` clause in and see what happens!
 
 Lets run the query `select * from public.traffic_data where measure_date < '2024-02-15'`
 
-![img_2.png](img_2.png)
+![Query result]({{site.url}}{{site.baseurl}}/assets/7225cac2-0224-4f0a-ae86-8057a1629022.png)
 
 We see that we got the data we expected, but what happened in postgres?
 
-![img_3.png](img_3.png)
+![2 Table Scan]({{site.url}}{{site.baseurl}}/assets/8aaaf23a-d737-4e9d-bcb4-61ddcc9e5a2a.png)
 
 We see that we did a sequential scan of the two tables that were relevant for us,
 but we never scanned our third table. If we were to query a more specific date, we know
 that we would only scan the relevant table!
 
-![img_4.png](img_4.png)
+![Single Table Scan]({{site.url}}{{site.baseurl}}/assets/c972da73-155a-426a-b487-5ad73295c918.png)
 
 Pairing this with indexing allows us to really optimize our tables!
 
