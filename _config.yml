@@ -29,7 +29,7 @@ home_post_limit: 5
 
 # Build settings
 remote_theme: jekyll/minima
-gravatar_hash: 2136e716a089f4a3794f4007328c7bfb
+#gravatar_hash: ## YOUR GRAVATAR HASH ##
 plugins:
   - jekyll-feed
   - jekyll-remote-theme
