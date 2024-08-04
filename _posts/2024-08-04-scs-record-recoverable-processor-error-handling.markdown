@@ -59,7 +59,7 @@ spring:
 public class SpringCloudStreamExample {
 
     public static void main(String[] args) {
-        SpringApplication.run(KafkaStreamsRecoverableSample.class, args);
+        SpringApplication.run(SpringCloudStreamExample.class, args);
     }
 
     /**
@@ -86,53 +86,35 @@ Kafka Streams using the [Spring Cloud Stream Kafka Streams Binder][kafka-streams
 
 ## Problem
 
-Prior to the introduction of the RecordRecoverableProcessor, the only error handling available
-in the documentation was [handling deserialization errors][deserialization-error-scs-ks].
+Before the introduction of RecordRecoverableProcessor, handling errors in Kafka Streams was a real headache. The framework primarily focused on [deserialization errors][deserialization-error-scs-ks], leaving developers to fend for themselves when it came to processing logic.
 
-This means that you could only gracefully handle errors using the framework's common components by
-making sure the initial deserialization failed, or you had to perform try-catch wrapped operations at all
-processing points in the code.
+To manage exceptions, we were forced to wrap every processing step in a try-catch block and manually handle errors. This was not only tedious but also error-prone. To make matters worse, Spring Cloud Streams' default behavior was to kill the consumer thread upon any exception, preventing message acknowledgments and leading to endless restart loops.
 
-Better yet, the default configuration of spring-cloud-streams is to kill the consumer thread when an exception
-propagates to the root. Killing the thread results in a failure to ACK a kafka message.
-
-The final result of all of this, is a single exception thrown in a processing component makes an application
-continuously restart and fail on the same message over and over again.
-
-In my experience, resolving this meant applying a pattern where an optional was returned from every processing or transforming
-component and following it with a filter operation, checking whether there was an error or not.
-
-This also came with issues with Intellisense, as it sometimes could not determine the type from the
-return Optional.
+A common workaround was to return Optional values from processing components and filter out errors. However, this approach introduced its own set of challenges, including type inference issues and a less-than-ideal developer experience.
 
 {% highlight java %}
 // Pseudocode
 @Bean
 public Function<KStream<String, String>, KStream<String, String>> readAndPublish() {
     return input -> input
-      // This method has a complicated try-catch with logging and DLQ
-      // and then ends in Optional.empty() if an error occurred
-      .process(someMethod::returnsOptional)
-      .filter(optional -> optional.isPresent())
-      .process(someOtherMethod::returnsOptional2)
-      .filter(optional -> optional.isPresent())
-      .process(sometOtherOtherMethod::returnsOptional3)
-      .filter(optional -> optional.isPresent())
+        // This method has a complicated try-catch with logging and DLQ
+        // and then ends in Optional.empty() if an error occurred
+        .process(someMethod::returnsOptional)
+        .filter(optional -> optional.isPresent())
+        .process(someOtherMethod::returnsOptional2)
+        .filter(optional -> optional.isPresent())
+        .process(sometOtherOtherMethod::returnsOptional3)
+        .filter(optional -> optional.isPresent())
 }
 {% endhighlight %}
 
+Implementing a Dead Letter Queue (DLQ) was also a manual nightmare. While the framework offered DLQ capabilities for deserialization errors, there was no out-of-the-box solution for processing errors.
+
+It wasn't until after raising [Issue #2779][spring-cloud-stream-issues-2779] with the Spring Cloud Streams team that the RecordRecoverableProcessor was introduced. This marked a significant improvement in the framework's error handling capabilities.
+(Special thanks to [Soby Chako][soby-chako])
+
 Attempting to implement a dead-letter-queue process (which is fully available via configuration during deserialization)
 was an extremely manual process too.
-
-Cue my conversation with one of the Spring Cloud Streams' team members, [Soby Chako][soby-chako].
-
-[Spring Cloud Streams Issue #2779][spring-cloud-stream-issues-2779]
-
-It doesn't take long to hit this issue in production and become very frustrated with
-what feels like a massive gap in the framework's capabilities.
-
-The components to resolve this issue were available in the framework, but not as a standard
-component until after issue #2779 referenced above was resolved.
 
 ## Solution
 
