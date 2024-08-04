@@ -34,6 +34,7 @@ plugins:
   - jekyll-feed
   - jekyll-remote-theme
   - jekyll-sitemap
+  - jekyll-toc
 
 # Used by simple links page
 social-links:
@@ -51,3 +52,5 @@ social:
 collections:
   personal: # collection for personal blog posts
     output: true
+
+future: true
