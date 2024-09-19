@@ -43,10 +43,25 @@ doing our extra processing in an intermediate method!
 TODO - add an example here
 ```
 
-Here's the full example
+Here's the full example code (and we don't need a default class anymore with JDK 23!)
+
+```java
+import java.util.function.Predicate;
+import java.util.stream.Gatherer;
+import java.util.stream.Stream;
+
+void main(String[] args) {
+
+    var result = Stream.of(1, 2, 3) // The Stream
+            .filter((integer -> integer > 0)) // Intermediate Operation
+            // TODO - gather example
+            .toList(); // The Terminal Operation
+    System.out.println(result);
+}
+
+```
 
 ```bash
- $ 
  $ javac demo.java --enable-preview -source 23
  $ java --enable-preview demo
 ```
