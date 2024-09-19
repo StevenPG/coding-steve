@@ -64,7 +64,6 @@ plugins {
 
 ...
 
-implementation 'org.springframework.boot:spring-boot-starter-actuator'
 implementation 'org.springframework.boot:spring-boot-starter-security'
 implementation 'org.springframework.boot:spring-boot-starter-web'
 implementation 'org.springframework.security:spring-security-oauth2-client:6.4.0-M3'
@@ -162,5 +161,14 @@ public class HttpServiceFactory
     }
 }
 ```
+
+TODO - add links to things
+
+## Summary
+
+The new RestClient is already a popular alternative for developers in the Spring ecosystem. 
+The lack of an OAuth2 component has been a sore spot for new users converting over from WebClient. So with
+this new feature releasing in Spring Boot 3.4.0, it can now take it's rightful place as the default, non-webflux
+HTTP Client for Spring MVC!
 
 [soby-chako]: https://github.com/sobychacko
