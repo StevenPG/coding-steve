@@ -9,12 +9,49 @@ categories:
 - java
 ---
 
-Structure:
+# Brief
 
-- overview of oauth2
+My goal is to make posts like this to SIMPLEST place on the internet to learn how to do things
+that caused me trouble. That way, if this is found, someone doesn't have to do the same digging I had to do.
 
-- note about updating on release
-- webclient in latest spring boot
+# What is OAuth2?
+
+OAuth2 is a popular authorization framework that allows users to grant 
+third-party applications access to their data without revealing their 
+credentials. It's often used for services like social media logins, API integrations, and more.
+
+### Key Components of OAuth2
+
+- Authorization Server: Issues access tokens to clients after user authorization.
+- Resource Server: Protects resources that can only be accessed with valid access tokens.
+- Client: The application requesting access to resources.
+- User: The person granting or denying access.
+
+### How OAuth2 Works
+
+- User Authorization: The user grants permission to the client to access specific resources.
+- Token Exchange: The client exchanges an authorization code for an access token.
+- Resource Access: The client uses the access token to access protected resources.
+
+### Why RestClient?
+
+While **RestTemplate** has been a staple for many years, its limitations and the 
+introduction of more modern alternatives have led to its deprecation in recent 
+versions of Spring Boot. Let's delve into the key differences between WebClient 
+and RestClient and why RestTemplate is being phased out.
+
+**WebClient** is built on top of Project Reactor, a reactive
+programming framework. This means it can handle asynchronous operations efficiently, 
+making it well-suited for scenarios where concurrent requests and non-blocking I/O 
+are essential.
+
+However, with RestTemplate's deprecation, the only real Spring alternative is WebClient.
+This requires including the spring-webflux dependencies and calling `.block()` when making
+blocking API calls. It feels shoe-horned into place.
+
+In comes RestClient, a client written in the same functional style as WebClient, but supports
+synchronous and asynchronous out of the box. This lets us remove the spring-webflux
+dependency and use spring-web-mvc as the primary HTTP dependency for server and client applications.
 
 ## The Setup (Currently a Milestone Release but this will be updated!)
 
@@ -59,7 +96,7 @@ oauthClientId: clientId
 oauth2ClientSecret: mySecretSecret
 ```
 
-ConfigurationClass.java
+RestClientConfiguration.java
 ```java
 @Configuration
 public class RestClientConfiguration
