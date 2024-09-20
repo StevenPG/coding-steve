@@ -11,7 +11,7 @@ categories:
 
 # Brief
 
-My goal is to make posts like this to SIMPLEST place on the internet to learn how to do things
+My goal is to make posts like this the SIMPLEST place on the internet to learn how to do things
 that caused me trouble. That way, if this is found, someone doesn't have to do the same digging I had to do.
 
 # What is OAuth2?
@@ -37,7 +37,7 @@ credentials. It's often used for services like social media logins, API integrat
 
 While **RestTemplate** has been a staple for many years, its limitations and the 
 introduction of more modern alternatives have led to its deprecation in recent 
-versions of Spring Boot. Let's delve into the key differences between WebClient 
+versions of Spring. Let's dive into the key differences between WebClient 
 and RestClient and why RestTemplate is being phased out.
 
 **WebClient** is built on top of Project Reactor, a reactive
@@ -49,8 +49,8 @@ However, with RestTemplate's deprecation, the only real Spring alternative is We
 This requires including the spring-webflux dependencies and calling `.block()` when making
 blocking API calls. It feels shoe-horned into place.
 
-In comes RestClient, a client written in the same functional style as WebClient, but supports
-synchronous and asynchronous out of the box. This lets us remove the spring-webflux
+In comes [RestClient][restClientBlogAnnouncement], a client written in the same functional style as WebClient, but supports
+synchronous and asynchronous operations out of the box. This lets us remove the spring-webflux
 dependency and use spring-web-mvc as the primary HTTP dependency for server and client applications.
 
 ## The Setup (Currently a Milestone Release but this will be updated!)
@@ -61,12 +61,16 @@ build.gradle
 ```groovy
 plugins {
     id 'org.springframework.boot' version '3.3.3'
+}
 
-...
+    // ... The rest of the stuff, this is just what's required
 
-implementation 'org.springframework.boot:spring-boot-starter-security'
-implementation 'org.springframework.boot:spring-boot-starter-web'
-implementation 'org.springframework.security:spring-security-oauth2-client:6.4.0-M3'
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-security'
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.security:spring-security-oauth2-client:6.4.0-M3'
+    }
+}
 ```
 
 application.yaml
@@ -95,7 +99,7 @@ oauthClientId: clientId
 oauth2ClientSecret: mySecretSecret
 ```
 
-RestClientConfiguration.java
+RestClientConfiguration.java using the new [OAuth2ClientHttpRequestInterceptor][oAuth2ClientHttpRequestInterceptor]
 ```java
 @Configuration
 public class RestClientConfiguration
@@ -137,7 +141,9 @@ public class RestClientConfiguration
 }
 ```
 
-Bonus: Setting up HttpServiceProxyFactory (not required but useful!)
+### Bonus: Setting up HttpServiceProxyFactory (not required but useful!)
+
+[HttpServiceProxyFactory][httpServiceProxyFactory] is new in [Spring 6][httpServiceProxyFactoryJavadoc]!
 
 ```java
 public interface MyHttpService {
@@ -162,8 +168,6 @@ public class HttpServiceFactory
 }
 ```
 
-TODO - add links to things
-
 ## Summary
 
 The new RestClient is already a popular alternative for developers in the Spring ecosystem. 
@@ -171,4 +175,13 @@ The lack of an OAuth2 component has been a sore spot for new users converting ov
 this new feature releasing in Spring Boot 3.4.0, it can now take it's rightful place as the default, non-webflux
 HTTP Client for Spring MVC!
 
+## Update Note
+
+Once this is available in the official spring release, I'll update this from milestone versions and 
+hook up the JavaDoc instead of the originating Github Issue!
+
+[restClientBlogAnnouncement]: https://spring.io/blog/2023/07/13/new-in-spring-6-1-restclient
+[oAuth2ClientHttpRequestInterceptor]: https://github.com/spring-projects/spring-security/issues/13588
+[httpServiceProxyFactoryJavadoc]: https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/service/invoker/HttpServiceProxyFactory.html
+[httpServiceProxyFactory]: https://www.baeldung.com/spring-6-http-interface
 [soby-chako]: https://github.com/sobychacko
