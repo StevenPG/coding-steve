@@ -16,6 +16,8 @@ Just kidding, this isn't an LTS release
 The next LTS release that will include all of the changes in JDK 23 is XXXTODOXXX and 
 that won't be available until XXXTODOXXX
 
+We can install Java 23 quickly using Sdkman! using `sdk install java 23-tem`
+
 The link to the release notes for Jdk23 are right here: https://openjdk.org/projects/jdk/23/
 
 But this article is going to focus on a pretty powerful addition for anyone that's been
