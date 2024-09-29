@@ -16,6 +16,8 @@ description: >- # this means to ignore newlines until "baseurl:"
   At the very least, it's an outlet for writing about tech and things
   I find interesting!
 
+include: ["_includes"]
+
 github_username:  StevenPG
 linkedin_username: test
 
