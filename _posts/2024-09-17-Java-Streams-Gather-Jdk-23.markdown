@@ -13,9 +13,9 @@ categories:
 <sub><sup>Just kidding, this isn't an LTS release</sup></sub>
 
 The next LTS release that will include all of the changes in JDK 23 (assuming Gatherers make the cut) is JDK 25 and 
-that won't be available until September 2025.
+that won't be available until September 2025. When that happens, all of the links on this page will be updated for JDK 25.
 
-This post is a simple overview of the new Gatherer and related classes that have been added
+This post is a simple overview of the new [java.util.stream.Gatherer][gatherer-javadoc] and related classes that have been added
 as part of JDK 23. These operations are incredibly powerful and right away, I wasn't able to find
 a good resource on the web that helped me understand.
 
@@ -187,29 +187,29 @@ Gatherer.ofSequential(initializer, integrator);
 TODO - add link to JavaDoc for each with examples!
 The following are built-in gatherers in the [java.util.stream.Gatherers][gatherers-javadoc] class:
 
-fold is a stateful many-to-one gatherer which constructs an aggregate 
+[fold][fold] is a stateful many-to-one gatherer which constructs an aggregate 
 incrementally and emits that aggregate when no more input elements exist.
 
 TODO - example
 
-mapConcurrent is a stateful one-to-one gatherer which invokes a supplied 
+[mapConcurrent][mapConcurrent] is a stateful one-to-one gatherer which invokes a supplied 
 function for each input element concurrently, up to a supplied limit.
 
 TODO - example
 
-scan is a stateful one-to-one gatherer which applies a supplied function 
+[scan][scan] is a stateful one-to-one gatherer which applies a supplied function 
 to the current state and the current element to produce the next element, 
 which it passes downstream.
 
 TODO - example
 
-windowFixed is a stateful many-to-many gatherer which groups input 
+[windowFixed][windowFixed] is a stateful many-to-many gatherer which groups input 
 elements into lists of a supplied size, emitting the windows 
 downstream when they are full.
 
 TODO - example
 
-windowSliding is a stateful many-to-many gatherer which groups input 
+[windowSliding][windowSliding] is a stateful many-to-many gatherer which groups input 
 elements into lists of a supplied size. After the first window, each 
 subsequent window is created from a copy of its predecessor by dropping 
 the first element and appending the next element from the input stream..
@@ -227,4 +227,10 @@ TODO - find real life example
 [soby-chako]: https://github.com/sobychacko
 [openjdk23]: https://openjdk.org/projects/jdk/23/
 [jeps473]: https://openjdk.org/jeps/473
-[gatherers-javadoc]: https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/util/stream/Gatherer.html
+[gatherer-javadoc]: https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/util/stream/Gatherer.html
+[gatherers-javadoc]: https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/util/stream/Gatherers.html
+[windowFixed]: https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/util/stream/Gatherers.html#windowFixed(int)
+[windowSliding]: https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/util/stream/Gatherers.html#windowSliding(int)
+[fold]: https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/util/stream/Gatherers.html#fold(java.util.function.Supplier,java.util.function.BiFunction)
+[scan]: https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/util/stream/Gatherers.html#scan(java.util.function.Supplier,java.util.function.BiFunction)
+[mapConcurrent]: https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/util/stream/Gatherers.html#mapConcurrent(int,java.util.function.Function)
