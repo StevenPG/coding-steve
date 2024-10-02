@@ -14,7 +14,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  transform: skewY(-5deg);
+  transform: skewY(-0deg);
   transform-origin: top left;
   z-index: -1
 }
@@ -23,7 +23,7 @@
 /* Colors */
 
 h1 {
-  color: white;
+  color: black;
 }
 
 .text-muted {
@@ -31,23 +31,23 @@ h1 {
 }
 
 .card-body {
-  background-color: #134B70;
+  background-color: #4c4848;
 }
 
 p {
-  color: #fff;
+  color: white;
 }
 
 body {
-  background-color: #508C9B;
+  background-color: white;
 }
 
 .bg-skew-light:before {
-  background-color: #201E43
+  background-color: rgb(94, 90, 90)
 }
 
 .card-title a {
-  color: #fff
+  color: white
 }
 
 /* End Colors */
