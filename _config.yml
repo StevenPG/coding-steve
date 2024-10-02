@@ -30,7 +30,8 @@ google_analytics: G-2ZPXM6LPR3
 home_post_limit: 5
 
 # Build settings
-remote_theme: jekyll/minima
+#remote_theme: jekyll/minima
+remote_theme: pages-themes/cayman@v0.2.0
 #gravatar_hash: ## YOUR GRAVATAR HASH ##
 plugins:
   - jekyll-feed
