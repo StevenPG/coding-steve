@@ -1,11 +1,16 @@
 ---
-layout: post
-title:  "Jdk 23 Streams - How To Use Gather Operations"
-toc: true
-date: 2024-09-29 12:00:00 -0500
-categories:
-- software
-- java
+author: StevenPG
+pubDatetime: 2024-09-29T12:00:00.000Z
+title: Jdk 23 Streams - How To Use Gather Operations
+slug: jdk23-streams-gather
+featured: false
+# TODO replace ogImage
+ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+tags:
+  - software
+  - spring boot
+  - java
+description: An article on how to use the Gather stream operation in JDK23
 ---
 
 # It's finally here! JDK 23

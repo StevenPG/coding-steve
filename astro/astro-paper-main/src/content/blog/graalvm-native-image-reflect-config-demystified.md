@@ -1,13 +1,16 @@
 ---
-layout: post
-title:  "GraalVM Native Image Reflect Config Demystified"
-toc: true
-date:   2024-04-13 12:00:00 -0500
-categories: 
+author: StevenPG
+pubDatetime: 2024-04-13T12:00:00.000Z
+title: GraalVM Native Image Reflect Config Demystified
+slug: graalvm-reflect-config-demystified
+featured: true
+# TODO replace ogImage
+ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+tags:
   - software
   - spring boot
   - graalvm
-  - native-image
+description: An article describing the latest way to log spring web client requests and responses using Logbook.
 ---
 
 One of the hardest things about compiling a Spring Boot application into a GraalVM native image is
@@ -37,7 +40,7 @@ tracing agent looks to write.
 To accomplish this, we're going to create a new project and go through a typical workflow to build and update
 a native-image application.
 
-![Image of Spring Initializr]({{site.url}}{{site.baseurl}}/assets/f8eae9e1-d1b0-4ee0-a19a-56a6ea290af3.png)
+![Image of Spring Initializr](/assets/f8eae9e1-d1b0-4ee0-a19a-56a6ea290af3.png)
 
 We can use Spring Initializr to generate our test project.
 
@@ -162,7 +165,7 @@ creating the `src/main/resources/META-INF/native-image` directory.
 
 Inside, we'll create the reflect-config.json file.
 
-![Directory Sample]({{site.url}}{{site.baseurl}}/assets/b40a4c04-5106-4a2e-9947-95eadcc59bb3.png)
+![Directory Sample](/assets/b40a4c04-5106-4a2e-9947-95eadcc59bb3.png)
 
 ## Breaking Down Reflect-Config
 

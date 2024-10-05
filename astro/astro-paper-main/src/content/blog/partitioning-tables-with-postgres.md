@@ -1,12 +1,16 @@
 ---
-layout: post
-title:  "Partitioning Tables with Progress"
-toc: true
-date:   2024-06-05 12:00:00 -0500
-categories: 
+author: StevenPG
+pubDatetime: 2024-06-05T12:00:00.000Z
+title: Partitioning Tables with Progress
+slug: partitioning-tables-postgres
+featured: false
+# TODO replace ogImage
+ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+tags:
   - software
   - spring boot
   - postgres
+description: An article walking through a demo of partitioning tables with postgres.
 ---
 
 # Partitioning Databases in PostgreSQL
@@ -99,7 +103,7 @@ Now that we have our database configured, we'll start reviewing some queries:
 
     explain select * from public.traffic_data
 
-![Full Table Scan]({{site.url}}{{site.baseurl}}/assets/a368fd78-2be5-412b-b744-265e20ef4aef.png)
+![Full Table Scan](/assets/a368fd78-2be5-412b-b744-265e20ef4aef.png)
 
 
 We can see that when we query the entire table, we do a sequential scan across the
@@ -107,17 +111,17 @@ entire database. Now lets throw a `where` clause in and see what happens!
 
 Lets run the query `select * from public.traffic_data where measure_date < '2024-02-15'`
 
-![Query result]({{site.url}}{{site.baseurl}}/assets/7225cac2-0224-4f0a-ae86-8057a1629022.png)
+![Query result](/assets/7225cac2-0224-4f0a-ae86-8057a1629022.png)
 
 We see that we got the data we expected, but what happened in postgres?
 
-![2 Table Scan]({{site.url}}{{site.baseurl}}/assets/8aaaf23a-d737-4e9d-bcb4-61ddcc9e5a2a.png)
+![2 Table Scan](/assets/8aaaf23a-d737-4e9d-bcb4-61ddcc9e5a2a.png)
 
 We see that we did a sequential scan of the two tables that were relevant for us,
 but we never scanned our third table. If we were to query a more specific date, we know
 that we would only scan the relevant table!
 
-![Single Table Scan]({{site.url}}{{site.baseurl}}/assets/c972da73-155a-426a-b487-5ad73295c918.png)
+![Single Table Scan](/assets/c972da73-155a-426a-b487-5ad73295c918.png)
 
 Pairing this with indexing allows us to really optimize our tables!
 

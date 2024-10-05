@@ -1,10 +1,15 @@
 ---
-layout: post
-title:  "Logging Request Body with Spring WebClient"
-date:   2024-03-05 12:00:00 -0500
-categories: 
+author: StevenPG
+pubDatetime: 2024-03-05T12:00:00.000Z
+title: Logging Request Body with Spring WebClient
+slug: request-body-with-spring-webclient
+featured: true
+# TODO replace ogImage
+ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+tags:
   - software
-  - spring webflux
+  - spring boot
+description: An article describing the latest way to log spring web client requests and responses using Logbook.
 ---
 
 ## Previously!
@@ -17,7 +22,7 @@ I was frustrated that I couldn't find any full examples, so (being the change I 
 
 That's resulted in a very very small, but non-zero amount of traffic to that article.
 
-![Image of page view statistics, showing 22k visitors since 2020]({{site.url}}{{site.baseurl}}/assets/3GzdjxY.png)
+![Image of page view statistics, showing 22k visitors since 2020](/assets/3GzdjxY.png)
 
 While that would normally be something I'm happy about, the methodology in my old article is outdated and poorly recommended.
 

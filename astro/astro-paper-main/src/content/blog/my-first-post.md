@@ -1,17 +1,26 @@
 ---
-layout: post
-title:  "My First Post, on My First Blog"
-date:   2024-02-04 12:00:00 -0500
-categories: 
+author: StevenPG
+pubDatetime: 2024-02-04T12:00:00.000Z
+title: My First Post, on My First Blog
+slug: my-first-post
+featured: false
+# TODO replace ogImage
+ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+tags:
   - story
   - tech
+description: My first blog post, describing the original Jekyll blog and a migration to Astro.
 ---
 
 ## The Hook
 
+TODO - update with Astro migration
+
 What do I write on my first post under the "Tech Posts" section of this blog? It's gotta be something
 tech related... And the only thing on my mind is this blog made with Jekyll. So I'll write a little
 bit about my setup and Jekyll!
+
+TODO - replace this with Astro migration, keep jekyll stuff
 
 ## How these pages were built
 
@@ -26,7 +35,7 @@ So I jumped over to [Jekyll's Install][jekyll-install] and got it installed on m
 Speaking of my local machine, I do nearly all of my work on a steeply discounted Apple M1 Pro I picked up
 right when the M2 Pro released.
 
-![Image of Directory]({{site.url}}{{site.baseurl}}/assets/LvdGYAG.jpg)
+![Image of Directory](/assets/LvdGYAG.jpg)
 
 In the spirit of open source, I've been cross referencing Chad's blog
 and the official Jekyll documentation.
@@ -47,7 +56,7 @@ I wanted by default (default.html), and for my home page (home.html).
 
 [The layout docs are right here](https://jekyllrb.com/docs/step-by-step/04-layouts/)
 
-![Image of Directory]({{site.url}}{{site.baseurl}}/assets/44wMq0Z.png)
+![Image of Directory](/assets/44wMq0Z.png)
 
 I followed the instructions in the Blogging section of the step-by-step and took some
 inspiration from Chad's repository, and separated my posts into personal and tech.

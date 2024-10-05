@@ -1,12 +1,16 @@
 ---
-layout: post
-title:  "Easy Spring Rest Client w/ OAuth2"
-toc: true
-date: 2024-09-19 12:00:00 -0500
-categories:
-- software
-- spring boot
-- java
+author: StevenPG
+pubDatetime: 2024-09-19T12:00:00.000Z
+title: Easy Spring Rest Client w/ OAuth2
+slug: spring-rest-client-oauth2
+featured: true
+# TODO replace ogImage
+ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+tags:
+  - software
+  - spring boot
+  - java
+description: An article walking through a demo of partitioning tables with postgres.
 ---
 
 # Brief

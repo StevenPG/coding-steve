@@ -1,15 +1,20 @@
 ---
-layout: post
-title:  "Freedom of Travel for the Three Legged Cat"
-date:   2024-02-06 12:00:00 -0500
-categories: 
+author: StevenPG
+pubDatetime: 2024-02-06T12:00:00.000Z
+title: Freedom of Travel for the Three Legged Cat
+slug: tripod-travel-freedom
+featured: false
+# TODO replace ogImage
+ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+tags:
   - story
-  - personal
+  - cats
+description: My first blog post, describing the original Jekyll blog and a migration to Astro.
 ---
 
 ## Eli, the three legged cat
 
-![Image of Eli]({{site.url}}{{site.baseurl}}/assets/jVNLPaR.jpg)
+![Image of Eli](/assets/jVNLPaR.jpg)
 
 My wife and I have a BUNCH of cats, but our oldest boy cat is 14
 and just survived a battle with a cancerous tumor in his leg.
@@ -22,7 +27,7 @@ Unfortunately, the result was a very agitated three legged cat.
 A few months later though, he's happy and energetic again. Sometimes 
 I wonder if he ever remembers having four legs. He's adapted to it surprisingly well.
 
-![Picture of Three Legged Cat]({{site.url}}{{site.baseurl}}/assets/ILGJD3b.jpg)
+![Picture of Three Legged Cat](/assets/ILGJD3b.jpg)
 
 (Wilson is making an appearance in the image above)
 
@@ -53,7 +58,7 @@ are registered via microchip to get into the office.
 I occasionally spot the other cats peeking in, jealous of the special portal that only allows in select creatures. It has to
 appear as magic to them, and I know some of them have attempted to open the door, only to find it locked and unable to be opened.
 
-![Image of Cat peeking through cat door]({{site.url}}{{site.baseurl}}/assets/EZb9cQ7.jpg)
+![Image of Cat peeking through cat door](/assets/EZb9cQ7.jpg)
 
 Thankfully, our objective has been complete. Eli has total freedom to enter and exit the office all day long. It always
 impresses me how technology can be creatively used for functional purposes outside of the originally intended purpose.

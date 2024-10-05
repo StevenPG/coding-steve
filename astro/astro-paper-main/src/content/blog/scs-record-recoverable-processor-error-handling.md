@@ -1,13 +1,17 @@
 ---
-layout: post
-title:  "Spring Cloud Stream's RecordRecoverableProcessor for Workflow Error Handling"
-toc: true
-date: 2024-08-04 12:00:00 -0500
-categories:
-- software
-- spring boot
-- java
-- kafka
+author: StevenPG
+pubDatetime: 2024-08-04T12:00:00.000Z
+title: Spring Cloud Stream's RecordRecoverableProcessor for Workflow Error Handling
+slug: scs-record-recoverable-processor
+featured: false
+# TODO replace ogImage
+ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+tags:
+  - software
+  - spring boot
+  - java
+  - kafka
+description: An article walking through a demo of partitioning tables with postgres.
 ---
 
 # Brief
@@ -35,7 +39,7 @@ event driven applications to set the stage for why we would use this framework o
 
 ##### Minimal Configuration
 
-{% highlight yaml %}
+```yaml
 spring:
   cloud:
     function:
@@ -49,7 +53,7 @@ spring:
         # The configuration for the function OUT binding
         readAndPublish-out-0:
           destination: my.out.topic
-{% endhighlight %}
+```
 
 ##### Minimal Java Code
 

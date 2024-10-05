@@ -1,9 +1,14 @@
 ---
-layout: post
-title:  "Homelab Drives & Buying Used"
-date:   2024-07-21 12:00:00 -0500
-categories: 
+author: StevenPG
+pubDatetime: 2024-07-21T12:00:00.000Z
+title: Homelab Drives & Buying Used
+slug: buying-used-harddrives
+featured: false
+# TODO replace ogImage
+ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+tags:
   - hardware
+description: An article with a short overview of my experiece buying used drives and using smartctl.
 ---
 
 # Homelab Drives & Buying Used
@@ -19,10 +24,10 @@ lsblk: Displays block devices with their mount points, label, UUID, and size.
 smartctl: Retrieves S.M.A.R.T. data, which provides information about the drive's health, performance, and reliability.
 Basic Commands:
 
-{% highlight bash %}
+```bash
 sudo lsblk -f
 sudo smartctl --all /dev/sda > output.txt
-{% endhighlight %}
+```
 
 
 The first command lists your block devices, while the second saves the S.M.A.R.T. data of /dev/sda to a text file for analysis.
