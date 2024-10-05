@@ -4,8 +4,8 @@ pubDatetime: 2024-03-04T12:00:00.000Z
 title: Converting Spring Boot 2 to Spring Boot 3 Native Image w/ GraalVM
 slug: spring2-to-spring3-graalvm
 featured: true
-# TODO replace ogImage
-ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+
+ogImage: https://i.imgur.com/4ICZldG.jpeg
 tags:
   - story
   - spring boot

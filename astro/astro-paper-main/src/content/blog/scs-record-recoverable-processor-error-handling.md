@@ -4,8 +4,8 @@ pubDatetime: 2024-08-04T12:00:00.000Z
 title: Spring Cloud Stream's RecordRecoverableProcessor for Workflow Error Handling
 slug: scs-record-recoverable-processor
 featured: false
-# TODO replace ogImage
-ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+
+ogImage: https://i.imgur.com/4ICZldG.jpeg
 tags:
   - software
   - spring boot
@@ -57,8 +57,7 @@ spring:
 
 ##### Minimal Java Code
 
-{% highlight java %}
-
+```java
 @SpringBootApplication
 public class SpringCloudStreamExample {
 
@@ -78,7 +77,7 @@ public class SpringCloudStreamExample {
         return input -> input.filter(value -> value != null);
     }
 }
-{% endhighlight %}
+```
 
 This minimal code example does a simple null check and passes the message from the in-0 configuration
 to the out-0 configuration. The framework comes with a TON of sensible default values, so a basic configuration is all
@@ -96,7 +95,7 @@ To manage exceptions, we were forced to wrap every processing step in a try-catc
 
 A common workaround was to return Optional values from processing components and filter out errors. However, this approach introduced its own set of challenges, including type inference issues and a less-than-ideal developer experience.
 
-{% highlight java %}
+```java
 // Pseudocode
 @Bean
 public Function<KStream<String, String>, KStream<String, String>> readAndPublish() {
@@ -110,7 +109,7 @@ public Function<KStream<String, String>, KStream<String, String>> readAndPublish
         .process(sometOtherOtherMethod::returnsOptional3)
         .filter(optional -> optional.isPresent())
 }
-{% endhighlight %}
+```
 
 Implementing a Dead Letter Queue (DLQ) was also a manual nightmare. While the framework offered DLQ capabilities for deserialization errors, there was no out-of-the-box solution for processing errors.
 
@@ -136,7 +135,7 @@ Both operate on a similar concept.
 
 This is the main body of the [RecordRecoverableProcessor][rrp]:
 
-{% highlight java %}
+```java
 try {
     // The delegate function is the function passed into the processor
     Record<KOut, VOut> downstreamRecord = this.delegateFunction.apply(record);
@@ -159,9 +158,6 @@ through the stream, and no exception is propagated.
 Below are examples of each of the two new components:
 
 #### DltAwareProcessor
-
-{% highlight java %}
-
 @Bean
 public Function<KStream<UUID, String>, KStream<UUID, String>> dltAwareExample(
     DltPublishingContext dltPublishingContext) {
@@ -170,8 +166,7 @@ public Function<KStream<UUID, String>, KStream<UUID, String>> dltAwareExample(
             throw new RuntimeException("Something went wrong, Error");
         }, "my.dead-letter-queue.topic", dltPublishingContext));
 }
-
-{% endhighlight %}
+```
 
 #### RecordRecoverableProcessor
 
@@ -179,8 +174,7 @@ Here is a sample RecordRecoverableProcessor, fully laid out. An IDE will suggest
 of this example into lambda functions, making it significantly cleaner. I will link both here to show what exactly
 is happening with the expanded version, but also how short it can be with the cleaned up version.
 
-{% highlight java %}
-
+```java
 // Expanded version
 @Bean
 public Function<KStream<String, String>, KStream<String, String>> rrpDemo(){
@@ -217,9 +211,7 @@ public Function<KStream<String, String>, KStream<String, String>> rrpDemo(){
         )
     ));
 }
-
-{% endhighlight %}
-
+```
 
 
 ### Finally

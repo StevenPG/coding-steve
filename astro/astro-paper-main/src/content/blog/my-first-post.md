@@ -4,67 +4,27 @@ pubDatetime: 2024-02-04T12:00:00.000Z
 title: My First Post, on My First Blog
 slug: my-first-post
 featured: false
-# TODO replace ogImage
-ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+
+ogImage: https://i.imgur.com/4ICZldG.jpeg
 tags:
   - story
   - tech
 description: My first blog post, describing the original Jekyll blog and a migration to Astro.
 ---
 
-## The Hook
+## The Origins
 
-TODO - update with Astro migration
+This is actually the second iteration of my blog, the first was built using Jekyll. That worked pretty well until I started wanted to configure the themes... things started to get a little hairy if you went
+outside the template, and I found myself creating a new template.
 
-What do I write on my first post under the "Tech Posts" section of this blog? It's gotta be something
-tech related... And the only thing on my mind is this blog made with Jekyll. So I'll write a little
-bit about my setup and Jekyll!
+I started digging and found Astro! It looks like Astro is used by a TON of companies, and plenty of bloggers, so I figured I'd try it out.
 
-TODO - replace this with Astro migration, keep jekyll stuff
+It's pretty simple, and I do a lot of React for work so I was pretty comfortable!
 
-## How these pages were built
+My original blog was a carbon copy of the template set up by Chad Baldwin, who has his template running for his own blog at chadbaldwin.net, so shout-out to him for getting me started!
 
-Shout-out to [Chad Baldwin][chadbaldwin.net], who's blog I came across when I started searching on how to
-get this Jekyll thing up off the ground. He created a really cool bootstrapping github template that I
-planned on using, but I like to understand tools by messing with them myself.
+THIS blog is built off of astro-paper, repo available here: https://github.com/satnaing/astro-paper
 
-His site was the inspiration for this one!
+It was extremely simple to convert everything and I'm happier with the customizability AND the default layout.
 
-So I jumped over to [Jekyll's Install][jekyll-install] and got it installed on my Mac.
-
-Speaking of my local machine, I do nearly all of my work on a steeply discounted Apple M1 Pro I picked up
-right when the M2 Pro released.
-
-![Image of Directory](/assets/LvdGYAG.jpg)
-
-In the spirit of open source, I've been cross referencing Chad's blog
-and the official Jekyll documentation.
-
-Once I got everything installed, I kicked off the process with `gem install jekyll` and
-got to creating!
-
-## Building the Blog
-
-As soon as I had jekyll installed, I ran `bundle exec jekyll serve`. This created
-a _site and .jekyll-cache and started serving my site locally.
-
-I quickly found myself in over my head at this point, and went through the step by step
-tutorial available [on jekyll's docs page](https://jekyllrb.com/docs/step-by-step/01-setup/)
-
-From there, I created a _layouts folder and set up the format
-I wanted by default (default.html), and for my home page (home.html).
-
-[The layout docs are right here](https://jekyllrb.com/docs/step-by-step/04-layouts/)
-
-![Image of Directory](/assets/44wMq0Z.png)
-
-I followed the instructions in the Blogging section of the step-by-step and took some
-inspiration from Chad's repository, and separated my posts into personal and tech.
-
-As of this post, that's where I am now!
-
-I'll be updating the site, and everything (including all my commits and history) will be
-available [in the github repository that serves this site!](https://github.com/StevenPG/coding-steve)
-
-[chadbaldwin.net]: https://chadbaldwin.net
-[jekyll-install]: https://jekyllrb.com/docs/installation/macos/
+There's still a lot to learn about Astro, but I'm ready to dive in a document it all! (And everything else I wish I'd found online)

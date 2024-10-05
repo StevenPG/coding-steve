@@ -4,8 +4,8 @@ pubDatetime: 2024-03-05T12:00:00.000Z
 title: Logging Request Body with Spring WebClient
 slug: request-body-with-spring-webclient
 featured: true
-# TODO replace ogImage
-ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+
+ogImage: https://i.imgur.com/4ICZldG.jpeg
 tags:
   - software
   - spring boot
