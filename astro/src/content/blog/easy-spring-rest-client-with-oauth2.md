@@ -148,6 +148,14 @@ public class RestClientConfiguration
 
 [HttpServiceProxyFactory][httpServiceProxyFactory] is new in [Spring 6][httpServiceProxyFactoryJavadoc]!
 
+ This factory allows you to easily generate reactive proxies for HTTP services, providing a convenient and 
+ efficient way to interact with REST APIs. You can define your HTTP service interface, annotate it with appropriate 
+ HTTP method and path annotations, and the factory will automatically generate a proxy that implements the interface. 
+ This eliminates the need for manual configuration and reduces boilerplate code.
+
+We can seamlessly inject our RestClient (or an existing WebClient) into the proxy, cutting back on the boilerplate
+and making the code much more readable!
+
 ```java
 public interface MyHttpService {
 
@@ -167,6 +175,43 @@ public class HttpServiceFactory
             .builderFor(RestClientAdapter.create(oauth2RestClient))
             .build();
         return factory.createClient(MyHttpService.class);
+    }
+}
+```
+
+### Another Bonus: Setting up Logbook
+
+The logbook library (https://github.com/zalando/logbook) can be integrated into this layout!
+
+You can set up logbook by following this post: https://stevenpg.com/posts/request-body-with-spring-webclient/
+
+From there, we just need to update our `oauth2RestClient`
+
+Here's the updated code below for easy access!
+
+```java
+@Configuration
+public class RestClientConfiguration
+{
+    // This needs to match the YAML configuration
+    private static final String CLIENT_REGISTRATION_ID = "my-oauth-client";
+
+    // ...
+
+    @Bean
+    public RestClient oauth2RestClient(
+        OAuth2AuthorizedClientManager authorizedClientManager,
+        LogbookRestClientInterceptor logbookRestClientInterceptor) {
+
+        // This is the new class!!! We instantiate a new one and provide it the client registration to match
+        OAuth2ClientHttpRequestInterceptor oAuth2ClientHttpRequestInterceptor =
+            new OAuth2ClientHttpRequestInterceptor(authorizedClientManager, request -> CLIENT_REGISTRATION_ID);
+
+        // From here we simply return the client with any custom configuration, and we're good to go!
+        return RestClient.builder()
+            .baseUrl("http://myBaseUrl:8080")
+            .requestInterceptors(List.of(logbookRestClientInterceptor, oAuth2ClientHttpRequestInterceptor))
+            .build();
     }
 }
 ```
