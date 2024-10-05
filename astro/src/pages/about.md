@@ -3,7 +3,7 @@ layout: ../layouts/AboutLayout.astro
 title: "About"
 ---
 
-I'm a senior software developer with about X years of experience (todo, automate that!) doing devops and developement work.
+I'm a senior software developer doing devops and development work.
 I've worked in retail, tax software and aerospace industries, and in all of those positions I was always pushing the limit
 as far as I could. Always trying to use bleeding edge tools where I can!
 

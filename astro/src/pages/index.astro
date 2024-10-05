@@ -17,6 +17,8 @@ const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
 const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
 
 const socialCount = SOCIALS.filter(social => social.active).length;
+
+const yoe = new Date().getFullYear() - 2016
 ---
 
 <Layout>
@@ -42,7 +44,7 @@ const socialCount = SOCIALS.filter(social => social.active).length;
       </a>
 
       <p>
-        I'm a senior software developer with about X years of experience (todo, automate that!) doing devops and developement work.
+        I'm a senior software developer with about {yoe} years of experience (todo, automate that!) doing devops and development work.
         This is my blog where I write posts I wish I had found online myself.
       </p>
       {
