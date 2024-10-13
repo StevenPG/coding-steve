@@ -27,6 +27,16 @@ a good resource on the web that helped me understand.
 SO, in keeping with this site, I intend to write up a simple article that I (and others!) can reference
 in the future when we need to understand something about this new non-terminating stream capability!
 
+There are two libraries being developed that contain common use-cases for gatherers. I'm sure these libraries 
+will continue to grow as more use-cases are identified. I don't recommend including them by default, but using the
+code as inspiration for your own gatherers OR pulling in the dependency when needed seems like a good move for most of us!
+
+Here are the libraries:
+
+https://github.com/pivovarit/more-gatherers
+
+https://github.com/jhspetersson/packrat
+
 ### Let's get to demo-ing!
 
 We can install Java 23 quickly using Sdkman! using `sdk install java 23-tem`
