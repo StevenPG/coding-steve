@@ -306,34 +306,21 @@ exception if it’s not found when the finisher is called.</p>
 <span class="line"><span style="color:#1976D2;--shiki-dark:#C5E478">Gatherer</span><span style="color:#212121;--shiki-dark:#D6DEEB">.</span><span style="color:#6F42C1;--shiki-dark:#82AAFF;font-style:inherit;--shiki-dark-font-style:italic">ofSequential</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">(</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">initializer</span><span style="color:#212121;--shiki-dark:#D6DEEB">,</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB"> integrator</span><span style="color:#24292EFF;--shiki-dark:#D9F5DD">)</span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">;</span></span>
 <span class="line"></span></code></pre>
 <h2 id="built-in-gatherers">Built-In Gatherers</h2>
-<p>TODO - add link to JavaDoc for each with examples!
-The following are built-in gatherers in the <a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/util/stream/Gatherers.html">java.util.stream.Gatherers</a> class:</p>
+<p>The following are built-in gatherers in the <a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/util/stream/Gatherers.html">java.util.stream.Gatherers</a> class:</p>
 <p><a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/util/stream/Gatherers.html#fold(java.util.function.Supplier,java.util.function.BiFunction)">fold</a> is a stateful many-to-one gatherer which constructs an aggregate
 incrementally and emits that aggregate when no more input elements exist.</p>
-<p>TODO - example</p>
 <p><a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/util/stream/Gatherers.html#mapConcurrent(int,java.util.function.Function)">mapConcurrent</a> is a stateful one-to-one gatherer which invokes a supplied
 function for each input element concurrently, up to a supplied limit.</p>
-<p>TODO - example</p>
 <p><a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/util/stream/Gatherers.html#scan(java.util.function.Supplier,java.util.function.BiFunction)">scan</a> is a stateful one-to-one gatherer which applies a supplied function
 to the current state and the current element to produce the next element,
 which it passes downstream.</p>
-<p>TODO - example</p>
 <p><a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/util/stream/Gatherers.html#windowFixed(int)">windowFixed</a> is a stateful many-to-many gatherer which groups input
 elements into lists of a supplied size, emitting the windows
 downstream when they are full.</p>
-<p>TODO - example</p>
 <p><a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/util/stream/Gatherers.html#windowSliding(int)">windowSliding</a> is a stateful many-to-many gatherer which groups input
 elements into lists of a supplied size. After the first window, each
 subsequent window is created from a copy of its predecessor by dropping
-the first element and appending the next element from the input stream..</p>
-<p>TODO - example</p>
-<h2 id="gatherers-are-so-useful-we-can-re-create-every-intermediate-stream-operation">Gatherers are so useful, we can re-create every intermediate stream operation</h2>
-<p>TODO - recreate everything as gatherers</p>
-<p>TODO - find real life example</p>
-<ul>
-<li>distinctBy</li>
-<li>grouping and applying a change to the whole collection</li>
-</ul> </article> <ul class="my-8 astro-vj4tpspi"> <li class="inline-block my-1 underline-offset-4 astro-blwjyjpt"> <a href="/tags/software/" class="text-sm pr-2 group astro-blwjyjpt" data-astro-transition-scope="astro-36ssibgs-2"> <svg xmlns="http://www.w3.org/2000/svg" class=" scale-75 astro-blwjyjpt"><path d="M16.018 3.815 15.232 8h-4.966l.716-3.815-1.964-.37L8.232 8H4v2h3.857l-.751 4H3v2h3.731l-.714 3.805 1.965.369L8.766 16h4.966l-.714 3.805 1.965.369.783-4.174H20v-2h-3.859l.751-4H21V8h-3.733l.716-3.815-1.965-.37zM14.106 14H9.141l.751-4h4.966l-.752 4z" class="astro-blwjyjpt"></path> </svg>
+the first element and appending the next element from the input stream..</p> </article> <ul class="my-8 astro-vj4tpspi"> <li class="inline-block my-1 underline-offset-4 astro-blwjyjpt"> <a href="/tags/software/" class="text-sm pr-2 group astro-blwjyjpt" data-astro-transition-scope="astro-36ssibgs-2"> <svg xmlns="http://www.w3.org/2000/svg" class=" scale-75 astro-blwjyjpt"><path d="M16.018 3.815 15.232 8h-4.966l.716-3.815-1.964-.37L8.232 8H4v2h3.857l-.751 4H3v2h3.731l-.714 3.805 1.965.369L8.766 16h4.966l-.714 3.805 1.965.369.783-4.174H20v-2h-3.859l.751-4H21V8h-3.733l.716-3.815-1.965-.37zM14.106 14H9.141l.751-4h4.966l-.752 4z" class="astro-blwjyjpt"></path> </svg>
 &nbsp;<span class="astro-blwjyjpt">software</span> </a> </li> <li class="inline-block my-1 underline-offset-4 astro-blwjyjpt"> <a href="/tags/spring-boot/" class="text-sm pr-2 group astro-blwjyjpt" data-astro-transition-scope="astro-36ssibgs-3"> <svg xmlns="http://www.w3.org/2000/svg" class=" scale-75 astro-blwjyjpt"><path d="M16.018 3.815 15.232 8h-4.966l.716-3.815-1.964-.37L8.232 8H4v2h3.857l-.751 4H3v2h3.731l-.714 3.805 1.965.369L8.766 16h4.966l-.714 3.805 1.965.369.783-4.174H20v-2h-3.859l.751-4H21V8h-3.733l.716-3.815-1.965-.37zM14.106 14H9.141l.751-4h4.966l-.752 4z" class="astro-blwjyjpt"></path> </svg>
 &nbsp;<span class="astro-blwjyjpt">spring-boot</span> </a> </li> <li class="inline-block my-1 underline-offset-4 astro-blwjyjpt"> <a href="/tags/java/" class="text-sm pr-2 group astro-blwjyjpt" data-astro-transition-scope="astro-36ssibgs-4"> <svg xmlns="http://www.w3.org/2000/svg" class=" scale-75 astro-blwjyjpt"><path d="M16.018 3.815 15.232 8h-4.966l.716-3.815-1.964-.37L8.232 8H4v2h3.857l-.751 4H3v2h3.731l-.714 3.805 1.965.369L8.766 16h4.966l-.714 3.805 1.965.369.783-4.174H20v-2h-3.859l.751-4H21V8h-3.733l.716-3.815-1.965-.37zM14.106 14H9.141l.751-4h4.966l-.752 4z" class="astro-blwjyjpt"></path> </svg>
 &nbsp;<span class="astro-blwjyjpt">java</span> </a> </li>  </ul> <div class="flex flex-col-reverse items-center justify-between gap-6 sm:flex-row-reverse sm:items-end sm:gap-4 astro-vj4tpspi"> <button id="back-to-top" class="focus-outline whitespace-nowrap py-1 hover:opacity-75 astro-vj4tpspi"> <svg xmlns="http://www.w3.org/2000/svg" class="rotate-90 astro-vj4tpspi"> <path d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z" class="astro-vj4tpspi"></path> </svg> <span class="astro-vj4tpspi">Back to Top</span> </button> <div class="social-icons astro-wkojbtzc"> <span class="italic astro-wkojbtzc">Share this post on:</span> <div class="text-center astro-wkojbtzc"> <a href="https://wa.me/?text=https://stevenpg.com/posts/jdk23-streams-gather/" class="group inline-block hover:text-skin-accent link-button astro-wkojbtzc" title="Share this post via WhatsApp"> <svg

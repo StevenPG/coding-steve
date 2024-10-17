@@ -199,45 +199,26 @@ Gatherer.ofSequential(initializer, integrator);
 
 ## Built-In Gatherers
 
-TODO - add link to JavaDoc for each with examples!
 The following are built-in gatherers in the [java.util.stream.Gatherers][gatherers-javadoc] class:
 
 [fold][fold] is a stateful many-to-one gatherer which constructs an aggregate 
 incrementally and emits that aggregate when no more input elements exist.
 
-TODO - example
-
 [mapConcurrent][mapConcurrent] is a stateful one-to-one gatherer which invokes a supplied 
 function for each input element concurrently, up to a supplied limit.
-
-TODO - example
 
 [scan][scan] is a stateful one-to-one gatherer which applies a supplied function 
 to the current state and the current element to produce the next element, 
 which it passes downstream.
 
-TODO - example
-
 [windowFixed][windowFixed] is a stateful many-to-many gatherer which groups input 
 elements into lists of a supplied size, emitting the windows 
 downstream when they are full.
-
-TODO - example
 
 [windowSliding][windowSliding] is a stateful many-to-many gatherer which groups input 
 elements into lists of a supplied size. After the first window, each 
 subsequent window is created from a copy of its predecessor by dropping 
 the first element and appending the next element from the input stream..
-
-TODO - example
-
-## Gatherers are so useful, we can re-create every intermediate stream operation
-
-TODO - recreate everything as gatherers
-
-TODO - find real life example
-- distinctBy
-- grouping and applying a change to the whole collection
 
 [soby-chako]: https://github.com/sobychacko
 [openjdk23]: https://openjdk.org/projects/jdk/23/
