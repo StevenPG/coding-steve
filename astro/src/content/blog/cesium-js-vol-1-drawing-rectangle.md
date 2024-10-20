@@ -1,19 +1,50 @@
 ---
 author: StevenPG
-pubDatetime: 2024-09-29T12:00:00.000Z
-title: Jdk 23 Streams - How To Use Gather Operations
-slug: jdk23-streams-gather
+pubDatetime: 2024-08-20T12:00:00.000Z
+title: Cesium JS Volume 1 - Drawing a Rectangle w/ Primitives & Entities
+slug: cesium-vol-1-rectangle
 featured: false
 # TODO replace ogImage
 ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
 tags:
   - software
-  - spring boot
-  - java
-description: An article on how to use the Gather stream operation in JDK23
+  - cesium
+  - javascript
+description: The first of a series of posts about basic CeisumJS components!
 ---
 
-# It's finally here! JDK 23
+# What is Cesium?
+
+### TODO - add an image here of cesium
+
+Cesium.js is a comprehensive JavaScript library that enables developers to create stunning and interactive 3D globes and maps. Built on top of WebGL, it leverages the power of modern web browsers to deliver high-performance, visually appealing geospatial applications.
+
+One of the most significant aspects of Cesium.js is its commitment to open source. This means that the library's code is freely available, allowing developers to inspect, modify, and contribute to its development. The open-source nature of Cesium.js has fostered a vibrant community of developers who have contributed to its growth and functionality.
+
+To put it simply, Cesium is a game engine on top of Google maps... or at least that's how I think of it.
+
+Cesium is used by tons of different organizations to do 3d and 4d geospatial operations. Anything you can imagine on a globe is supported by Cesium.
+
+I'm just starting my Cesium journey, and as I learn the basic pieces and learn lessons, I'll record some of the self-contained ones here.
+
+Such as...
+
+# Drawing a Simple Rectangle
+
+## Drawing a Rectangle with Primitives
+
+## Drawing a Rectangle with Entities
+
+
+
+
+
+
+
+
+
+
+
 
 <sub><sup>Just kidding, this isn't an LTS release</sup></sub>
 
