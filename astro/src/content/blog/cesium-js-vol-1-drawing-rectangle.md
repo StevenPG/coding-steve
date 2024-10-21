@@ -15,7 +15,7 @@ description: The first of a series of posts about basic CeisumJS components!
 
 # What is Cesium?
 
-### TODO - add an image here of cesium
+![Image of CesiumJS drawn on the globe](/assets/brave_1VcZYMyILD.png)
 
 Cesium.js is a comprehensive JavaScript library that enables developers to create stunning and interactive 3D globes and maps. Built on top of WebGL, it leverages the power of modern web browsers to deliver high-performance, visually appealing geospatial applications.
 
