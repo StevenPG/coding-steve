@@ -31,6 +31,24 @@ Such as...
 
 # Drawing a Simple Rectangle
 
+Now, CesiumJS offers two primary APIs for creating and managing 3D objects on a globe: the Primitive API and the Entity API. While both may serve the same purpose, they differ in their approach and have wildly different performance characteristics.
+
+#### Primitive API
+- Direct manipulation: The Primitive API provides direct control over the underlying geometry and appearance of 3D objects.
+- Performance-oriented: It is often more efficient for large datasets or complex visualizations due to its lower-level nature.
+
+We might expect to use Cesium primitives for custom geometries, advanced rendering techniques, and performance-critical applications.
+
+#### Entity API
+- Data-driven approach: The Entity API represents 3D objects as data-driven entities, making it easier to manage and update objects based on changing data.
+- Higher-level abstraction: It provides a more intuitive interface for common 3D object properties like position, orientation, and appearance.
+
+The Entity API works best for data-driven visualizations, real-time updates, and applications that require easy management of 3D objects.
+
+Put simply, the Primitive API is better suited for custom geometries and high performance rendering, while the Entity API is more convenient for developers simply trying to render known structures on screen, where performance is a secondary concern and the required 3d element matches an existing entity configuration.
+
+A great example and introduction into Cesium is drawing something like a rectangle on the globe. There's a million reasons one might want to have a rectangle. Maybe to map out an area, or to display boundaries. Maybe to calculate a diagonal or get the distance around a center point.
+
 ## Drawing a Rectangle with Primitives
 
 ## Drawing a Rectangle with Entities
