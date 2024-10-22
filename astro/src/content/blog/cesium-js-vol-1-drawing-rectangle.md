@@ -51,11 +51,13 @@ A great example and introduction into Cesium is drawing something like a rectang
 
 ## Drawing a Rectangle with Primitives
 
-
+- TODO - draw outline using rectangle, and also do outline graphics thing
+- TODO - do the fill in also
 
 ## Drawing a Rectangle with Entities
 
-
+- TODO - draw outline with polylines
+- TODO - draw full box with simple rectangle
 
 
 
