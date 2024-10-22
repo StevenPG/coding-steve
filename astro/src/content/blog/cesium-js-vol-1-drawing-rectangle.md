@@ -51,7 +51,11 @@ A great example and introduction into Cesium is drawing something like a rectang
 
 ## Drawing a Rectangle with Primitives
 
+
+
 ## Drawing a Rectangle with Entities
+
+
 
 
 
