@@ -10,10 +10,12 @@ tags:
   - software
   - cesium
   - javascript
-description: The second post about basic CeisumJS components!
+description: The second post about basic CesumJS components!
 ---
 
 # Drawing Circles and Spheres in CesiumJS
+
+This is the second article in my set of posts about CesiumJS, partly so that I can reference them later!
 
 CesiumJS is a powerful open-source JavaScript library for creating 3D globes and maps. One of its many capabilities is drawing geometric shapes like circles and spheres. This article explores different approaches to creating these shapes using both the Entity API and the more performant Primitive API.
 
