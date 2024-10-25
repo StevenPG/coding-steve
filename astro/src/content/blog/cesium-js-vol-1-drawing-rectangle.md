@@ -51,25 +51,87 @@ A great example and introduction into Cesium is drawing something like a rectang
 
 ## Drawing a Rectangle with Primitives
 
-- TODO - draw outline using rectangle, and also do outline graphics thing
-- TODO - do the fill in also
+```typescript
+// Initialize the Cesium viewer
+const viewer = new Cesium.Viewer('cesiumContainer');
+
+// Define rectangle coordinates (in radians)
+const west = Cesium.Math.toRadians(-100.0);
+const south = Cesium.Math.toRadians(30.0);
+const east = Cesium.Math.toRadians(-90.0);
+const north = Cesium.Math.toRadians(40.0);
+
+// Create a filled rectangle
+const filledRectanglePrimitive = new Cesium.GeometryInstance({
+    geometry: new Cesium.RectangleGeometry({
+        rectangle: new Cesium.Rectangle(west, south, east, north),
+        vertexFormat: Cesium.PerInstanceColorAppearance.VERTEX_FORMAT
+    }),
+    attributes: {
+        color: Cesium.ColorGeometryInstanceAttribute.fromColor(
+            new Cesium.Color(1.0, 0.0, 0.0, 0.5)
+        )
+    }
+});
+
+// Create an outline rectangle
+const outlineRectanglePrimitive = new Cesium.GeometryInstance({
+    geometry: new Cesium.RectangleOutlineGeometry({
+        rectangle: new Cesium.Rectangle(west, south, east, north)
+    }),
+    attributes: {
+        color: Cesium.ColorGeometryInstanceAttribute.fromColor(
+            Cesium.Color.WHITE
+        )
+    }
+});
+
+// Add primitives to the scene
+viewer.scene.primitives.add(new Cesium.Primitive({
+    geometryInstances: filledRectanglePrimitive,
+    appearance: new Cesium.PerInstanceColorAppearance({
+        translucent: true,
+        closed: true
+    })
+}));
+
+viewer.scene.primitives.add(new Cesium.Primitive({
+    geometryInstances: outlineRectanglePrimitive,
+    appearance: new Cesium.PerInstanceColorAppearance({
+        flat: true,
+        renderState: {
+            lineWidth: Math.min(2.0, viewer.scene.maximumAliasedLineWidth)
+        }
+    })
+}));
+```
 
 ## Drawing a Rectangle with Entities
 
-- TODO - draw outline with polylines
-- TODO - draw full box with simple rectangle
+```typescript
+// Create a filled rectangle entity
+const filledRectangleEntity = viewer.entities.add({
+    rectangle: {
+        coordinates: Cesium.Rectangle.fromDegrees(-100.0, 30.0, -90.0, 40.0),
+        material: new Cesium.Color(0.0, 1.0, 0.0, 0.5),
+        height: 0
+    }
+});
 
+// Create an outline rectangle entity
+const outlineRectangleEntity = viewer.entities.add({
+    rectangle: {
+        coordinates: Cesium.Rectangle.fromDegrees(-100.0, 30.0, -90.0, 40.0),
+        fill: false,
+        outline: true,
+        outlineColor: Cesium.Color.YELLOW,
+        outlineWidth: 2
+    }
+});
 
-
-
-
-
-
-
-
-
-
-
+// Set camera to view the rectangles
+viewer.zoomTo(viewer.entities);
+```
 <sub><sup>Just kidding, this isn't an LTS release</sup></sub>
 
 The next LTS release that will include all of the changes in JDK 23 (assuming Gatherers make the cut) is JDK 25 and 
