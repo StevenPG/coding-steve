@@ -1,6 +1,6 @@
 ---
 author: StevenPG
-pubDatetime: 2024-08-24T12:00:00.000Z
+pubDatetime: 2024-10-24T12:00:00.000Z
 title: Cesium JS Volume 2 - Drawing a Rectangle w/ Primitives & Entities
 slug: cesium-vol-2-circle
 featured: false
