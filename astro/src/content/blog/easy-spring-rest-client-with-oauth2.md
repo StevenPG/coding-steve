@@ -10,7 +10,7 @@ tags:
   - software
   - spring boot
   - java
-description: An article walking through a demo of partitioning tables with postgres.
+description: Using the new Spring RestClient with newly supported OAuth2 capabilities!
 ---
 
 # Brief
