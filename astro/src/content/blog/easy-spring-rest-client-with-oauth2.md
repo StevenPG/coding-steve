@@ -64,7 +64,7 @@ Here's everything you need to get RestClient working with OAuth2!
 build.gradle
 ```groovy
 plugins {
-    id 'org.springframework.boot' version '3.3.3'
+    id 'org.springframework.boot' version '3.4.0'
 }
 
     // ... The rest of the stuff, this is just what's required
@@ -72,7 +72,7 @@ plugins {
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-security'
         implementation 'org.springframework.boot:spring-boot-starter-web'
-        implementation 'org.springframework.security:spring-security-oauth2-client:6.4.0-M3'
+        implementation 'org.springframework.security:spring-security-oauth2-client'
     }
 }
 ```
@@ -131,15 +131,22 @@ public class RestClientConfiguration
     public RestClient oauth2RestClient(
         OAuth2AuthorizedClientManager authorizedClientManager) {
 
-        // This is the new class!!! We instantiate a new one and provide it the client registration to match
+        // This is the new class! 
+        // We instantiate a new interceptor to load into RestClient
         OAuth2ClientHttpRequestInterceptor oAuth2ClientHttpRequestInterceptor =
-            new OAuth2ClientHttpRequestInterceptor(authorizedClientManager, request -> CLIENT_REGISTRATION_ID);
+            new OAuth2ClientHttpRequestInterceptor(authorizedClientManager);
+        // Then provide it the client registration to resolve the id from
+        oAuth2ClientHttpRequestInterceptor.setClientRegistrationIdResolver(clientRegistrationIdResolver());
 
         // From here we simply return the client with any custom configuration, and we're good to go!
         return RestClient.builder()
             .baseUrl("http://myBaseUrl:8080")
             .requestInterceptor(oAuth2ClientHttpRequestInterceptor)
             .build();
+    }
+
+    private static OAuth2ClientHttpRequestInterceptor.ClientRegistrationIdResolver clientRegistrationIdResolver() {
+     return (request) -> CLIENT_REGISTRATION_ID;
     }
 }
 ```
@@ -220,13 +227,8 @@ public class RestClientConfiguration
 
 The new RestClient is already a popular alternative for developers in the Spring ecosystem. 
 The lack of an OAuth2 component has been a sore spot for new users converting over from WebClient. So with
-this new feature releasing in Spring Boot 3.4.0, it can now take it's rightful place as the default, non-webflux
+this new feature releasing with Spring Boot 3.4.0, it can now take it's rightful place as the default, non-webflux
 HTTP Client for Spring MVC!
-
-## Update Note
-
-Once this is available in the official spring release, I'll update this from milestone versions and 
-hook up the JavaDoc instead of the originating Github Issue!
 
 [restClientBlogAnnouncement]: https://spring.io/blog/2023/07/13/new-in-spring-6-1-restclient
 [oAuth2ClientHttpRequestInterceptor]: https://github.com/spring-projects/spring-security/issues/13588
