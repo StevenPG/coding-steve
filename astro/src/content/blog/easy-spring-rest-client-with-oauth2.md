@@ -57,7 +57,7 @@ In comes [RestClient][restClientBlogAnnouncement], a client written in the same 
 synchronous and asynchronous operations out of the box. This lets us remove the spring-webflux
 dependency and use spring-web-mvc as the primary HTTP dependency for server and client applications.
 
-## The Setup (Currently a Milestone Release but this will be updated!)
+## The Setup
 
 Here's everything you need to get RestClient working with OAuth2!
 
@@ -229,6 +229,11 @@ The new RestClient is already a popular alternative for developers in the Spring
 The lack of an OAuth2 component has been a sore spot for new users converting over from WebClient. So with
 this new feature releasing with Spring Boot 3.4.0, it can now take it's rightful place as the default, non-webflux
 HTTP Client for Spring MVC!
+
+Paired with the HttpServiceProxyFactory feature, making REST calls
+with OAuth2 authorization has never been easier. Pair that with the extensive
+autoconfiguration of logbook, and you have a powerful combination of 
+security, readability and logging!
 
 [restClientBlogAnnouncement]: https://spring.io/blog/2023/07/13/new-in-spring-6-1-restclient
 [oAuth2ClientHttpRequestInterceptor]: https://github.com/spring-projects/spring-security/issues/13588

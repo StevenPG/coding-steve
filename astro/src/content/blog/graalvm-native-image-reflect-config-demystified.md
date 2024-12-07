@@ -10,7 +10,7 @@ tags:
   - software
   - spring boot
   - graalvm
-description: An article describing the latest way to log spring web client requests and responses using Logbook.
+description: This post digs into the native-image configurations, specifically the reflect-config.json!.
 ---
 
 One of the hardest things about compiling a Spring Boot application into a GraalVM native image is
