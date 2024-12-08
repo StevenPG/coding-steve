@@ -4,8 +4,7 @@ pubDatetime: 2024-09-19T12:00:00.000Z
 title: Easy Spring Rest Client w/ OAuth2
 slug: spring-rest-client-oauth2
 featured: true
-# TODO replace ogImage
-ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+ogImage: /assets/17e73d45-30ad-4daf-a92b-6333eec91b89.png
 tags:
   - software
   - spring boot
