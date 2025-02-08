@@ -4,7 +4,7 @@ pubDatetime: 2025-02-07T12:00:00.000Z
 title: Spring Cloud Stream's Record Recoverable Processor
 slug: spring-cloud-stream-record-recoverable-processor
 featured: true
-ogImage: /assets/17e73d45-30ad-4daf-a92b-6333eec91b89.png
+ogImage: /assets/9c3ccd7a-9f7d-496e-be89-1fdb32628163.png
 tags:
   - software
   - spring boot
@@ -33,6 +33,8 @@ Why am I writing this post? Because I requested this feature and wrote the examp
 https://github.com/spring-cloud/spring-cloud-stream/issues/2779
 
 Kudos to [Soby Chako][soby-chako]
+
+Documentation on the [Spring Cloud Stream Kafka Streams Binder][kafka-streams-binder-documentation]
 
 And while DLQs are useful for capturing messages that are truly unprocessable, they can be unsophisticated for
 everyday errors. What if you want to do something *specific* when a particular type of
@@ -68,6 +70,9 @@ So, what happens when an error occurs in a traditional processor versus one usin
 
 The beauty of `RecordRecoverableProcessor` is that it puts *you* in the driver's seat for error handling within your
 processing logic.
+
+Check out the [Spring Cloud Stream Samples][scs-samples] under the `kafka-recoverable`
+sub-project if you want to go straight to the published Spring samples.
 
 ## No More Clunky Workarounds
 
@@ -283,3 +288,5 @@ If you've been struggling with error handling in Spring Cloud Stream, or if you'
 alternative to just relying on DLQs, definitely explore `RecordRecoverableProcessor`.
 
 [soby-chako]: https://github.com/sobychacko
+[kafka-streams-binder-documentation]: https://cloud.spring.io/spring-cloud-stream-binder-kafka/spring-cloud-stream-binder-kafka.html#_kafka_streams_binder
+[scs-samples]: https://github.com/spring-cloud/spring-cloud-stream-samples
