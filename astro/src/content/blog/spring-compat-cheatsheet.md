@@ -168,8 +168,6 @@ Key Points:
 
 ### Java Version Compatibility with Spring Boot
 
-TODO - validate these are correct
-
 | Spring Boot Version | Compatible Java Versions (Min - Max) |
 |:--------------------|:-------------------------------------|
 | 3.4.x               | Java 17 - 24                         |
