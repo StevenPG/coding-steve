@@ -1,0 +1,1 @@
+import"./hoisted.BvA1nkMO.js";console.log(window.location.pathname);window.location.pathname==="/software/spring%20boot/java/2024/09/19/Easy-Spring-Rest-Client-with-OAuth2.html"&&(window.location.href="/posts/spring-rest-client-oauth2/");

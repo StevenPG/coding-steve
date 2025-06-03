@@ -1,5 +1,5 @@
 # build output
-dist/
+# dist/ -- used for deployment
 .output/
 
 # dependencies
