@@ -1,0 +1,649 @@
+<!DOCTYPE html><html lang="en" class="scroll-smooth"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://stevenpg.com/posts/spring2-to-spring3-graalvm/"><meta name="generator" content="Astro v4.15.6"><!-- General Meta Tags --><title>Converting Spring Boot 2 to Spring Boot 3 Native Image w/ GraalVM | Coding Steve</title><meta name="title" content="Converting Spring Boot 2 to Spring Boot 3 Native Image w/ GraalVM | Coding Steve"><meta name="description" content="A walkthrough of updating a Spring Boot 2 application to Spring 3 running on GraalVM as a native application."><meta name="author" content="StevenPG"><link rel="sitemap" href="/sitemap-index.xml"><!-- Open Graph / Facebook --><meta property="og:title" content="Converting Spring Boot 2 to Spring Boot 3 Native Image w/ GraalVM | Coding Steve"><meta property="og:description" content="A walkthrough of updating a Spring Boot 2 application to Spring 3 running on GraalVM as a native application."><meta property="og:url" content="https://stevenpg.com/posts/spring2-to-spring3-graalvm/"><meta property="og:image" content="https://i.imgur.com/4ICZldG.jpeg"><!-- Google --><script type="text/partytown" src="https://www.googletagmanager.com/gtag/js?id=G-2ZPXM6LPR3"></script> <script type="text/partytown" data-ga-measurement-id="G-2ZPXM6LPR3" id="ga-init">
+  const measurementId = document
+    .getElementById('ga-init')
+    .getAttribute('data-ga-measurement-id')
+  window.dataLayer = window.dataLayer || []
+  function gtag() {
+    dataLayer.push(arguments) // eslint-disable-line
+  }
+  gtag('js', new Date())
+  gtag('config', measurementId)
+</script><!-- Article Published/Modified time --><meta property="article:published_time" content="2024-03-04T12:00:00.000Z"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://stevenpg.com/posts/spring2-to-spring3-graalvm/"><meta property="twitter:title" content="Converting Spring Boot 2 to Spring Boot 3 Native Image w/ GraalVM | Coding Steve"><meta property="twitter:description" content="A walkthrough of updating a Spring Boot 2 application to Spring 3 running on GraalVM as a native application."><meta property="twitter:image" content="https://i.imgur.com/4ICZldG.jpeg"><!-- Google JSON-LD Structured data --><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Converting Spring Boot 2 to Spring Boot 3 Native Image w/ GraalVM | Coding Steve","image":"https://i.imgur.com/4ICZldG.jpeg","datePublished":"2024-03-04T12:00:00.000Z","author":[{"@type":"Person","name":"StevenPG","url":"https://stevenpg.com/"}]}</script><!-- Google Font --><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="preload" as="style" onload="this.onload=null; this.rel='stylesheet';" crossorigin><meta name="theme-color" content=""><meta name="astro-view-transitions-enabled" content="true"><meta name="astro-view-transitions-fallback" content="animate"><script src="/toggle-theme.js" async></script><link rel="stylesheet" href="/_astro/about.Cx2Amk4o.css">
+<style>a:where(.astro-blwjyjpt){position:relative;text-decoration-line:underline;text-decoration-style:dashed}a:where(.astro-blwjyjpt):hover{top:-.125rem;--tw-text-opacity: 1;color:rgba(var(--color-accent),var(--tw-text-opacity))}a:where(.astro-blwjyjpt):focus-visible{padding:.25rem}a:where(.astro-blwjyjpt) svg:where(.astro-blwjyjpt){margin-right:-1.25rem;height:1.5rem;width:1.5rem;--tw-scale-x: .95;--tw-scale-y: .95;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));--tw-text-opacity: 1;color:rgba(var(--color-text-base),var(--tw-text-opacity));opacity:.8}.group:where(.astro-blwjyjpt):hover a:where(.astro-blwjyjpt) svg:where(.astro-blwjyjpt){fill:rgb(var(--color-accent))}
+@keyframes astroFadeInOut{0%{opacity:1}to{opacity:0}}@keyframes astroFadeIn{0%{opacity:0}}@keyframes astroFadeOut{to{opacity:0}}@keyframes astroSlideFromRight{0%{transform:translate(100%)}}@keyframes astroSlideFromLeft{0%{transform:translate(-100%)}}@keyframes astroSlideToRight{to{transform:translate(100%)}}@keyframes astroSlideToLeft{to{transform:translate(-100%)}}@media (prefers-reduced-motion){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}[data-astro-transition-scope]{animation:none!important}}
+.social-icons:where(.astro-wkojbtzc){display:flex;flex-direction:column;flex-wrap:wrap;align-items:center;justify-content:center;gap:.25rem}@media (min-width: 640px){.social-icons:where(.astro-wkojbtzc){align-items:flex-start}}.link-button:where(.astro-wkojbtzc){--tw-scale-x: .9;--tw-scale-y: .9;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));padding:.5rem}.link-button:where(.astro-wkojbtzc):hover{--tw-rotate: 6deg;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@media (min-width: 640px){.link-button:where(.astro-wkojbtzc){padding:.25rem}}main:where(.astro-vj4tpspi){margin-left:auto;margin-right:auto;width:100%;max-width:48rem;padding-left:1rem;padding-right:1rem;padding-bottom:3rem}.post-title:where(.astro-vj4tpspi){font-size:1.5rem;line-height:2rem;font-weight:600;--tw-text-opacity: 1;color:rgba(var(--color-accent),var(--tw-text-opacity))}
+</style><script type="module" src="/_astro/hoisted.BvA1nkMO.js"></script>
+<script>!(function(w,p,f,c){if(!window.crossOriginIsolated && !navigator.serviceWorker) return;c=w[p]=Object.assign(w[p]||{},{"lib":"/~partytown/","debug":false});c[f]=(c[f]||[]).concat(["dataLayer.push"])})(window,'partytown','forward');/* Partytown 0.10.2 - MIT builder.io */
+const t={preserveBehavior:!1},e=e=>{if("string"==typeof e)return[e,t];const[n,r=t]=e;return[n,{...t,...r}]},n=Object.freeze((t=>{const e=new Set;let n=[];do{Object.getOwnPropertyNames(n).forEach((t=>{"function"==typeof n[t]&&e.add(t)}))}while((n=Object.getPrototypeOf(n))!==Object.prototype);return Array.from(e)})());!function(t,r,o,i,a,s,c,d,l,p,u=t,f){function h(){f||(f=1,"/"==(c=(s.lib||"/~partytown/")+(s.debug?"debug/":""))[0]&&(l=r.querySelectorAll('script[type="text/partytown"]'),i!=t?i.dispatchEvent(new CustomEvent("pt1",{detail:t})):(d=setTimeout(v,1e4),r.addEventListener("pt0",w),a?y(1):o.serviceWorker?o.serviceWorker.register(c+(s.swPath||"partytown-sw.js"),{scope:c}).then((function(t){t.active?y():t.installing&&t.installing.addEventListener("statechange",(function(t){"activated"==t.target.state&&y()}))}),console.error):v())))}function y(e){p=r.createElement(e?"script":"iframe"),t._pttab=Date.now(),e||(p.style.display="block",p.style.width="0",p.style.height="0",p.style.border="0",p.style.visibility="hidden",p.setAttribute("aria-hidden",!0)),p.src=c+"partytown-"+(e?"atomics.js?v=0.10.2":"sandbox-sw.html?"+t._pttab),r.querySelector(s.sandboxParent||"body").appendChild(p)}function v(n,o){for(w(),i==t&&(s.forward||[]).map((function(n){const[r]=e(n);delete t[r.split(".")[0]]})),n=0;n<l.length;n++)(o=r.createElement("script")).innerHTML=l[n].innerHTML,o.nonce=s.nonce,r.head.appendChild(o);p&&p.parentNode.removeChild(p)}function w(){clearTimeout(d)}s=t.partytown||{},i==t&&(s.forward||[]).map((function(r){const[o,{preserveBehavior:i}]=e(r);u=t,o.split(".").map((function(e,r,o){var a;u=u[o[r]]=r+1<o.length?u[o[r]]||(a=o[r+1],n.includes(a)?[]:{}):(()=>{let e=null;if(i){const{methodOrProperty:n,thisObject:r}=((t,e)=>{let n=t;for(let t=0;t<e.length-1;t+=1)n=n[e[t]];return{thisObject:n,methodOrProperty:e.length>0?n[e[e.length-1]]:void 0}})(t,o);"function"==typeof n&&(e=(...t)=>n.apply(r,...t))}return function(){let n;return e&&(n=e(arguments)),(t._ptf=t._ptf||[]).push(o,arguments),n}})()}))})),"complete"==r.readyState?h():(t.addEventListener("DOMContentLoaded",h),t.addEventListener("load",h))}(window,document,navigator,top,window.crossOriginIsolated);;(e=>{e.addEventListener("astro:before-swap",e=>{let r=document.body.querySelector("iframe[src*='/~partytown/']");if(r)e.newDocument.body.append(r)})})(document);</script><style>[data-astro-transition-scope="astro-plk3gbjq-1"] { view-transition-name: converting-spring-boot-2-to-spring-boot-3-native-image-w-graal-vm; }@layer astro { ::view-transition-old(converting-spring-boot-2-to-spring-boot-3-native-image-w-graal-vm) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(converting-spring-boot-2-to-spring-boot-3-native-image-w-graal-vm) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(converting-spring-boot-2-to-spring-boot-3-native-image-w-graal-vm) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(converting-spring-boot-2-to-spring-boot-3-native-image-w-graal-vm) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-plk3gbjq-1"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-plk3gbjq-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-plk3gbjq-1"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-plk3gbjq-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-plk3gbjq-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-plk3gbjq-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-plk3gbjq-1"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-plk3gbjq-1"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-2"] { view-transition-name: story; }@layer astro { ::view-transition-old(story) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(story) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(story) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(story) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-2"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-2"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-3"] { view-transition-name: spring-boot; }@layer astro { ::view-transition-old(spring-boot) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(spring-boot) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(spring-boot) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(spring-boot) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-3"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-3"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style><style>[data-astro-transition-scope="astro-36ssibgs-4"] { view-transition-name: graalvm; }@layer astro { ::view-transition-old(graalvm) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }::view-transition-new(graalvm) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back]::view-transition-old(graalvm) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back]::view-transition-new(graalvm) { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; } }[data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }[data-astro-transition=back][data-astro-transition-fallback="old"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="old"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeOut; }[data-astro-transition=back][data-astro-transition-fallback="new"] [data-astro-transition-scope="astro-36ssibgs-4"],
+			[data-astro-transition=back][data-astro-transition-fallback="new"][data-astro-transition-scope="astro-36ssibgs-4"] { 
+	animation-duration: 180ms;
+	animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+	animation-fill-mode: both;
+	animation-name: astroFadeIn; }</style></head> <body>  <header class="astro-3ef6ksr2"> <a id="skip-to-content" href="#main-content" class="astro-3ef6ksr2">Skip to content</a> <div class="nav-container astro-3ef6ksr2"> <div class="top-nav-wrap astro-3ef6ksr2"> <a href="/" class="logo whitespace-nowrap astro-3ef6ksr2"> Coding Steve </a> <nav id="nav-menu" class="astro-3ef6ksr2"> <button class="hamburger-menu focus-outline astro-3ef6ksr2" aria-label="Open Menu" aria-expanded="false" aria-controls="menu-items"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="menu-icon astro-3ef6ksr2"> <line x1="7" y1="12" x2="21" y2="12" class="line astro-3ef6ksr2"></line> <line x1="3" y1="6" x2="21" y2="6" class="line astro-3ef6ksr2"></line> <line x1="12" y1="18" x2="21" y2="18" class="line astro-3ef6ksr2"></line> <line x1="18" y1="6" x2="6" y2="18" class="close astro-3ef6ksr2"></line> <line x1="6" y1="6" x2="18" y2="18" class="close astro-3ef6ksr2"></line> </svg> </button> <ul id="menu-items" class="display-none sm:flex astro-3ef6ksr2"> <li class="astro-3ef6ksr2"> <a href="/posts/" class=" astro-3ef6ksr2">
+Posts
+</a> </li> <li class="astro-3ef6ksr2"> <a href="/tags/" class=" astro-3ef6ksr2">
+Tags
+</a> </li> <li class="astro-3ef6ksr2"> <a href="/about/" class=" astro-3ef6ksr2">
+About
+</a> </li> <li class="astro-3ef6ksr2"> <a href="/search/" class="group inline-block hover:text-skin-accent focus-outline p-3 sm:p-1  flex astro-3ef6ksr2" aria-label="search" title="Search"> <svg xmlns="http://www.w3.org/2000/svg" class="scale-125 sm:scale-100 astro-3ef6ksr2"><path d="M19.023 16.977a35.13 35.13 0 0 1-1.367-1.384c-.372-.378-.596-.653-.596-.653l-2.8-1.337A6.962 6.962 0 0 0 16 9c0-3.859-3.14-7-7-7S2 5.141 2 9s3.14 7 7 7c1.763 0 3.37-.66 4.603-1.739l1.337 2.8s.275.224.653.596c.387.363.896.854 1.384 1.367l1.358 1.392.604.646 2.121-2.121-.646-.604c-.379-.372-.885-.866-1.391-1.36zM9 14c-2.757 0-5-2.243-5-5s2.243-5 5-5 5 2.243 5 5-2.243 5-5 5z" class="astro-3ef6ksr2"></path> </svg> <span class="sr-only astro-3ef6ksr2">Search</span> </a> </li> <li class="astro-3ef6ksr2"> <button id="theme-btn" class="focus-outline astro-3ef6ksr2" title="Toggles light & dark" aria-label="auto" aria-live="polite"> <svg xmlns="http://www.w3.org/2000/svg" id="moon-svg" class="astro-3ef6ksr2"> <path d="M20.742 13.045a8.088 8.088 0 0 1-2.077.271c-2.135 0-4.14-.83-5.646-2.336a8.025 8.025 0 0 1-2.064-7.723A1 1 0 0 0 9.73 2.034a10.014 10.014 0 0 0-4.489 2.582c-3.898 3.898-3.898 10.243 0 14.143a9.937 9.937 0 0 0 7.072 2.93 9.93 9.93 0 0 0 7.07-2.929 10.007 10.007 0 0 0 2.583-4.491 1.001 1.001 0 0 0-1.224-1.224zm-2.772 4.301a7.947 7.947 0 0 1-5.656 2.343 7.953 7.953 0 0 1-5.658-2.344c-3.118-3.119-3.118-8.195 0-11.314a7.923 7.923 0 0 1 2.06-1.483 10.027 10.027 0 0 0 2.89 7.848 9.972 9.972 0 0 0 7.848 2.891 8.036 8.036 0 0 1-1.484 2.059z" class="astro-3ef6ksr2"></path> </svg> <svg xmlns="http://www.w3.org/2000/svg" id="sun-svg" class="astro-3ef6ksr2"> <path d="M6.993 12c0 2.761 2.246 5.007 5.007 5.007s5.007-2.246 5.007-5.007S14.761 6.993 12 6.993 6.993 9.239 6.993 12zM12 8.993c1.658 0 3.007 1.349 3.007 3.007S13.658 15.007 12 15.007 8.993 13.658 8.993 12 10.342 8.993 12 8.993zM10.998 19h2v3h-2zm0-17h2v3h-2zm-9 9h3v2h-3zm17 0h3v2h-3zM4.219 18.363l2.12-2.122 1.415 1.414-2.12 2.122zM16.24 6.344l2.122-2.122 1.414 1.414-2.122 2.122zM6.342 7.759 4.22 5.637l1.415-1.414 2.12 2.122zm13.434 10.605-1.414 1.414-2.122-2.122 1.414-1.414z" class="astro-3ef6ksr2"></path> </svg> </button> </li> </ul> </nav> </div> </div> <div class="max-w-3xl mx-auto px-4"> <hr class="border-skin-line" aria-hidden="true"> </div> </header>   <div class="mx-auto flex w-full max-w-3xl justify-start px-2 astro-vj4tpspi"> <button class="focus-outline mb-2 mt-8 flex hover:opacity-75 astro-vj4tpspi" onclick="(() => (history.length === 1) ? window.location = '/' : history.back())()"> <svg xmlns="http://www.w3.org/2000/svg" class="astro-vj4tpspi"><path d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z" class="astro-vj4tpspi"></path> </svg><span class="astro-vj4tpspi">Go back</span> </button> </div> <main id="main-content" class="astro-vj4tpspi"> <h1 class="post-title astro-vj4tpspi" data-astro-transition-scope="astro-plk3gbjq-1">Converting Spring Boot 2 to Spring Boot 3 Native Image w/ GraalVM</h1> <div class="flex items-center space-x-2 opacity-80 my-2 astro-vj4tpspi"><svg xmlns="http://www.w3.org/2000/svg" class="scale-100 inline-block h-6 w-6 min-w-[1.375rem] fill-skin-base" aria-hidden="true"><path d="M7 11h2v2H7zm0 4h2v2H7zm4-4h2v2h-2zm0 4h2v2h-2zm4-4h2v2h-2zm0 4h2v2h-2z"></path><path d="M5 22h14c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2h-2V2h-2v2H9V2H7v2H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2zM19 8l.001 12H5V8h14z"></path></svg><span class="sr-only">Published:</span><span class="italic text-base"><time dateTime="2024-03-04T12:00:00.000Z">Mar 4, 2024</time><span aria-hidden="true"> | </span><span class="sr-only"> at </span><span class="text-nowrap">07:00 AM</span></span></div> <article id="article" class="prose mx-auto mt-8 max-w-3xl astro-vj4tpspi"> <h1 id="migrating-to-spring-boot-3-and-native-image">Migrating to Spring Boot 3 and Native Image</h1>
+<p>2024 comes with it a sense of finality when it comes to the end-of-life status of Spring Boot 2
+and the embrace of Spring Boot 3 by the Spring community.</p>
+<p>Tutorials are being updated, Spring Initialzr no longer supports any Spring Boot 2 versions and
+dependencies are supporting Spring Boot 3 explicitly.</p>
+<p>At my current job, I’ve spent a good deal of time converting Spring Boot 2 applications to Spring Boot
+3, and with it a migration into utilizing Native Images using GraalVM. In my experience, the documentation
+around this transition is spotty and disjoint. I can’t find a singular place where the basic changes
+needed to perform the upgrade are clearly listed out.</p>
+<p>So I intend to create that place, with a simple blog post that walks through converting an application with
+common pieces, all in one place.</p>
+<h2 id="the-latest-tools">The Latest Tools</h2>
+<p>In support of upgrading, we should upgrade to the latest Java and Gradle versions. The same may apply to Maven but I’m
+only including Gradle in this post.</p>
+<p>For this post, we’re going to be talking about the latest version of GraalVM so that we can take advantage of spring boot’s
+native image support.</p>
+<p>If you’re not familiar with GraalVM, it can be thought of as a different distribution of the Java Runtime Engine, and it can
+execute Java applications the same as any JRE. However, it also supports native image creation, which will be addressed
+in this page and the results we can expect from going native-image. This post won’t go into the benefits or tradeoffs with
+native images, but focuses on creating them reliably.</p>
+<h4 id="windows">Windows</h4>
+<p>GraalVM installation on windows can be done easily using the .msi file available on <a href="https://www.oracle.com/java/technologies/downloads/#jdk21-windows">Oracle’s website</a></p>
+<h4 id="macos--linux">MacOS + Linux</h4>
+<p>Similar to installing normal Java installations, we can use <a href="https://sdkman.io/">sdkman</a> to perform the install</p>
+<h4 id="gradle-upgrade">Gradle Upgrade</h4>
+<p>Since we’re focused on Gradle instead of Maven, we want to upgrade to the latest version of Gradle to try to guarantee
+compatibility.</p>
+<h2 id="upgrading-a-spring-boot-2-application">Upgrading a Spring Boot 2 Application</h2>
+<p>The assumptions in this post are that we’re converting a Spring Boot application that uses
+Spring Data JPA, Spring Web MVC, Spring Actuator and a few more smaller dependencies.</p>
+<h3 id="going-spring-boot-3">Going Spring Boot 3</h3>
+<p>We can look at our <code>build.gradle</code> file and update the following components:</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="plaintext"><code><span class="line"><span>plugins {</span></span>
+<span class="line"><span>    id 'java'</span></span>
+<span class="line"><span>    id 'org.springframework.boot' version '3.2.2'</span></span>
+<span class="line"><span>    id 'io.spring.dependency-management' version '1.1.4'</span></span>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>java {</span></span>
+<span class="line"><span>    sourceCompatibility = '21'</span></span>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span></code></pre>
+<p>That should be it! You may need to make updates to your IDE or environment to account
+for JDK21, but otherwise reloading the gradle project will get the ball rolling!</p>
+<h3 id="gradle-plugin-updates">Gradle Plugin Updates</h3>
+<p>To support native compilation, we’re going to need to add a gradle plugin. Use your existing configuration (single or
+multi module) to add the following plugin:</p>
+<p><code>id 'org.graalvm.buildtools.native' version '0.9.28'</code></p>
+<p>Grab the latest version! This is the latest as of early 2024.</p>
+<p>Next we have 2 sections to configure, one will be explained later.</p>
+<p>The first is <code>bootBuildImage</code>. This may be different, but the instructions here will be
+in Gradle - Groovy.</p>
+<p>Add the following sections to your <code>build.gradle</code></p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="plaintext"><code><span class="line"><span>bootJar {</span></span>
+<span class="line"><span>    enabled = true</span></span>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>bootBuildImage {</span></span>
+<span class="line"><span>    builder = "paketobuildpacks/builder-jammy-full:0.3.331"</span></span>
+<span class="line"><span>    environment = [</span></span>
+<span class="line"><span>        "BP_NATIVE_IMAGE": "true",</span></span>
+<span class="line"><span>        "BP_JVM_VERSION": "21"</span></span>
+<span class="line"><span>    ]</span></span>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>graalvmNative {</span></span>
+<span class="line"><span>    testSupport = false</span></span>
+<span class="line"><span>    metadataRepository {</span></span>
+<span class="line"><span>    enabled = true</span></span>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>    binaries {</span></span>
+<span class="line"><span>        configureEach {</span></span>
+<span class="line"><span>            resources.autodetect()</span></span>
+<span class="line"><span>        }</span></span>
+<span class="line"><span>    }</span></span>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span></code></pre>
+<p>The <code>bootJar</code> section is for enabling our runnable jar that’ll be used for building the native image.</p>
+<p>Second is the <code>bootBuildImage</code>. This is what we’ll use to build runnable images that can be deployed.
+We include the configuration for native images and Java 21, but you can change these to the values needed
+for your project.</p>
+<p>Lastly, the <code>graalvmNative</code> section is where we’ll add in our support for AoT tests and the metadata repository.</p>
+<p>The details around the metadata repository are included in the above Spring documentation, but suffice to say we’ll want
+to enable the metadata repository in our project to avoid as many native issues as possible.</p>
+<p>These types of issues are explained in the documentation, with a deeper explanation available here:</p>
+<p><a href="https://www.graalvm.org/22.0/reference-manual/native-image/">GraalVM Native Image Documentation</a></p>
+<h3 id="javax-to-jakarta">Javax to Jakarta</h3>
+<p>We’re starting with an interesting change that occurred in 2020 around Jakarta EE. If you haven’t
+already run into this issue, many libraries post-2020 are using
+<a href="https://jakarta.ee/blogs/javax-jakartaee-namespace-ecosystem-progress/">Jakarta EE 9</a>, which changes the namespace
+from <code>javax</code> to <code>jakarta</code>. So when you update to the next version of spring boot from the last step,
+this may be the first build error you run into.</p>
+<p>For example, <code>import javax.persistence cannot be resolved</code></p>
+<p>To resolve this issue, simply find-and-replace all <code>javax</code> imports and change them to <code>jakarta</code>, and that’s it!</p>
+<p>If you are using old libraries that depend on javax, you should be able to locate the javax api dependencies and
+add them into the project. For example, some older dependencies may require <code>javax.servlet-api</code>.</p>
+<p>That dependency can be found here:</p>
+<p><a href="https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api">Maven Central: javax.servlet/javax.servlet-api</a></p>
+<h3 id="spring-security">Spring Security</h3>
+<p>The sample Spring Security setup below is a common security configuration for
+a Spring Web MVC application.</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="plaintext"><code><span class="line"><span>@Component</span></span>
+<span class="line"><span>public class SecurityConfig extends WebSecurityConfigurerAdapter</span></span>
+<span class="line"><span>{</span></span>
+<span class="line"><span>    @Override</span></span>
+<span class="line"><span>    protected void configure(HttpSecurity http) throws Exception {</span></span>
+<span class="line"><span>        http.authorizeRequests(authorizeRequests -> authorizeRequests</span></span>
+<span class="line"><span>                .mvcMatchers("/actuator/**").permitAll()</span></span>
+<span class="line"><span>                .mvcMatchers("/api/**").authenticated()</span></span>
+<span class="line"><span>                .anyRequest().denyAll()</span></span>
+<span class="line"><span>    )</span></span>
+<span class="line"><span>    .oauth2ResourceServer().jwt()</span></span>
+<span class="line"><span>    .jwtAuthenticationConverter(converter());</span></span>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span></code></pre>
+<p>This configuration changes greatly for Spring Boot 3.</p>
+<p>We transition from a <code>WebSecurityConfigurerAdapter</code> to a <code>SecurityFilterChain</code>. The reference
+<a href="https://docs.spring.io/spring-security/reference/servlet/architecture.html#servlet-securityfilterchain">doc for the new security component is available here</a></p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="plaintext"><code><span class="line"><span>@EnableWebSecurity</span></span>
+<span class="line"><span>@Configuration</span></span>
+<span class="line"><span>public class SecurityConfig</span></span>
+<span class="line"><span>{</span></span>
+<span class="line"><span>    @Bean</span></span>
+<span class="line"><span>    public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {</span></span>
+<span class="line"><span>    http.authorizeHttpRequests( authorize -> authorize</span></span>
+<span class="line"><span>        .requestMatchers("/actuator/**").permitAll()</span></span>
+<span class="line"><span>        .requestMatchers("/v1/**").authenticated()</span></span>
+<span class="line"><span>        .anyRequest().denyAll()</span></span>
+<span class="line"><span>    )</span></span>
+<span class="line"><span>    .oauth2ResourceServer(oauth2 -></span></span>
+<span class="line"><span>        oauth2.jwt(</span></span>
+<span class="line"><span>            jwt -> jwt.jwtAuthenticationConverter(converter())</span></span>
+<span class="line"><span>        )</span></span>
+<span class="line"><span>    );</span></span>
+<span class="line"><span>    return http.build();</span></span>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span></code></pre>
+<p>The tl;dr for this section, are the following three changes.</p>
+<p>The first is the copy-paste structural change. The second, is updating mvcMatchers to
+<code>requestMatchers</code>. The third is using the new format of passing a lambda into the method, see
+the converter() above across the two different examples.</p>
+<p>With that (and some nuanced changes that can be found in the official documentation); we’ve migrated
+the spring security configuration.</p>
+<p>At this point, we can take some time to review the documentation spring has made available
+to try to understand what’s happening when we’re creating these native images.</p>
+<p>Check out the documentation below. It doesn’t attempt to go into detail like this guide does about individual changes,
+but it’s invaluable to understand the information they’ve provided to be able to update our application
+to be a functional native image.</p>
+<p><a href="https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#native-image">https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#native-image</a></p>
+<h3 id="graalvm-and-building-for-the-tracing-agent">GraalVM and Building for the Tracing Agent</h3>
+<p>Now for the most confusing but interesting part of this
+whole GraalVM process.</p>
+<p>It’s mentioned in the documentation, but I hope here to summarize this complicated part of the native-image process.</p>
+<p>When you do a nativeCompile (for example), the GraalVM
+compilation process attempts to locate and mark down all
+of the places in the code things that aren’t supported
+by native images are done. Things like reflection, dynamic property configuration, classloading, reading
+files off of the filesystem dynamically, etc.</p>
+<p>However, it’s not perfect (far from it!), so we have to help out the process.</p>
+<p>The documentation on the tracing agent is available here:
+<a href="https://www.graalvm.org/latest/reference-manual/native-image/metadata/AutomaticMetadataCollection/">https://www.graalvm.org/latest/reference-manual/native-image/metadata/AutomaticMetadataCollection/</a></p>
+<p>There’s a set of files that contain each a very specific chunk of data
+that together, informs the native-image what needs to be included in the compilation.</p>
+<p>These files are generated and then placed in the src/main/resources/META-INF/native-image folder.</p>
+<p>Trying to write these files by hand would be CRAZY difficult, so the tracing agent allows us to execute our application via the JVM, and the agent will write out the files for us.</p>
+<p>The methodology will be explained in the how-to-run section coming up!</p>
+<p>Until then, here are the files you can expect to generate (and sometimes manually update!)</p>
+<p>These files are (with examples!):</p>
+<ol>
+<li>
+<p>jni-config.json</p>
+<p>Any JNI references the application needs to know about</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="plaintext"><code><span class="line"><span> [{</span></span>
+<span class="line"><span>     "name":"java.util.Arrays",</span></span>
+<span class="line"><span>     "methods":[{"name":"asList","parameterTypes":["java.lang.Object[]"] }]</span></span>
+<span class="line"><span> }]</span></span>
+<span class="line"><span></span></span></code></pre>
+</li>
+<li>
+<p>predefined-classes-config.json</p>
+<p>Bytecode references to existing, predefined classes. (I’ve never seen this populated across the dozen applications I’ve migrated to native-image!)</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="plaintext"><code><span class="line"><span> [{</span></span>
+<span class="line"><span>     "type": "agent-extracted",</span></span>
+<span class="line"><span>     "classes": [</span></span>
+<span class="line"><span>         {</span></span>
+<span class="line"><span>             "hash": "&#x3C;class-bytecodes-hash>",</span></span>
+<span class="line"><span>             "nameInfo": "&#x3C;class-name"</span></span>
+<span class="line"><span>         }</span></span>
+<span class="line"><span>     ]</span></span>
+<span class="line"><span> }]</span></span>
+<span class="line"><span></span></span></code></pre>
+</li>
+<li>
+<p>proxy-config.json</p>
+<p>This file allows for pre-defining classes that will be generated at runtime. This isn’t supported by native-image, so it’ll need to be known in advance.</p>
+<p>There are a handful of spring classes that the tracing agent will provide here that are managed via proxy!</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="plaintext"><code><span class="line"><span> [</span></span>
+<span class="line"><span>     {</span></span>
+<span class="line"><span>         "interfaces":["org.springframework.beans.factory.annotation.Qualifier"]</span></span>
+<span class="line"><span>     },</span></span>
+<span class="line"><span>     {</span></span>
+<span class="line"><span>         "interfaces":["org.springframework.boot.actuate.endpoint.annotation.Endpoint"]</span></span>
+<span class="line"><span>     },</span></span>
+<span class="line"><span>     {</span></span>
+<span class="line"><span>         "interfaces":["org.springframework.boot.actuate.endpoint.annotation.EndpointExtension"]</span></span>
+<span class="line"><span>     },</span></span>
+<span class="line"><span>     {</span></span>
+<span class="line"><span>         "interfaces":["org.springframework.boot.context.properties.ConfigurationProperties"]</span></span>
+<span class="line"><span>     },</span></span>
+<span class="line"><span>     {</span></span>
+<span class="line"><span>         "interfaces":["org.springframework.web.bind.annotation.ControllerAdvice"]</span></span>
+<span class="line"><span>     },</span></span>
+<span class="line"><span>     {</span></span>
+<span class="line"><span>         "interfaces":["org.springframework.web.bind.annotation.RequestMapping"]</span></span>
+<span class="line"><span>     }</span></span>
+<span class="line"><span> ]</span></span>
+<span class="line"><span></span></span></code></pre>
+</li>
+<li>
+<p>reflect-config.json</p>
+<p>Reflection is not supported within native-images! All the classes dynamically managed via reflection need to be configured here to be found in the native-image</p>
+</li>
+<li>
+<p>resource-config.json</p>
+<p>This file specifies all of the known files and resource bundles to roll into the native-image to be referenced directly.</p>
+<p>The tracing agent will add any file that must be included into the native-image, not just external resource bundles.</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="plaintext"><code><span class="line"><span> "resources":{</span></span>
+<span class="line"><span>     "includes":[{</span></span>
+<span class="line"><span>         "pattern":"\\QMETA-INF/resources/index.html\\E"</span></span>
+<span class="line"><span>     }, {</span></span>
+<span class="line"><span>         "pattern":"\\QMETA-INF/services/ch.qos.logback.classic.spi.Configurator\\E"</span></span>
+<span class="line"><span>     }, {</span></span>
+<span class="line"><span>         "pattern":"\\QMETA-INF/services/jakarta.el.ExpressionFactory\\E"</span></span>
+<span class="line"><span>     }, {</span></span>
+<span class="line"><span>         "pattern":"\\QMETA-INF/services/jakarta.persistence.spi.PersistenceProvider\\E"</span></span>
+<span class="line"><span>     }, {</span></span>
+<span class="line"><span>         "pattern":"\\QMETA-INF/services/jakarta.validation.ConstraintValidator\\E"</span></span>
+<span class="line"><span>     }]</span></span>
+<span class="line"><span> }</span></span>
+<span class="line"><span></span></span></code></pre>
+</li>
+<li>
+<p>serialization-config.json</p>
+<p>Serialization generally utilizes reflection in some way to retrieve information for the serialization process. This file is where those additional pieces of information can be provided.</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="plaintext"><code><span class="line"><span> {</span></span>
+<span class="line"><span>     "types": [</span></span>
+<span class="line"><span>         {</span></span>
+<span class="line"><span>         "condition": {</span></span>
+<span class="line"><span>             "typeReachable": "&#x3C;condition-class>"</span></span>
+<span class="line"><span>         },</span></span>
+<span class="line"><span>         "name": "&#x3C;fully-qualified-class-name>",</span></span>
+<span class="line"><span>         "customTargetConstructorClass": "&#x3C;custom-target-constructor-class>"</span></span>
+<span class="line"><span>         }</span></span>
+<span class="line"><span>     ],</span></span>
+<span class="line"><span>     "lambdaCapturingTypes": [</span></span>
+<span class="line"><span>         {</span></span>
+<span class="line"><span>         "condition": {</span></span>
+<span class="line"><span>             "typeReachable": "&#x3C;condition-class>"</span></span>
+<span class="line"><span>         },</span></span>
+<span class="line"><span>         "name": "&#x3C;fully-qualified-class-name>",</span></span>
+<span class="line"><span>         "customTargetConstructorClass": "&#x3C;custom-target-constructor-class>"</span></span>
+<span class="line"><span>         }</span></span>
+<span class="line"><span>     ]</span></span>
+<span class="line"><span> }</span></span>
+<span class="line"><span></span></span></code></pre>
+</li>
+</ol>
+<h3 id="running-the-tracing-agent">Running the Tracing Agent</h3>
+<p>The tracing agent is an agent-lib we’re going to attach to our jar execution. It’s going to generate the files from the previous section.</p>
+<p>The goal of the tracing agent, is to exercise the application. Each time a new reflection activity occurs, or a new file is loaded, the agent will populate the file.</p>
+<p>We have two options, specifying the directory to write these files to, or merging to an existing directory.</p>
+<p>The latter makes it easier to test your application holistically and with multiple passthroughs.</p>
+<p>We’ll first build the application using <code>./gradlew clean build</code></p>
+<p>The first option, is simply providing a folder to the agent:</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$JAVA_HOME/bin/java -agentlib:native-image-agent=config-merge-dir=/config -jar /build/libs/app.jar</span></span>
+<span class="line"><span></span></span></code></pre>
+<p>The merge option is</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="plaintext"><code><span class="line"><span>$JAVA_HOME/bin/java -agentlib:native-image-agent=config-merge-dir=/config -jar /build/libs/app.jar</span></span>
+<span class="line"><span></span></span></code></pre>
+<h3 id="how-to-run-our-native-image">How to run our Native Image</h3>
+<p>Now that we have our native-image metadata files that should help guarantee our application runs correctly, we can focus on the two initial ways to run out native-image.</p>
+<p>The first, manually compiling our executable and running it by hand.</p>
+<p>This is a simple process. First we run <code>./gradlew clean build nativeCompile</code></p>
+<p>From there, you’ll find a file called <code>app</code> in the ./build/native folder structure.</p>
+<p>You can run this simply using <code>./app</code>.</p>
+<p>Our second option, is a one-step process. We simply execute <code>./gradlew clean build nativeRun</code></p>
+<p>This will nativeCompile and execute the application.</p>
+<h3 id="building-docker-containers">Building Docker Containers</h3>
+<p>Our final (and most useful) native-image option is <code>bootBuildImage</code>.</p>
+<p>This command will perform a native compilation and embed the executable in a Docker image.</p>
+<p>This image can be run anywhere that supports Docker, making this command immensely powerful.</p>
+<p>There are plenty of configurations available with building this image as well; different base images, pre-named images, hard coded values like JVM_VERSION, etc.</p>
+<h3 id="final-thoughts">Final Thoughts</h3>
+<p>This is far from an all inclusive guide on GraalVM native-images using Spring Boot 3, but I hope anyone who stumbles across this page gains some value from it.</p>
+<p>I’ve filled this page will all of the things that slowed me down during my own journey to convert a handful of my company’s applications into native-images.</p> </article> <ul class="my-8 astro-vj4tpspi"> <li class="inline-block my-1 underline-offset-4 astro-blwjyjpt"> <a href="/tags/story/" class="text-sm pr-2 group astro-blwjyjpt" data-astro-transition-scope="astro-36ssibgs-2"> <svg xmlns="http://www.w3.org/2000/svg" class=" scale-75 astro-blwjyjpt"><path d="M16.018 3.815 15.232 8h-4.966l.716-3.815-1.964-.37L8.232 8H4v2h3.857l-.751 4H3v2h3.731l-.714 3.805 1.965.369L8.766 16h4.966l-.714 3.805 1.965.369.783-4.174H20v-2h-3.859l.751-4H21V8h-3.733l.716-3.815-1.965-.37zM14.106 14H9.141l.751-4h4.966l-.752 4z" class="astro-blwjyjpt"></path> </svg>
+&nbsp;<span class="astro-blwjyjpt">story</span> </a> </li> <li class="inline-block my-1 underline-offset-4 astro-blwjyjpt"> <a href="/tags/spring-boot/" class="text-sm pr-2 group astro-blwjyjpt" data-astro-transition-scope="astro-36ssibgs-3"> <svg xmlns="http://www.w3.org/2000/svg" class=" scale-75 astro-blwjyjpt"><path d="M16.018 3.815 15.232 8h-4.966l.716-3.815-1.964-.37L8.232 8H4v2h3.857l-.751 4H3v2h3.731l-.714 3.805 1.965.369L8.766 16h4.966l-.714 3.805 1.965.369.783-4.174H20v-2h-3.859l.751-4H21V8h-3.733l.716-3.815-1.965-.37zM14.106 14H9.141l.751-4h4.966l-.752 4z" class="astro-blwjyjpt"></path> </svg>
+&nbsp;<span class="astro-blwjyjpt">spring-boot</span> </a> </li> <li class="inline-block my-1 underline-offset-4 astro-blwjyjpt"> <a href="/tags/graalvm/" class="text-sm pr-2 group astro-blwjyjpt" data-astro-transition-scope="astro-36ssibgs-4"> <svg xmlns="http://www.w3.org/2000/svg" class=" scale-75 astro-blwjyjpt"><path d="M16.018 3.815 15.232 8h-4.966l.716-3.815-1.964-.37L8.232 8H4v2h3.857l-.751 4H3v2h3.731l-.714 3.805 1.965.369L8.766 16h4.966l-.714 3.805 1.965.369.783-4.174H20v-2h-3.859l.751-4H21V8h-3.733l.716-3.815-1.965-.37zM14.106 14H9.141l.751-4h4.966l-.752 4z" class="astro-blwjyjpt"></path> </svg>
+&nbsp;<span class="astro-blwjyjpt">graalvm</span> </a> </li>  </ul> <div class="flex flex-col-reverse items-center justify-between gap-6 sm:flex-row-reverse sm:items-end sm:gap-4 astro-vj4tpspi"> <button id="back-to-top" class="focus-outline whitespace-nowrap py-1 hover:opacity-75 astro-vj4tpspi"> <svg xmlns="http://www.w3.org/2000/svg" class="rotate-90 astro-vj4tpspi"> <path d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z" class="astro-vj4tpspi"></path> </svg> <span class="astro-vj4tpspi">Back to Top</span> </button> <div class="social-icons astro-wkojbtzc"> <span class="italic astro-wkojbtzc">Share this post on:</span> <div class="text-center astro-wkojbtzc"> <a href="https://wa.me/?text=https://stevenpg.com/posts/spring2-to-spring3-graalvm/" class="group inline-block hover:text-skin-accent link-button astro-wkojbtzc" title="Share this post via WhatsApp"> <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="icon-tabler"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"></path>
+      <path d="M9 10a0.5 .5 0 0 0 1 0v-1a0.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a0.5 .5 0 0 0 0 -1h-1a0.5 .5 0 0 0 0 1"></path>
+    </svg> <span class="sr-only astro-wkojbtzc">Share this post via WhatsApp</span> </a><a href="https://www.facebook.com/sharer.php?u=https://stevenpg.com/posts/spring2-to-spring3-graalvm/" class="group inline-block hover:text-skin-accent link-button astro-wkojbtzc" title="Share this post on Facebook"> <svg
+    xmlns="http://www.w3.org/2000/svg"
+    class="icon-tabler"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+    <path
+      d="M7 10v4h3v7h4v-7h3l1 -4h-4v-2a1 1 0 0 1 1 -1h3v-4h-3a5 5 0 0 0 -5 5v2h-3"
+    ></path>
+  </svg> <span class="sr-only astro-wkojbtzc">Share this post on Facebook</span> </a><a href="https://twitter.com/intent/tweet?url=https://stevenpg.com/posts/spring2-to-spring3-graalvm/" class="group inline-block hover:text-skin-accent link-button astro-wkojbtzc" title="Tweet this post"> <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="icon-tabler"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z"></path>
+    </svg> <span class="sr-only astro-wkojbtzc">Tweet this post</span> </a><a href="https://t.me/share/url?url=https://stevenpg.com/posts/spring2-to-spring3-graalvm/" class="group inline-block hover:text-skin-accent link-button astro-wkojbtzc" title="Share this post via Telegram"> <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="icon-tabler"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4"></path>
+      </svg> <span class="sr-only astro-wkojbtzc">Share this post via Telegram</span> </a><a href="https://pinterest.com/pin/create/button/?url=https://stevenpg.com/posts/spring2-to-spring3-graalvm/" class="group inline-block hover:text-skin-accent link-button astro-wkojbtzc" title="Share this post on Pinterest"> <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="icon-tabler"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <line x1="8" y1="20" x2="12" y2="11"></line>
+      <path d="M10.7 14c.437 1.263 1.43 2 2.55 2c2.071 0 3.75 -1.554 3.75 -4a5 5 0 1 0 -9.7 1.7"></path>
+      <circle cx="12" cy="12" r="9"></circle>
+    </svg> <span class="sr-only astro-wkojbtzc">Share this post on Pinterest</span> </a><a href="mailto:?subject=See%20this%20post&#38;body=https://stevenpg.com/posts/spring2-to-spring3-graalvm/" class="group inline-block hover:text-skin-accent link-button astro-wkojbtzc" title="Share this post via email"> <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="icon-tabler"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+      <polyline points="3 7 12 13 21 7"></polyline>
+    </svg> <span class="sr-only astro-wkojbtzc">Share this post via email</span> </a> </div> </div>  </div> <hr class="my-6 border-dashed astro-vj4tpspi"> <!-- Previous/Next Post Buttons --> <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 astro-vj4tpspi"> <a href="/posts/request-body-with-spring-webclient" class="flex w-full gap-1 hover:opacity-75 astro-vj4tpspi"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left flex-none astro-vj4tpspi">  <path stroke="none" d="M0 0h24v24H0z" fill="none" class="astro-vj4tpspi"></path> <path d="M15 6l-6 6l6 6" class="astro-vj4tpspi"></path>  </svg> <div class="astro-vj4tpspi"> <span class="astro-vj4tpspi">Previous Post</span> <div class="text-sm text-skin-accent/85 astro-vj4tpspi">Logging Request Body with Spring WebClient</div> </div> </a> <a href="/posts/tripod-travel-freedom" class="flex w-full justify-end gap-1 text-right hover:opacity-75 sm:col-start-2 astro-vj4tpspi"> <div class="astro-vj4tpspi"> <span class="astro-vj4tpspi">Next Post</span> <div class="text-sm text-skin-accent/85 astro-vj4tpspi">Freedom of Travel for the Three Legged Cat</div> </div> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right flex-none astro-vj4tpspi">  <path stroke="none" d="M0 0h24v24H0z" fill="none" class="astro-vj4tpspi"></path> <path d="M9 6l6 6l-6 6" class="astro-vj4tpspi"></path>  </svg> </a> </div> </main> <footer class="mt-auto astro-sz7xmlte"> <div class="max-w-3xl mx-auto px-0"> <hr class="border-skin-line" aria-hidden="true"> </div> <div class="footer-wrapper astro-sz7xmlte"> <div class="social-icons flex astro-upu6fzxr"> <a href="https://github.com/stevenpg" class="group inline-block hover:text-skin-accent link-button astro-upu6fzxr" title=" Coding Steve on Github"> <svg
+    xmlns="http://www.w3.org/2000/svg"
+    class="icon-tabler"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+    <path
+      d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"
+    ></path>
+  </svg> <span class="sr-only astro-upu6fzxr"> Coding Steve on Github</span> </a> </div>  <div class="copyright-wrapper astro-sz7xmlte"> <span class="astro-sz7xmlte">Copyright &#169; 2024</span> <span class="separator astro-sz7xmlte">&nbsp;|&nbsp;</span> <span class="astro-sz7xmlte">All rights reserved.</span> </div> </div> </footer>   </body></html>  <script data-astro-rerun>
+  /** Create a progress indicator
+   *  at the top */
+  function createProgressBar() {
+    // Create the main container div
+    const progressContainer = document.createElement("div");
+    progressContainer.className =
+      "progress-container fixed top-0 z-10 h-1 w-full bg-skin-fill";
+
+    // Create the progress bar div
+    const progressBar = document.createElement("div");
+    progressBar.className = "progress-bar h-1 w-0 bg-skin-accent";
+    progressBar.id = "myBar";
+
+    // Append the progress bar to the progress container
+    progressContainer.appendChild(progressBar);
+
+    // Append the progress container to the document body or any other desired parent element
+    document.body.appendChild(progressContainer);
+  }
+  createProgressBar();
+
+  /** Update the progress bar
+   *  when user scrolls */
+  function updateScrollProgress() {
+    document.addEventListener("scroll", () => {
+      const winScroll =
+        document.body.scrollTop || document.documentElement.scrollTop;
+      const height =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      if (document) {
+        const myBar = document.getElementById("myBar");
+        if (myBar) {
+          myBar.style.width = scrolled + "%";
+        }
+      }
+    });
+  }
+  updateScrollProgress();
+
+  /** Attaches links to headings in the document,
+   *  allowing sharing of sections easily */
+  function addHeadingLinks() {
+    const headings = Array.from(
+      document.querySelectorAll("h2, h3, h4, h5, h6")
+    );
+    for (const heading of headings) {
+      heading.classList.add("group");
+      const link = document.createElement("a");
+      link.className =
+        "heading-link ml-2 opacity-0 group-hover:opacity-100 focus:opacity-100";
+      link.href = "#" + heading.id;
+
+      const span = document.createElement("span");
+      span.ariaHidden = "true";
+      span.innerText = "#";
+      link.appendChild(span);
+      heading.appendChild(link);
+    }
+  }
+  addHeadingLinks();
+
+  /** Attaches copy buttons to code blocks in the document,
+   * allowing users to copy code easily. */
+  function attachCopyButtons() {
+    const copyButtonLabel = "Copy";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      const copyButton = document.createElement("button");
+      copyButton.className =
+        "copy-code absolute right-3 -top-3 rounded bg-skin-card px-2 py-1 text-xs leading-4 text-skin-base font-medium";
+      copyButton.innerHTML = copyButtonLabel;
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      // wrap codebock with relative parent element
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        await copyCode(codeBlock, copyButton);
+      });
+    }
+
+    async function copyCode(block, button) {
+      const code = block.querySelector("code");
+      const text = code?.innerText;
+
+      await navigator.clipboard.writeText(text ?? "");
+
+      // visual feedback that task is completed
+      button.innerText = "Copied";
+
+      setTimeout(() => {
+        button.innerText = copyButtonLabel;
+      }, 700);
+    }
+  }
+  attachCopyButtons();
+
+  /** Scrolls the document to the top when
+   * the "Back to Top" button is clicked. */
+  function backToTop() {
+    document.querySelector("#back-to-top")?.addEventListener("click", () => {
+      document.body.scrollTop = 0; // For Safari
+      document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+    });
+  }
+  backToTop();
+
+  /* Go to page start after page swap */
+  document.addEventListener("astro:after-swap", () =>
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
+  );
+</script>
