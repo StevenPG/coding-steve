@@ -4,8 +4,8 @@ pubDatetime: 2024-09-29T12:00:00.000Z
 title: Jdk 23 Streams - How To Use Gather Operations
 slug: jdk23-streams-gather
 featured: false
-
-ogImage: https://i.imgur.com/4ICZldG.jpeg
+# TODO replace ogImage
+ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
 tags:
   - software
   - spring boot
@@ -26,6 +26,16 @@ a good resource on the web that helped me understand.
 
 SO, in keeping with this site, I intend to write up a simple article that I (and others!) can reference
 in the future when we need to understand something about this new non-terminating stream capability!
+
+There are two libraries being developed that contain common use-cases for gatherers. I'm sure these libraries 
+will continue to grow as more use-cases are identified. I don't recommend including them by default, but using the
+code as inspiration for your own gatherers OR pulling in the dependency when needed seems like a good move for most of us!
+
+Here are the libraries:
+
+https://github.com/pivovarit/more-gatherers
+
+https://github.com/jhspetersson/packrat
 
 ### Let's get to demo-ing!
 
@@ -189,45 +199,26 @@ Gatherer.ofSequential(initializer, integrator);
 
 ## Built-In Gatherers
 
-TODO - add link to JavaDoc for each with examples!
 The following are built-in gatherers in the [java.util.stream.Gatherers][gatherers-javadoc] class:
 
 [fold][fold] is a stateful many-to-one gatherer which constructs an aggregate 
 incrementally and emits that aggregate when no more input elements exist.
 
-TODO - example
-
 [mapConcurrent][mapConcurrent] is a stateful one-to-one gatherer which invokes a supplied 
 function for each input element concurrently, up to a supplied limit.
-
-TODO - example
 
 [scan][scan] is a stateful one-to-one gatherer which applies a supplied function 
 to the current state and the current element to produce the next element, 
 which it passes downstream.
 
-TODO - example
-
 [windowFixed][windowFixed] is a stateful many-to-many gatherer which groups input 
 elements into lists of a supplied size, emitting the windows 
 downstream when they are full.
-
-TODO - example
 
 [windowSliding][windowSliding] is a stateful many-to-many gatherer which groups input 
 elements into lists of a supplied size. After the first window, each 
 subsequent window is created from a copy of its predecessor by dropping 
 the first element and appending the next element from the input stream..
-
-TODO - example
-
-## Gatherers are so useful, we can re-create every intermediate stream operation
-
-TODO - recreate everything as gatherers
-
-TODO - find real life example
-- distinctBy
-- grouping and applying a change to the whole collection
 
 [soby-chako]: https://github.com/sobychacko
 [openjdk23]: https://openjdk.org/projects/jdk/23/

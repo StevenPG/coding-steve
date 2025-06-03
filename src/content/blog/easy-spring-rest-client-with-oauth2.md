@@ -4,13 +4,12 @@ pubDatetime: 2024-09-19T12:00:00.000Z
 title: Easy Spring Rest Client w/ OAuth2
 slug: spring-rest-client-oauth2
 featured: true
-
-ogImage: https://i.imgur.com/4ICZldG.jpeg
+ogImage: /assets/17e73d45-30ad-4daf-a92b-6333eec91b89.png
 tags:
   - software
   - spring boot
   - java
-description: An article walking through a demo of partitioning tables with postgres.
+description: Using the new Spring RestClient with newly supported OAuth2 capabilities!
 ---
 
 # Brief
@@ -57,14 +56,14 @@ In comes [RestClient][restClientBlogAnnouncement], a client written in the same 
 synchronous and asynchronous operations out of the box. This lets us remove the spring-webflux
 dependency and use spring-web-mvc as the primary HTTP dependency for server and client applications.
 
-## The Setup (Currently a Milestone Release but this will be updated!)
+## The Setup
 
 Here's everything you need to get RestClient working with OAuth2!
 
 build.gradle
 ```groovy
 plugins {
-    id 'org.springframework.boot' version '3.3.3'
+    id 'org.springframework.boot' version '3.4.0'
 }
 
     // ... The rest of the stuff, this is just what's required
@@ -72,7 +71,7 @@ plugins {
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-security'
         implementation 'org.springframework.boot:spring-boot-starter-web'
-        implementation 'org.springframework.security:spring-security-oauth2-client:6.4.0-M3'
+        implementation 'org.springframework.security:spring-security-oauth2-client'
     }
 }
 ```
@@ -131,9 +130,12 @@ public class RestClientConfiguration
     public RestClient oauth2RestClient(
         OAuth2AuthorizedClientManager authorizedClientManager) {
 
-        // This is the new class!!! We instantiate a new one and provide it the client registration to match
+        // This is the new class! 
+        // We instantiate a new interceptor to load into RestClient
         OAuth2ClientHttpRequestInterceptor oAuth2ClientHttpRequestInterceptor =
-            new OAuth2ClientHttpRequestInterceptor(authorizedClientManager, request -> CLIENT_REGISTRATION_ID);
+            new OAuth2ClientHttpRequestInterceptor(authorizedClientManager);
+        // Then provide it the client registration to resolve the id from
+        oAuth2ClientHttpRequestInterceptor.setClientRegistrationIdResolver(clientRegistrationIdResolver());
 
         // From here we simply return the client with any custom configuration, and we're good to go!
         return RestClient.builder()
@@ -141,12 +143,24 @@ public class RestClientConfiguration
             .requestInterceptor(oAuth2ClientHttpRequestInterceptor)
             .build();
     }
+
+    private static OAuth2ClientHttpRequestInterceptor.ClientRegistrationIdResolver clientRegistrationIdResolver() {
+     return (request) -> CLIENT_REGISTRATION_ID;
+    }
 }
 ```
 
 ### Bonus: Setting up HttpServiceProxyFactory (not required but useful!)
 
 [HttpServiceProxyFactory][httpServiceProxyFactory] is new in [Spring 6][httpServiceProxyFactoryJavadoc]!
+
+ This factory allows you to easily generate reactive proxies for HTTP services, providing a convenient and 
+ efficient way to interact with REST APIs. You can define your HTTP service interface, annotate it with appropriate 
+ HTTP method and path annotations, and the factory will automatically generate a proxy that implements the interface. 
+ This eliminates the need for manual configuration and reduces boilerplate code.
+
+We can seamlessly inject our RestClient (or an existing WebClient) into the proxy, cutting back on the boilerplate
+and making the code much more readable!
 
 ```java
 public interface MyHttpService {
@@ -171,17 +185,54 @@ public class HttpServiceFactory
 }
 ```
 
+### Another Bonus: Setting up Logbook
+
+The logbook library (https://github.com/zalando/logbook) can be integrated into this layout!
+
+You can set up logbook by following this post: https://stevenpg.com/posts/request-body-with-spring-webclient/
+
+From there, we just need to update our `oauth2RestClient`
+
+Here's the updated code below for easy access!
+
+```java
+@Configuration
+public class RestClientConfiguration
+{
+    // This needs to match the YAML configuration
+    private static final String CLIENT_REGISTRATION_ID = "my-oauth-client";
+
+    // ...
+
+    @Bean
+    public RestClient oauth2RestClient(
+        OAuth2AuthorizedClientManager authorizedClientManager,
+        LogbookRestClientInterceptor logbookRestClientInterceptor) {
+
+        // This is the new class!!! We instantiate a new one and provide it the client registration to match
+        OAuth2ClientHttpRequestInterceptor oAuth2ClientHttpRequestInterceptor =
+            new OAuth2ClientHttpRequestInterceptor(authorizedClientManager, request -> CLIENT_REGISTRATION_ID);
+
+        // From here we simply return the client with any custom configuration, and we're good to go!
+        return RestClient.builder()
+            .baseUrl("http://myBaseUrl:8080")
+            .requestInterceptors(List.of(logbookRestClientInterceptor, oAuth2ClientHttpRequestInterceptor))
+            .build();
+    }
+}
+```
+
 ## Summary
 
 The new RestClient is already a popular alternative for developers in the Spring ecosystem. 
 The lack of an OAuth2 component has been a sore spot for new users converting over from WebClient. So with
-this new feature releasing in Spring Boot 3.4.0, it can now take it's rightful place as the default, non-webflux
+this new feature releasing with Spring Boot 3.4.0, it can now take it's rightful place as the default, non-webflux
 HTTP Client for Spring MVC!
 
-## Update Note
-
-Once this is available in the official spring release, I'll update this from milestone versions and 
-hook up the JavaDoc instead of the originating Github Issue!
+Paired with the HttpServiceProxyFactory feature, making REST calls
+with OAuth2 authorization has never been easier. Pair that with the extensive
+autoconfiguration of logbook, and you have a powerful combination of 
+security, readability and logging!
 
 [restClientBlogAnnouncement]: https://spring.io/blog/2023/07/13/new-in-spring-6-1-restclient
 [oAuth2ClientHttpRequestInterceptor]: https://github.com/spring-projects/spring-security/issues/13588

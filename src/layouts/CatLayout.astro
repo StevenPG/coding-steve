@@ -17,13 +17,16 @@ const { frontmatter } = Astro.props;
 ---
 
 <Layout title={`${frontmatter.title} | ${SITE.title}`}>
-  <Header activeNav="about" />
+  <Header activeNav="cats" />
   <Breadcrumbs />
   <main id="main-content">
     <section id="about" class="prose mb-28 max-w-3xl prose-img:border-0">
       <h1 class="text-2xl tracking-wider sm:text-3xl">{frontmatter.title}</h1>
       <slot />
+      <div>
+        <iframe height="800px" width="100%" src="https://howoldaremycats.com"></iframe>
+      </div>
     </section>
   </main>
-  <Footer />
+\  <Footer />
 </Layout>

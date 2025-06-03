@@ -7,9 +7,14 @@ Disallow: /nogooglebot/
 
 User-agent: *
 Allow: /
+Allow: /posts
+Allow: /posts/*
 
 Sitemap: ${new URL("sitemap-index.xml", SITE.website).href}
+Sitemap: ${new URL("sitemap-0.xml", SITE.website).href}
+
 `.trim();
+
 
 export const GET: APIRoute = () =>
   new Response(robots, {

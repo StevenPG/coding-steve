@@ -3,8 +3,7 @@ layout: ../layouts/AboutLayout.astro
 title: "About"
 ---
 
-Hi, I'm Steve. I like 3d printing, have 11 cats with my wife, and really enjoy working with new technology.
-
+I'm a senior software developer doing devops and development work.
 I've worked in retail, tax software and aerospace industries, and in all of those positions I was always pushing the limit
 as far as I could. Always trying to use bleeding edge tools where I can!
 
@@ -14,6 +13,7 @@ a mountain of research, I write about it here! Similarly, a lot of articles and 
 
 I hate that, so I aim for my posts to actually be useful to whoever comes across them! (Or me, 6 months from now)
 
+TODO - replace this image!
 <div>
   <img src="/assets/dev.svg" class="sm:w-1/2 mx-auto" alt="coding dev illustration">
 </div>

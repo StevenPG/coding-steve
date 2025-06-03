@@ -4,7 +4,7 @@ pubDatetime: 2023-01-30T15:57:52.737Z
 title: AstroPaper 2.0
 slug: astro-paper-2
 featured: false
-ogImage: https://i.imgur.com/4ICZldG.jpeg
+ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
 tags:
   - release
 description: AstroPaper with the enhancements of Astro v2. Type-safe markdown contents, bug fixes and better dev experience etc.
@@ -14,7 +14,7 @@ Astro 2.0 has been released with some cool features, breaking changes, DX improv
 
 <!-- ![Introducing AstroPaper 2.0](https://user-images.githubusercontent.com/53733092/215683840-dc2502f5-8c5a-44f0-a26c-4e7180455056.png) -->
 
-![Introducing AstroPaper 2.0](https://i.imgur.com/4ICZldG.jpeg)
+![Introducing AstroPaper 2.0](https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png)
 
 ## Table of contents
 

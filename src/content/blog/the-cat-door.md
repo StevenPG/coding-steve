@@ -4,8 +4,8 @@ pubDatetime: 2024-02-06T12:00:00.000Z
 title: Freedom of Travel for the Three Legged Cat
 slug: tripod-travel-freedom
 featured: false
-
-ogImage: https://i.imgur.com/4ICZldG.jpeg
+# TODO replace ogImage
+ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
 tags:
   - story
   - cats
@@ -55,12 +55,8 @@ I can tell he's proud of himself afterward, because he acts a lot more energetic
 The most important part about this door though, is that only the two or three cats that can be trusted (not to destroy everything)
 are registered via microchip to get into the office.
 
-I occasionally spot the other cats peeking in, jealous of the special portal that only allows in select creatures. 
-
-![Image of Cats looking at each other through the cat door](/assets/v9EGGek.jpeg)
-
-
-It has to appear as magic to them, and I know some of them have attempted to open the door, only to find it locked and unable to be opened.
+I occasionally spot the other cats peeking in, jealous of the special portal that only allows in select creatures. It has to
+appear as magic to them, and I know some of them have attempted to open the door, only to find it locked and unable to be opened.
 
 ![Image of Cat peeking through cat door](/assets/EZb9cQ7.jpg)
 
