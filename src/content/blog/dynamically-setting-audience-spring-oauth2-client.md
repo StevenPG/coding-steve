@@ -3,7 +3,8 @@ author: StevenPG
 pubDatetime: 2025-06-02T12:00:00.000Z
 title: Dynamically setting audience for using Spring OAuth2 Client
 slug: spring-oauth2-client-dynamic-audience
-featured: true
+featured: false
+draft: true
 
 ogImage: https://i.imgur.com/4ICZldG.jpeg
 tags:
