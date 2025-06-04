@@ -369,20 +369,300 @@ public class AudienceWritingClientCredentialsOAuth2AuthorizedClientProvider impl
 }
 ```
 
-#### OAuth2ClientHttpRequestInterceptor
+#### AudienceWritingOAuth2ClientHttpRequestInterceptor
 
 This is a new class that provides an easy mechanism for using an OAuth2AuthorizedClient to make requests
 by automatically injecting a bearer token for OAuth2 requests. It is defined in our `RestClientConfiguration` above.
 
-#### OAuth2ClientCredentialsGrantRequest
+TODO - comments
+```java
+public class AudienceWritingOAuth2ClientHttpRequestInterceptor implements ClientHttpRequestInterceptor {
+
+    // @formatter:off
+    private static final Map<HttpStatusCode, String> OAUTH2_ERROR_CODES = Map.of(
+            HttpStatus.UNAUTHORIZED, OAuth2ErrorCodes.INVALID_TOKEN,
+            HttpStatus.FORBIDDEN, OAuth2ErrorCodes.INSUFFICIENT_SCOPE
+    );
+    // @formatter:on
+
+    private static final Authentication ANONYMOUS_AUTHENTICATION = new AnonymousAuthenticationToken("anonymous",
+            "anonymousUser", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
+
+    private final OAuth2AuthorizedClientManager authorizedClientManager;
+
+    private OAuth2ClientHttpRequestInterceptor.ClientRegistrationIdResolver clientRegistrationIdResolver = new RequestAttributeClientRegistrationIdResolver();
+
+    private OAuth2ClientHttpRequestInterceptor.PrincipalResolver principalResolver = new SecurityContextHolderPrincipalResolver();
+
+    // @formatter:off
+    private OAuth2AuthorizationFailureHandler authorizationFailureHandler =
+            (clientRegistrationId, principal, attributes) -> { };
+    // @formatter:on
+
+    /**
+     * Constructs a {@code OAuth2ClientHttpRequestInterceptor} using the provided
+     * parameters.
+     * @param authorizedClientManager the {@link OAuth2AuthorizedClientManager} which
+     * manages the authorized client(s)
+     */
+    public AudienceWritingOAuth2ClientHttpRequestInterceptor(OAuth2AuthorizedClientManager authorizedClientManager) {
+        Assert.notNull(authorizedClientManager, "authorizedClientManager cannot be null");
+        this.authorizedClientManager = authorizedClientManager;
+    }
+
+    @Override
+    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+            throws IOException {
+        Authentication principal = this.principalResolver.resolve(request);
+        if (principal == null) {
+            principal = ANONYMOUS_AUTHENTICATION;
+        }
+
+        authorizeClient(request, principal);
+        try {
+            ClientHttpResponse response = execution.execute(request, body);
+            handleAuthorizationFailure(request, principal, response.getHeaders(), response.getStatusCode());
+            return response;
+        }
+        catch (RestClientResponseException ex) {
+            handleAuthorizationFailure(request, principal, ex.getResponseHeaders(), ex.getStatusCode());
+            throw ex;
+        }
+        catch (OAuth2AuthorizationException ex) {
+            handleAuthorizationFailure(ex, principal);
+            throw ex;
+        }
+    }
+
+    private void authorizeClient(HttpRequest request, Authentication principal) {
+        String clientRegistrationId = this.clientRegistrationIdResolver.resolve(request);
+        if (clientRegistrationId == null) {
+            return;
+        }
+
+        OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest.withClientRegistrationId(clientRegistrationId)
+                .principal(principal)
+                .attribute("intended_audience", request.getAttributes().get("audience"))
+                .build();
+        OAuth2AuthorizedClient authorizedClient = this.authorizedClientManager.authorize(authorizeRequest);
+        if (authorizedClient != null) {
+            request.getHeaders().setBearerAuth(authorizedClient.getAccessToken().getTokenValue());
+        }
+    }
+
+    private void handleAuthorizationFailure(HttpRequest request, Authentication principal, HttpHeaders headers,
+                                            HttpStatusCode httpStatus) {
+        OAuth2Error error = resolveOAuth2ErrorIfPossible(headers, httpStatus);
+        if (error == null) {
+            return;
+        }
+
+        String clientRegistrationId = this.clientRegistrationIdResolver.resolve(request);
+        if (clientRegistrationId == null) {
+            return;
+        }
+
+        ClientAuthorizationException authorizationException = new ClientAuthorizationException(error,
+                clientRegistrationId);
+        handleAuthorizationFailure(authorizationException, principal);
+    }
+
+    private static OAuth2Error resolveOAuth2ErrorIfPossible(HttpHeaders headers, HttpStatusCode httpStatus) {
+        String wwwAuthenticateHeader = headers.getFirst(HttpHeaders.WWW_AUTHENTICATE);
+        if (wwwAuthenticateHeader != null) {
+            Map<String, String> parameters = parseWwwAuthenticateHeader(wwwAuthenticateHeader);
+            if (parameters.containsKey(OAuth2ParameterNames.ERROR)) {
+                return new OAuth2Error(parameters.get(OAuth2ParameterNames.ERROR),
+                        parameters.get(OAuth2ParameterNames.ERROR_DESCRIPTION),
+                        parameters.get(OAuth2ParameterNames.ERROR_URI));
+            }
+        }
+
+        String errorCode = OAUTH2_ERROR_CODES.get(httpStatus);
+        if (errorCode != null) {
+            return new OAuth2Error(errorCode, null, "https://tools.ietf.org/html/rfc6750#section-3.1");
+        }
+
+        return null;
+    }
+
+    private static Map<String, String> parseWwwAuthenticateHeader(String wwwAuthenticateHeader) {
+        if (!StringUtils.hasLength(wwwAuthenticateHeader)
+                || !StringUtils.startsWithIgnoreCase(wwwAuthenticateHeader, "bearer")) {
+            return Map.of();
+        }
+
+        String headerValue = wwwAuthenticateHeader.substring("bearer".length()).stripLeading();
+        Map<String, String> parameters = new HashMap<>();
+        for (String kvPair : StringUtils.delimitedListToStringArray(headerValue, ",")) {
+            String[] kv = StringUtils.split(kvPair, "=");
+            if (kv == null || kv.length <= 1) {
+                continue;
+            }
+
+            parameters.put(kv[0].trim(), kv[1].trim().replace("\"", ""));
+        }
+
+        return parameters;
+    }
+
+    private void handleAuthorizationFailure(OAuth2AuthorizationException authorizationException,
+                                            Authentication principal) {
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder
+                .getRequestAttributes();
+        Map<String, Object> attributes = new HashMap<>();
+        if (requestAttributes != null) {
+            attributes.put(HttpServletRequest.class.getName(), requestAttributes.getRequest());
+            if (requestAttributes.getResponse() != null) {
+                attributes.put(HttpServletResponse.class.getName(), requestAttributes.getResponse());
+            }
+        }
+
+        this.authorizationFailureHandler.onAuthorizationFailure(authorizationException, principal, attributes);
+    }
+
+}
+```
+
+#### OAuth2ClientCredentialsAudiencedGrantRequest
 
 This object contains the client credentials and other client registration details relevant for querying
 for a new token.
 
-#### OAuth2AccessTokenResponseClient
+TODO - comment and finalize
+
+```java
+public class OAuth2ClientCredentialsAudiencedGrantRequest extends OAuth2ClientCredentialsGrantRequest {
+
+    private final String audience;
+
+    /**
+     * Constructs an {@code OAuth2ClientCredentialsGrantRequest} using the provided
+     * parameters, without an audience value
+     *
+     * @param clientRegistration the client registration
+     */
+    public OAuth2ClientCredentialsAudiencedGrantRequest(ClientRegistration clientRegistration) {
+        super(clientRegistration);
+        this.audience = null;
+    }
+
+    /**
+     * Constructs an {@code OAuth2ClientCredentialsGrantRequest} using the provided
+     * parameters
+     *
+     * @param clientRegistration the client registration
+     * @param audience           the audience value
+     */
+    public OAuth2ClientCredentialsAudiencedGrantRequest(ClientRegistration clientRegistration, String audience) {
+        super(clientRegistration);
+        this.audience = audience;
+    }
+
+    public String getAudience() {
+        return audience;
+    }
+}
+```
+
+#### AudienceWritingOAuth2AccessTokenResponseClient
 
 This class performs the actual exchange for an access token at the authorization server's token endpoint. This parent class is implemented based on the underlying oauth2 type. In this post, we'll
 be overriding the ClientCredentials implementation of a TokenResponseClient.
+
+TODO - comments and cleanup
+```java
+@Component
+public class AudienceWritingOAuth2AccessTokenResponseClient implements
+        OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsAudiencedGrantRequest> {
+
+    private static final String INVALID_TOKEN_RESPONSE_ERROR_CODE = "invalid_token_response";
+
+    // @formatter:off
+    private final RestClient restClient = RestClient.builder()
+            .messageConverters((messageConverters) -> {
+                messageConverters.clear();
+                messageConverters.add(new FormHttpMessageConverter());
+                messageConverters.add(new OAuth2AccessTokenResponseHttpMessageConverter());
+            })
+            .defaultStatusHandler(new OAuth2ErrorResponseErrorHandler())
+            .build();
+    // @formatter:on
+
+    private final Converter<OAuth2ClientCredentialsAudiencedGrantRequest, HttpHeaders> headersConverter = new DefaultOAuth2TokenRequestHeadersConverter<>();
+
+    private final Converter<OAuth2ClientCredentialsAudiencedGrantRequest, MultiValueMap<String, String>> parametersConverter = new DefaultOAuth2TokenRequestParametersConverter<>();
+
+    private final Consumer<MultiValueMap<String, String>> parametersCustomizer = (parameters) -> {
+    };
+
+    @Override
+    public OAuth2AccessTokenResponse getTokenResponse(OAuth2ClientCredentialsAudiencedGrantRequest grantRequest) {
+        Assert.notNull(grantRequest, "grantRequest cannot be null");
+        try {
+            // @formatter:off
+            OAuth2AccessTokenResponse accessTokenResponse = this.validatingPopulateRequest(grantRequest, grantRequest.getAudience())
+                    .retrieve()
+                    .body(OAuth2AccessTokenResponse.class);
+            // @formatter:on
+            if (accessTokenResponse == null) {
+                OAuth2Error error = new OAuth2Error(INVALID_TOKEN_RESPONSE_ERROR_CODE,
+                        "Empty OAuth 2.0 Access Token Response", null);
+                throw new OAuth2AuthorizationException(error);
+            }
+            return accessTokenResponse;
+        } catch (RestClientException ex) {
+            OAuth2Error error = new OAuth2Error(INVALID_TOKEN_RESPONSE_ERROR_CODE,
+                    "An error occurred while attempting to retrieve the OAuth 2.0 Access Token Response: "
+                            + ex.getMessage(),
+                    null);
+            throw new OAuth2AuthorizationException(error, ex);
+        }
+    }
+
+    private RestClient.RequestHeadersSpec<?> validatingPopulateRequest(OAuth2ClientCredentialsAudiencedGrantRequest grantRequest,
+                                                                       String audience) {
+        validateClientAuthenticationMethod(grantRequest);
+        return populateRequest(grantRequest, audience);
+    }
+
+    private void validateClientAuthenticationMethod(OAuth2ClientCredentialsGrantRequest grantRequest) {
+        ClientRegistration clientRegistration = grantRequest.getClientRegistration();
+        ClientAuthenticationMethod clientAuthenticationMethod = clientRegistration.getClientAuthenticationMethod();
+        boolean supportedClientAuthenticationMethod = clientAuthenticationMethod.equals(ClientAuthenticationMethod.NONE)
+                || clientAuthenticationMethod.equals(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                || clientAuthenticationMethod.equals(ClientAuthenticationMethod.CLIENT_SECRET_POST);
+        if (!supportedClientAuthenticationMethod) {
+            throw new IllegalArgumentException(String.format(
+                    "This class supports `client_secret_basic`, `client_secret_post`, and `none` by default. Client [%s] is using [%s] instead. Please use a supported client authentication method, or use `set/addParametersConverter` or `set/addHeadersConverter` to supply an instance that supports [%s].",
+                    clientRegistration.getRegistrationId(), clientAuthenticationMethod, clientAuthenticationMethod));
+        }
+    }
+
+    private RestClient.RequestHeadersSpec<?> populateRequest(OAuth2ClientCredentialsAudiencedGrantRequest grantRequest,
+                                                             String audience) {
+        MultiValueMap<String, String> parameters = this.parametersConverter.convert(grantRequest);
+        if (parameters == null) {
+            parameters = new LinkedMultiValueMap<>();
+        }
+        this.parametersCustomizer.accept(parameters);
+
+        var tokenRequestUri = grantRequest.getClientRegistration().getProviderDetails().getTokenUri()
+                + (audience != null ? "?audience=" + audience : "");;
+
+        return this.restClient.post()
+                .uri(tokenRequestUri)
+                .headers((headers) -> {
+                    HttpHeaders headersToAdd = this.headersConverter.convert(grantRequest);
+                    if (headersToAdd != null) {
+                        headers.addAll(headersToAdd);
+                    }
+                })
+                .body(parameters);
+    }
+
+}
+```
 
 TODO
 
