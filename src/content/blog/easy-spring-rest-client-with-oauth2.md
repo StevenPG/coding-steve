@@ -207,7 +207,7 @@ public class RestClientConfiguration
     @Bean
     public RestClient oauth2RestClient(
         OAuth2AuthorizedClientManager authorizedClientManager,
-        LogbookRestClientInterceptor logbookRestClientInterceptor) {
+        LogbookClientHttpRequestInterceptor logbookRestClientInterceptor) {
 
         // This is the new class!!! We instantiate a new one and provide it the client registration to match
         OAuth2ClientHttpRequestInterceptor oAuth2ClientHttpRequestInterceptor =
