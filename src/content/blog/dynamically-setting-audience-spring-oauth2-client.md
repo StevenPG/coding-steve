@@ -27,7 +27,9 @@ third-party applications access to their data without revealing their
 credentials. It's often used for services like social media logins, API integrations, and more.
 
 Tokens used in the OAuth2 process have required and optional claims. These claims are simple fields that are validated by the receiver of the token as defined in
-https://datatracker.ietf.org/doc/html/rfc7519. One of these claims is the "aud" claim, or the audience claim.
+https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3. 
+
+One of these claims is the "aud" claim, or the audience claim.
 
 The "aud" (audience) claim identifies the recipients that the JWT is intended for and principal that intends to process the JWT must identify itself with a value in the audience claim; otherwise, the JWT must be rejected. The "aud" value is typically an array of case-sensitive strings, each containing a StringOrURI value, though it can also be a single case-sensitive string when there is only one audience. The interpretation of audience values is generally application-specific, and the use of this claim is optional. This is all for defense against "replay attacks", where a token is re-used to call a different target once it's stolen from the initial request.
 
