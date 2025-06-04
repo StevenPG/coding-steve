@@ -45,6 +45,8 @@ to set the audience claim to `"aud": "my-target-server"`.
 
 The main goal of this article is to have a single source of information for setting up custom Client Credentials Provider in Spring Security. The example in this post will be dynamically setting the "aud" claim based on the target host.
 
+TODO - diagram of the pieces
+
 TODO
 
 - describe the issue and link to intended_audience with google (federated system ex.)
