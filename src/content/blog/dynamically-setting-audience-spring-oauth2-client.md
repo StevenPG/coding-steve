@@ -15,6 +15,10 @@ tags:
 description: An article walking through a demo of dynamically setting a query parameter using spring-oauth2-client.
 ---
 
+## Table of Contents
+
+[[toc]]
+
 # Brief
 
 My goal is to make posts like this the SIMPLEST place on the internet to learn how to do things
