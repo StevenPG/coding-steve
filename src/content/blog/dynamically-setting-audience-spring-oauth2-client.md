@@ -47,9 +47,20 @@ The main goal of this article is to have a single source of information for sett
 
 TODO - diagram of the pieces
 
+### The Classes at Play
+
+#### Class Name
+
+Description
+
+```java
+code
+```
+
+
+
 TODO
 
-- describe the issue and link to intended_audience with google (federated system ex.)
 - lay out diagram of classes with descriptions in diagram
 - lay out individual classes
 - link to public Github with example, add in readme of how to set up keycloak
