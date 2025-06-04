@@ -4,7 +4,7 @@ pubDatetime: 2025-06-02T12:00:00.000Z
 title: Dynamically setting audience for using Spring OAuth2 Client
 slug: spring-oauth2-client-dynamic-audience
 featured: false
-draft: true
+draft: false
 
 ogImage: https://i.imgur.com/4ICZldG.jpeg
 tags:
@@ -63,7 +63,6 @@ Many of these classes are final, so to implement our functionality, we're going 
 
 We set up the initial configuration in a `RestClientConfiguration` class
 
-TODO - finalize with comments and cleanup
 ```java
 @Configuration
 public class RestClientConfiguration
@@ -72,8 +71,7 @@ public class RestClientConfiguration
     @Bean
     public OAuth2AuthorizedClientManager authorizedClientManager (
             ClientRegistrationRepository clientRegistrationRepository,
-            OAuth2AuthorizedClientService authorizedClientService,
-            AudienceWritingOAuth2AccessTokenResponseClient accessTokenResponseClient
+            OAuth2AuthorizedClientService authorizedClientService
     ){
         // We create a manager using the autowired clientRegistrations from YAML and connect it to the service
         AudienceWritingAuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientManager =
@@ -81,11 +79,6 @@ public class RestClientConfiguration
 
         // Setting the clientManager to look for a clientCredentials configuration
         authorizedClientManager.setAuthorizedClientProvider(new AudienceWritingClientCredentialsOAuth2AuthorizedClientProvider());
-//        authorizedClientManager.setAuthorizedClientProvider(OAuth2AuthorizedClientProviderBuilder.builder()
-//                        .clientCredentials(clientCredentialsGrantBuilder ->
-//                                clientCredentialsGrantBuilder.accessTokenResponseClient(accessTokenResponseClient))
-//                .clientCredentials()
-//                .build());
 
         // This customizer is crucial for passing RestClient attributes to the OAuth2AuthorizeRequest
         authorizedClientManager.setContextAttributesMapper(authorizeRequest -> {
@@ -102,7 +95,6 @@ public class RestClientConfiguration
     public RestClient oauth2RestClient(
             OAuth2AuthorizedClientManager authorizedClientManager) {
 
-        // This is the new class!
         // We instantiate a new interceptor to load into RestClient
         AudienceWritingOAuth2ClientHttpRequestInterceptor oAuth2ClientHttpRequestInterceptor =
                 new AudienceWritingOAuth2ClientHttpRequestInterceptor(authorizedClientManager);
@@ -169,7 +161,6 @@ https://github.com/spring-projects/spring-security/blob/6.5.0/oauth2/oauth2-clie
 
 In our version of this class, we're going to implement the base OAuth2AuthorizedClientManager class. 
 
-TODO - add comments
 ```java
 public class AudienceWritingAuthorizedClientServiceOAuth2AuthorizedClientManager implements OAuth2AuthorizedClientManager {
     private static final OAuth2AuthorizedClientProvider DEFAULT_AUTHORIZED_CLIENT_PROVIDER = OAuth2AuthorizedClientProviderBuilder
@@ -303,7 +294,6 @@ public class AudienceWritingAuthorizedClientServiceOAuth2AuthorizedClientManager
 OAuth2AuthorizedClientProvider implementations attempt to authorize or re-authorize the configured ClientRegistration. It contains a context object that maintains the relevant information for performing
 the aforementioned authorizaton or re-authorizations.
 
-TODO - comments
 ```java
 public class AudienceWritingClientCredentialsOAuth2AuthorizedClientProvider implements OAuth2AuthorizedClientProvider {
 
@@ -374,7 +364,6 @@ public class AudienceWritingClientCredentialsOAuth2AuthorizedClientProvider impl
 This is a new class that provides an easy mechanism for using an OAuth2AuthorizedClient to make requests
 by automatically injecting a bearer token for OAuth2 requests. It is defined in our `RestClientConfiguration` above.
 
-TODO - comments
 ```java
 public class AudienceWritingOAuth2ClientHttpRequestInterceptor implements ClientHttpRequestInterceptor {
 
@@ -442,7 +431,7 @@ public class AudienceWritingOAuth2ClientHttpRequestInterceptor implements Client
 
         OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest.withClientRegistrationId(clientRegistrationId)
                 .principal(principal)
-                .attribute("intended_audience", request.getAttributes().get("audience"))
+                .attribute("audience", request.getAttributes().get("audience"))
                 .build();
         OAuth2AuthorizedClient authorizedClient = this.authorizedClientManager.authorize(authorizeRequest);
         if (authorizedClient != null) {
@@ -529,31 +518,11 @@ public class AudienceWritingOAuth2ClientHttpRequestInterceptor implements Client
 This object contains the client credentials and other client registration details relevant for querying
 for a new token.
 
-TODO - comment and finalize
-
 ```java
 public class OAuth2ClientCredentialsAudiencedGrantRequest extends OAuth2ClientCredentialsGrantRequest {
 
     private final String audience;
 
-    /**
-     * Constructs an {@code OAuth2ClientCredentialsGrantRequest} using the provided
-     * parameters, without an audience value
-     *
-     * @param clientRegistration the client registration
-     */
-    public OAuth2ClientCredentialsAudiencedGrantRequest(ClientRegistration clientRegistration) {
-        super(clientRegistration);
-        this.audience = null;
-    }
-
-    /**
-     * Constructs an {@code OAuth2ClientCredentialsGrantRequest} using the provided
-     * parameters
-     *
-     * @param clientRegistration the client registration
-     * @param audience           the audience value
-     */
     public OAuth2ClientCredentialsAudiencedGrantRequest(ClientRegistration clientRegistration, String audience) {
         super(clientRegistration);
         this.audience = audience;
@@ -570,12 +539,12 @@ public class OAuth2ClientCredentialsAudiencedGrantRequest extends OAuth2ClientCr
 This class performs the actual exchange for an access token at the authorization server's token endpoint. This parent class is implemented based on the underlying oauth2 type. In this post, we'll
 be overriding the ClientCredentials implementation of a TokenResponseClient.
 
-TODO - comments and cleanup
 ```java
 @Component
 public class AudienceWritingOAuth2AccessTokenResponseClient implements
         OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsAudiencedGrantRequest> {
 
+    private final Logger logger = LoggerFactory.getLogger(AudienceWritingOAuth2AccessTokenResponseClient.class);
     private static final String INVALID_TOKEN_RESPONSE_ERROR_CODE = "invalid_token_response";
 
     // @formatter:off
@@ -584,6 +553,11 @@ public class AudienceWritingOAuth2AccessTokenResponseClient implements
                 messageConverters.clear();
                 messageConverters.add(new FormHttpMessageConverter());
                 messageConverters.add(new OAuth2AccessTokenResponseHttpMessageConverter());
+            })
+            .requestInterceptor((request,body,execution)-> {
+                // This interceptor is not used in this implementation, but can be customized if needed
+                logger.info("Request URI: {}", request.getURI());
+                return execution.execute(request, body);
             })
             .defaultStatusHandler(new OAuth2ErrorResponseErrorHandler())
             .build();
@@ -664,10 +638,6 @@ public class AudienceWritingOAuth2AccessTokenResponseClient implements
 }
 ```
 
-TODO
-
-- lay out diagram of classes with descriptions in diagram
-- lay out individual classes
 - link to public Github with example, add in readme of how to set up keycloak
 
 [github]: https://github.com
