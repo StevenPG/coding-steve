@@ -49,13 +49,35 @@ TODO - diagram of the pieces
 
 ### The Classes at Play
 
-#### Class Name
+#### AuthorizedClientServiceOAuth2AuthorizedClientManager
 
 Description
 
-```java
-code
-```
+https://github.com/spring-projects/spring-security/blob/6.5.0/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/AuthorizedClientServiceOAuth2AuthorizedClientManager.java
+
+#### ClientCredentialsOAuth2AuthorizedClientProvider
+
+Description
+
+https://github.com/spring-projects/spring-security/blob/6.5.0/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/ClientCredentialsOAuth2AuthorizedClientProvider.java
+
+#### OAuth2ClientHttpRequestInterceptor
+
+Description
+
+https://github.com/spring-projects/spring-security/blob/6.5.0/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/web/client/OAuth2ClientHttpRequestInterceptor.java
+
+#### OAuth2ClientCredentialsGrantRequest
+
+Description
+
+https://github.com/spring-projects/spring-security/blob/6.5.0/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/OAuth2ClientCredentialsGrantRequest.java
+
+#### OAuth2AccessTokenResponseClient
+
+Description
+
+https://github.com/spring-projects/spring-security/blob/6.5.0/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/OAuth2AccessTokenResponseClient.java
 
 
 
