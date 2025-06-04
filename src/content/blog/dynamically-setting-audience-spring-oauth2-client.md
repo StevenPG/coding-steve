@@ -20,6 +20,10 @@ description: An article walking through a demo of dynamically setting a query pa
 My goal is to make posts like this the SIMPLEST place on the internet to learn how to do things
 that caused me trouble. That way, if this is found, someone doesn't have to do the same digging I had to do.
 
+This post DOES assume you have a basic understanding of OAuth2 and Spring Security around classes and concepts like ClientRegistrations and AuthorizationGrantType.
+
+If you're missing that, go do a sample project of basic OAuth2 and come back later!
+
 # What is OAuth2?
 
 OAuth2 is a popular authorization framework that allows users to grant
@@ -49,39 +53,115 @@ The main goal of this article is to have a single source of information for sett
 
 TODO - diagram of the pieces
 
+### Setting up our Overrides
+
+Many of these classes are final, so to implement our functionality, we're going to create sibling classes and inject them into the Spring Security management layer so that we can control our token requests!
+
+We set up the initial configuration in a `RestClientConfiguration` class
+
+TODO - finalize with comments and cleanup
+```java
+@Configuration
+public class RestClientConfiguration
+{
+
+    @Bean
+    public OAuth2AuthorizedClientManager authorizedClientManager (
+            ClientRegistrationRepository clientRegistrationRepository,
+            OAuth2AuthorizedClientService authorizedClientService,
+            AudienceWritingOAuth2AccessTokenResponseClient accessTokenResponseClient
+    ){
+        // We create a manager using the autowired clientRegistrations from YAML and connect it to the service
+        AudienceWritingAuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientManager =
+                new AudienceWritingAuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, authorizedClientService);
+
+        // Setting the clientManager to look for a clientCredentials configuration
+        authorizedClientManager.setAuthorizedClientProvider(new AudienceWritingClientCredentialsOAuth2AuthorizedClientProvider());
+//        authorizedClientManager.setAuthorizedClientProvider(OAuth2AuthorizedClientProviderBuilder.builder()
+//                        .clientCredentials(clientCredentialsGrantBuilder ->
+//                                clientCredentialsGrantBuilder.accessTokenResponseClient(accessTokenResponseClient))
+//                .clientCredentials()
+//                .build());
+
+        // This customizer is crucial for passing RestClient attributes to the OAuth2AuthorizeRequest
+        authorizedClientManager.setContextAttributesMapper(authorizeRequest -> {
+            // The OAuth2AuthorizedClientInterceptor automatically copies RestClient's
+            // attributes into the OAuth2AuthorizeRequest's attributes.
+            // So, we just return the existing attributes.
+            return new HashMap<>(authorizeRequest.getAttributes());
+        });
+
+        return authorizedClientManager;
+    }
+
+    @Bean
+    public RestClient oauth2RestClient(
+            OAuth2AuthorizedClientManager authorizedClientManager) {
+
+        // This is the new class!
+        // We instantiate a new interceptor to load into RestClient
+        AudienceWritingOAuth2ClientHttpRequestInterceptor oAuth2ClientHttpRequestInterceptor =
+                new AudienceWritingOAuth2ClientHttpRequestInterceptor(authorizedClientManager);
+        // Then provide it the client registration to resolve the id from
+
+        // From here we simply return the client with any custom configuration, and we're good to go!
+        return RestClient.builder()
+                .baseUrl("https://httpbin.org/headers")
+                .requestInterceptor(oAuth2ClientHttpRequestInterceptor)
+                .build();
+    }
+}
+```
+
 ### The Classes at Play
+
+With our initial configuration, the following classes are what we're going to be either extending or overwriting. Our overridden versions will be included below this section:
+
+Please note: This is focusing on the ClientCredentials grant type for OAuth2. The other types are
+similar but may have different classes or class hierarchy.
 
 #### AuthorizedClientServiceOAuth2AuthorizedClientManager
 
-Description
+This manager contains the overall configuration and bootstrapping of the token retrieving operation
+that executes automagically before RestClient requests that are configured to utilize it.
+
+The bean we define in the `RestClientConfiguration` returns an OAuth2AuthorizedClientManager, with the
+referenced class here being just one example. This bean is then used to instantiate the RestClient's
+ClientHttpRequestInterceptor.
 
 https://github.com/spring-projects/spring-security/blob/6.5.0/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/AuthorizedClientServiceOAuth2AuthorizedClientManager.java
 
 #### ClientCredentialsOAuth2AuthorizedClientProvider
 
-Description
+OAuth2AuthorizedClientProvider implementations attempt to authorize or re-authorize the configured ClientRegistration. It contains a context object that maintains the relevant information for performing
+the aforementioned authorizaton or re-authorizations.
 
 https://github.com/spring-projects/spring-security/blob/6.5.0/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/ClientCredentialsOAuth2AuthorizedClientProvider.java
 
 #### OAuth2ClientHttpRequestInterceptor
 
-Description
+This is a new class that provides an easy mechanism for using an OAuth2AuthorizedClient to make requests
+by automatically injecting a bearer token for OAuth2 requests. It is defined in our `RestClientConfiguration` above.
 
 https://github.com/spring-projects/spring-security/blob/6.5.0/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/web/client/OAuth2ClientHttpRequestInterceptor.java
 
 #### OAuth2ClientCredentialsGrantRequest
 
-Description
+This object contains the client credentials and other client registration details relevant for querying
+for a new token.
 
 https://github.com/spring-projects/spring-security/blob/6.5.0/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/OAuth2ClientCredentialsGrantRequest.java
 
 #### OAuth2AccessTokenResponseClient
 
-Description
+This class performs the actual exchange for an access token at the authorization server's token endpoint. This parent class is implemented based on the underlying oauth2 type. In this post, we'll
+be overriding the ClientCredentials implementation of a TokenResponseClient.
 
 https://github.com/spring-projects/spring-security/blob/6.5.0/oauth2/oauth2-client/src/main/java/org/springframework/security/oauth2/client/endpoint/OAuth2AccessTokenResponseClient.java
 
+### Overriding and Injecting
 
+TODO - the overridden classes
 
 TODO
 
