@@ -1,6 +1,6 @@
 ---
 author: StevenPG
-pubDatetime: 2025-07-12T12:00:00.000Z
+pubDatetime: 2025-06-12T12:00:00.000Z
 title: Multiple OAuth2 Resource Servers with Spring Boot 3.5.0
 slug: spring-boot-oauth2-multiple-resource-servers
 featured: false
