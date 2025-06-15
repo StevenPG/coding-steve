@@ -1,0 +1,10 @@
+User-agent: Googlebot
+Disallow: /nogooglebot/
+
+User-agent: *
+Allow: /
+Allow: /posts
+Allow: /posts/*
+
+Sitemap: https://stevenpg.com/sitemap-index.xml
+Sitemap: https://stevenpg.com/sitemap-0.xml
