@@ -1,6 +1,6 @@
 ---
 author: StevenPG
-pubDatetime: 2025-06-19T12:00:00.000Z
+pubDatetime: 2025-06-18T12:00:00.000Z
 title: JLink - Java Runtime Optimization Reference Guide
 slug: jlink-java-runtime-optimization
 featured: true
