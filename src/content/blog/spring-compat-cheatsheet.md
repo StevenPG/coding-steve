@@ -129,8 +129,6 @@ dependencyManagement {
 }
 ```
 
- 
-
 - Inspect the Dependency Tree: Use mvn dependency:tree or gradle dependencies (or gradle buildEnvironment) to see the
   resolved dependency versions. Identify conflicts where different versions of the same library are being requested. Use
   exclusions or explicitly declare needed versions if necessary.
@@ -168,19 +166,21 @@ Key Points:
 
 ### Java Version Compatibility with Spring Boot
 
-| Spring Boot Version | Compatible Java Versions (Min - Max) |
-|:--------------------|:-------------------------------------|
-| 3.4.x               | Java 17 - 24                         |
-| 3.3.x               | Java 17 - 23                         |
-| 3.0.x - 3.2.x       | Java 17 - 21                         |
-| 2.7.x               | Java 8 - 21                          |
-| 2.6.x               | Java 8 - 19                          |
-| 2.5.x               | Java 8 - 18                          |
-| 2.4.x               | Java 8 - 16                          |
-| 2.2.x - 2.3.x       | Java 8 - 15                          |
-| 2.1.x               | Java 8 - 12                          |
-| 2.0.x               | Java 8 - 9                           |
-| 1.5.x               | Java 6 - 8                           |
+| Spring Boot Version | Compatible Java Versions (Min - Max Targeted) |
+|:--------------------|:----------------------------------------------|
+| 4.0.x               | Java 17 - 24                                  |
+| 3.5.x               | Java 17 - 24                                  |
+| 3.4.x               | Java 17 - 24                                  |
+| 3.3.x               | Java 17 - 23                                  |
+| 3.0.x - 3.2.x       | Java 17 - 21                                  |
+| 2.7.x               | Java 8 - 21                                   |
+| 2.6.x               | Java 8 - 19                                   |
+| 2.5.x               | Java 8 - 18                                   |
+| 2.4.x               | Java 8 - 16                                   |
+| 2.2.x - 2.3.x       | Java 8 - 15                                   |
+| 2.1.x               | Java 8 - 12                                   |
+| 2.0.x               | Java 8 - 9                                    |
+| 1.5.x               | Java 6 - 8                                    |
 
 Key Notes:
 
@@ -200,6 +200,7 @@ Spring Boot version.
 
 | Spring Cloud Release Train | Corresponding Spring Boot Version |
 |:---------------------------|:----------------------------------|
+| 2025.1.x (Oakwood)         | Spring Boot 4.0.x                 |
 | 2025.0.x (Northfields)     | Spring Boot 3.5.x                 |
 | 2024.0.x (Moorgate)        | Spring Boot 3.4.x                 |
 | 2023.0.x (Leyton)          | Spring Boot 3.2.x / 3.3.x         |
