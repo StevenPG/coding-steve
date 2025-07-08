@@ -168,7 +168,7 @@ Key Points:
 
 | Spring Boot Version | Compatible Java Versions (Min - Max Targeted) |
 |:--------------------|:----------------------------------------------|
-| 4.0.x               | Java 17 - 24                                  |
+| 4.0.x               | Java 21 - 24                                  |
 | 3.5.x               | Java 17 - 24                                  |
 | 3.4.x               | Java 17 - 24                                  |
 | 3.3.x               | Java 17 - 23                                  |
