@@ -21,3 +21,11 @@ that caused me trouble. That way, if this is found, someone doesn't have to do t
 # What is Spring AI?
 
 TODO
+
+- lay out ai explanation
+- explain MCP
+- explain Ollama
+- explain how this is a demo of these things working together
+- diagram
+- explain testcontainers and running tests
+- lay out bare minimum code and dependencies needed to bootstrap
