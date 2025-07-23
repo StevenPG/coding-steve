@@ -4,7 +4,7 @@ pubDatetime: 2025-06-12T12:00:00.000Z
 title: Multiple OAuth2 Resource Servers with Spring Boot 3.5.0
 slug: spring-boot-oauth2-multiple-resource-servers
 featured: false
-ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+ogImage: /assets/default-og-image.png
 tags:
   - software
   - spring boot
