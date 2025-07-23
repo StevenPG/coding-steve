@@ -5,7 +5,7 @@ title: Freedom of Travel for the Three Legged Cat
 slug: tripod-travel-freedom
 featured: false
 # TODO replace ogImage
-ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+ogImage: /assets/default-og-image.png
 tags:
   - story
   - cats

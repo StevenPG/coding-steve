@@ -4,8 +4,7 @@ pubDatetime: 2024-07-21T12:00:00.000Z
 title: Homelab Drives & Buying Used
 slug: buying-used-harddrives
 featured: false
-# TODO replace ogImage
-ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+ogImage: /assets/default-og-image.png
 tags:
   - hardware
 description: An article with a short overview of my experiece buying used drives and using smartctl.

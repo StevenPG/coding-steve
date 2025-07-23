@@ -4,7 +4,7 @@ pubDatetime: 2025-06-18T12:00:00.000Z
 title: JLink - Java Runtime Optimization Reference Guide
 slug: jlink-java-runtime-optimization
 featured: true
-ogImage: https://user-images.githubusercontent.com/53733092/215771435-25408246-2309-4f8b-a781-1f3d93bdf0ec.png
+ogImage: /assets/default-og-image.png
 tags:
   - software
   - java
