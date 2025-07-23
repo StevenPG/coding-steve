@@ -13,10 +13,7 @@ a mountain of research, I write about it here! Similarly, a lot of articles and 
 
 I hate that, so I aim for my posts to actually be useful to whoever comes across them! (Or me, 6 months from now)
 
-TODO - replace this image!
-<div>
-  <img src="/assets/dev.svg" class="sm:w-1/2 mx-auto" alt="coding dev illustration">
-</div>
+I also write on my substack, which is a little less technical and sometimes a bit more personal. You can find that at [https://substack.com/@stevenpg1](https://substack.com/@stevenpg1).
 
 ## This Site
 
