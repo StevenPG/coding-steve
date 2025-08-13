@@ -29,6 +29,11 @@ Spring Cloud.
 * [Java Version Compatibility with Spring Boot](#java-version-compatibility-with-spring-boot)
 * [Spring Cloud Compatibility with Spring Boot](#spring-cloud-compatibility-with-spring-boot)
 
+### Spring Support Mapping - NEW August 2025
+Spring has now published an awesome new [compatibility list](https://spring.io/projects/generations) 
+called Spring Support Mapping. It provides a matrix of which versions of different Spring dependencies
+are compatible with each other, including Spring Boot, Spring Framework and Spring Cloud.
+
 ## Why Version Compatibility is Necessary
 
 Spring Boot simplifies dependency management through its starters and managed dependencies (BOM). Spring Cloud builds on
