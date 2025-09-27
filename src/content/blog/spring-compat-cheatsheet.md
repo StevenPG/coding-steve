@@ -149,6 +149,7 @@ dependencyManagement {
 
 | Gradle Version | Latest Supported Java Version |
 |:---------------|:------------------------------|
+| 9.1.0          | Java 25                       |
 | 8.14           | Java 24                       |
 | 8.10           | Java 23                       |
 | 8.8            | Java 22                       |
@@ -173,10 +174,10 @@ Key Points:
 
 | Spring Boot Version | Compatible Java Versions (Min - Max Targeted) |
 |:--------------------|:----------------------------------------------|
-| 4.0.x               | Java 21 - 24                                  |
-| 3.5.x               | Java 17 - 24                                  |
-| 3.4.x               | Java 17 - 24                                  |
-| 3.3.x               | Java 17 - 23                                  |
+| 4.0.x               | Java 21 - 25                                  |
+| 3.5.x               | Java 17 - 25                                  |
+| 3.4.x               | Java 17 - 25                                  |
+| 3.3.x               | Java 17 - 25                                  |
 | 3.0.x - 3.2.x       | Java 17 - 21                                  |
 | 2.7.x               | Java 8 - 21                                   |
 | 2.6.x               | Java 8 - 19                                   |
