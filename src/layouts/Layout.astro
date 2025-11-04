@@ -80,8 +80,18 @@ const structuredData = {
     <!-- Google -->
     <GoogleAnalytics measurementId={'G-2ZPXM6LPR3'} />
 
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9553425410079173"
-            crossorigin="anonymous"></script>
+    <script is:inline async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9553425410079173"
+            crossorigin="anonymous">
+
+    </script>
+    <script is:inline>
+    function loadAds() {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    }
+
+    loadAds();
+    document.addEventListener('astro:after-swap', loadAds);
+    </script>
 
     <!-- Article Published/Modified time -->
     {
