@@ -3,7 +3,7 @@ author: StevenPG
 pubDatetime: 2025-11-03T12:00:00.000Z
 title: Spring Boot 4 - What is JSpecify?
 slug: spring-boot-4-what-is-jspecify
-featured: false
+featured: true
 draft: false
 ogImage: https://i.imgur.com/4ICZldG.jpeg
 tags:
@@ -22,8 +22,6 @@ The Spring Boot 4 release brings exciting improvements to the framework, but one
 JSpecify is a collaborative effort by multiple organizations (including Google, JetBrains, and Uber) to create a standard set of nullness annotations for Java. Think of it as a lingua franca for null safety—a common language that different static analysis tools can understand.
 
 Before JSpecify, the Java ecosystem was fragmented. You had `@Nullable` and `@NotNull` annotations from JSR-305, JetBrains, Eclipse, Android, and others. Each tool preferred its own flavor, creating confusion and compatibility issues. JSpecify aims to solve this by providing a single, well-designed standard.
-
-**[SCREENSHOT: Comparison of different nullable annotation packages in a typical Spring project before JSpecify]**
 
 ## What JSpecify Can Do
 
@@ -63,6 +61,7 @@ IntelliJ IDEA has excellent support for JSpecify. Once you've added the annotati
 - Suggest fixes and safe alternatives
 - Provide dataflow analysis to track nullness through your code
 
+### TODO
 **[SCREENSHOT: IntelliJ IDEA showing a warning when passing a @Nullable value to a non-null parameter]**
 
 ### 3. Generic Type Nullness
@@ -160,13 +159,20 @@ First, verify that JSpecify is available in your project. Run:
 mvn dependency:tree | grep jspecify
 ```
 
-Or for Gradle:
+Or for Gradle (example from Spring Initializr):
 
 ```bash
-./gradlew dependencies | grep jspecify
-```
+> ./gradlew dependencies | grep jspecify
 
-**[SCREENSHOT: Terminal output showing jspecify in the dependency tree]**
+     |    |    |    +--- org.jspecify:jspecify:1.0.0
+     |    |    +--- org.jspecify:jspecify:1.0.0
+     |         |    \--- org.jspecify:jspecify:1.0.0
+     |                   +--- org.jspecify:jspecify:1.0.0
+     |                        \--- org.jspecify:jspecify:1.0.0
+|    |         |    \--- org.jspecify:jspecify:1.0.0
+|    |                   +--- org.jspecify:jspecify:1.0.0
+|    |                        \--- org.jspecify:jspecify:1.0.0
+```
 
 You should see it listed as a transitive dependency. If for some reason it's not present, or you want to ensure a specific version, you can add it explicitly:
 
@@ -269,38 +275,19 @@ IntelliJ IDEA 2024.1+ has built-in support for JSpecify. Here's how to enable it
 ### 1. Enable Inspections
 
 Go to **Settings → Editor → Inspections** and enable:
-- JVM languages → Probable bugs → Nullability problems
-- JVM languages → Probable bugs → Constant conditions & exceptions
+- Java → Probable bugs → @Nullable problems
 
-**[SCREENSHOT: IntelliJ IDEA inspection settings with JSpecify-related inspections highlighted]**
+![img.png](../../../public/assets/jspecify/jspecify_settings_example.png)
 
-### 2. Configure Analysis Scope
+### 2. Editor Integration
 
-IDEA will analyze your code as you type, but you can run a full inspection:
+IDEA will analyze your code as you type, here are some examples of what it looks like in an editor:
 
-**[SCREENSHOT: "Analyze → Inspect Code" menu showing null-safety inspection results]**
+![img.png](../../../public/assets/jspecify/without_jspecify.png)
 
-### 3. Quick Fixes
+![img.png](../../../public/assets/jspecify/with_jspecify.png)
 
-When IDEA detects a potential null-safety issue, it offers quick fixes:
-
-```java
-@NullMarked
-public class CustomerService {
-    
-    public void processCustomer(@Nullable Customer customer) {
-        // IDEA warns: customer might be null
-        String name = customer.getName(); // ⚠️ Warning here
-    }
-}
-```
-
-IDEA will suggest:
-- Adding a null check
-- Using Optional
-- Changing the method signature
-
-**[SCREENSHOT: IntelliJ quick-fix popup showing null-safety suggestions]**
+![img.png](../../../public/assets/jspecify/nullmarked_example.png)
 
 ## Practical Patterns
 
@@ -441,5 +428,3 @@ The key is to approach it incrementally: start with new code, gradually migrate 
 As the Spring ecosystem continues to adopt JSpecify throughout its libraries, we'll see better interoperability and more consistent null-safety practices across the board. Now is a great time to start incorporating these patterns into your projects.
 
 ---
-
-*Have you started using JSpecify in your Spring Boot projects? What challenges have you encountered? Let me know in the comments below.*
