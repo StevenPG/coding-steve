@@ -34,6 +34,81 @@ Spring has now published an awesome new [compatibility list](https://spring.io/p
 called Spring Support Mapping. It provides a matrix of which versions of different Spring dependencies
 are compatible with each other, including Spring Boot, Spring Framework and Spring Cloud.
 
+## Compatibility Reference Tables
+
+### Java Version Compatibility with Spring Boot
+
+| Spring Boot Version | Compatible Java Versions (Min - Max Targeted) |
+|:--------------------|:----------------------------------------------|
+| 4.0.x               | Java 21 - 25                                  |
+| 3.5.x               | Java 17 - 25                                  |
+| 3.4.x               | Java 17 - 25                                  |
+| 3.3.x               | Java 17 - 25                                  |
+| 3.0.x - 3.2.x       | Java 17 - 21                                  |
+| 2.7.x               | Java 8 - 21                                   |
+| 2.6.x               | Java 8 - 19                                   |
+| 2.5.x               | Java 8 - 18                                   |
+| 2.4.x               | Java 8 - 16                                   |
+| 2.2.x - 2.3.x       | Java 8 - 15                                   |
+| 2.1.x               | Java 8 - 12                                   |
+| 2.0.x               | Java 8 - 9                                    |
+| 1.5.x               | Java 6 - 8                                    |
+
+Key Notes:
+
+- Spring Boot 3.x requires Java 17 as a baseline.
+- Spring Boot 2.x supports Java 8 but is tested with newer JDKs up to specific versions.
+
+Reference doc (https://endoflife.date/spring-boot#java-compatibility)
+
+### Spring Cloud Compatibility with Spring Boot
+
+Spring Cloud uses "Release Trains" (e.g., 2023.0.x). Each train corresponds to specific Spring Boot versions. Mixing
+versions not intended to work together is highly likely to cause issues.
+
+Do not arbitrarily combine Spring Cloud trains and Spring Boot versions.
+Always check the documentation page for the specific Spring Cloud release train (e.g., 2023.0.1) to find its required
+Spring Boot version.
+
+| Spring Cloud Release Train | Corresponding Spring Boot Version |
+|:---------------------------|:----------------------------------|
+| 2025.1.x (Oakwood)         | Spring Boot 4.0.x                 |
+| 2025.0.x (Northfields)     | Spring Boot 3.5.x                 |
+| 2024.0.x (Moorgate)        | Spring Boot 3.4.x                 |
+| 2023.0.x (Leyton)          | Spring Boot 3.2.x / 3.3.x         |
+| 2022.0.x (Kilburn)         | Spring Boot 3.0.x / 3.1.x         |
+| 2021.0.x (Jubilee)         | Spring Boot 2.6.x / 2.7.x         |
+| 2020.0.x (Ilford)          | Spring Boot 2.4.x / 2.5.x         |
+| Hoxton                     | Spring Boot 2.2.x / 2.3.x         |
+| Greenwich                  | Spring Boot 2.1.x                 |
+| Finchley                   | Spring Boot 2.0.x                 |
+| Edgware                    | Spring Boot 1.5.x                 |
+
+### Gradle and Java Compatibility
+
+| Gradle Version | Latest Supported Java Version |
+|:---------------|:------------------------------|
+| 9.1.0          | Java 25                       |
+| 8.14           | Java 24                       |
+| 8.10           | Java 23                       |
+| 8.8            | Java 22                       |
+| 8.5            | Java 21                       |
+| 8.3            | Java 20                       |
+| 7.6            | Java 19                       |
+| 7.5            | Java 18                       |
+| 7.3            | Java 17                       |
+| 7.0            | Java 16                       |
+| 6.7            | Java 15                       |
+
+Key Points:
+
+- Newer Gradle versions are generally required to support newer Java versions for running Gradle itself.
+- While you might run Gradle 8 on JDK 17, you can still configure it to compile your project code for Java 8 or Java 11
+  using toolchains.
+- Always check the specific Gradle version's documentation, as support details can change between minor releases.
+
+(https://docs.gradle.org/current/userguide/compatibility.html)
+
 ## Why Version Compatibility is Necessary
 
 Spring Boot simplifies dependency management through its starters and managed dependencies (BOM). Spring Cloud builds on
@@ -143,80 +218,6 @@ dependencyManagement {
 
 - Test Consistently: Implement unit and integration tests to catch runtime errors early.
 
-## Compatibility Reference Tables
-
-### Gradle and Java Compatibility
-
-| Gradle Version | Latest Supported Java Version |
-|:---------------|:------------------------------|
-| 9.1.0          | Java 25                       |
-| 8.14           | Java 24                       |
-| 8.10           | Java 23                       |
-| 8.8            | Java 22                       |
-| 8.5            | Java 21                       |
-| 8.3            | Java 20                       |
-| 7.6            | Java 19                       |
-| 7.5            | Java 18                       |
-| 7.3            | Java 17                       |
-| 7.0            | Java 16                       |
-| 6.7            | Java 15                       |
-
-Key Points:
-
-- Newer Gradle versions are generally required to support newer Java versions for running Gradle itself.
-- While you might run Gradle 8 on JDK 17, you can still configure it to compile your project code for Java 8 or Java 11
-  using toolchains.
-- Always check the specific Gradle version's documentation, as support details can change between minor releases.
-
-(https://docs.gradle.org/current/userguide/compatibility.html)
-
-### Java Version Compatibility with Spring Boot
-
-| Spring Boot Version | Compatible Java Versions (Min - Max Targeted) |
-|:--------------------|:----------------------------------------------|
-| 4.0.x               | Java 21 - 25                                  |
-| 3.5.x               | Java 17 - 25                                  |
-| 3.4.x               | Java 17 - 25                                  |
-| 3.3.x               | Java 17 - 25                                  |
-| 3.0.x - 3.2.x       | Java 17 - 21                                  |
-| 2.7.x               | Java 8 - 21                                   |
-| 2.6.x               | Java 8 - 19                                   |
-| 2.5.x               | Java 8 - 18                                   |
-| 2.4.x               | Java 8 - 16                                   |
-| 2.2.x - 2.3.x       | Java 8 - 15                                   |
-| 2.1.x               | Java 8 - 12                                   |
-| 2.0.x               | Java 8 - 9                                    |
-| 1.5.x               | Java 6 - 8                                    |
-
-Key Notes:
-
-- Spring Boot 3.x requires Java 17 as a baseline.
-- Spring Boot 2.x supports Java 8 but is tested with newer JDKs up to specific versions.
-
-Reference doc (https://endoflife.date/spring-boot#java-compatibility)
-
-### Spring Cloud Compatibility with Spring Boot
-
-Spring Cloud uses "Release Trains" (e.g., 2023.0.x). Each train corresponds to specific Spring Boot versions. Mixing
-versions not intended to work together is highly likely to cause issues.
-
-Do not arbitrarily combine Spring Cloud trains and Spring Boot versions.
-Always check the documentation page for the specific Spring Cloud release train (e.g., 2023.0.1) to find its required
-Spring Boot version.
-
-| Spring Cloud Release Train | Corresponding Spring Boot Version |
-|:---------------------------|:----------------------------------|
-| 2025.1.x (Oakwood)         | Spring Boot 4.0.x                 |
-| 2025.0.x (Northfields)     | Spring Boot 3.5.x                 |
-| 2024.0.x (Moorgate)        | Spring Boot 3.4.x                 |
-| 2023.0.x (Leyton)          | Spring Boot 3.2.x / 3.3.x         |
-| 2022.0.x (Kilburn)         | Spring Boot 3.0.x / 3.1.x         |
-| 2021.0.x (Jubilee)         | Spring Boot 2.6.x / 2.7.x         |
-| 2020.0.x (Ilford)          | Spring Boot 2.4.x / 2.5.x         |
-| Hoxton                     | Spring Boot 2.2.x / 2.3.x         |
-| Greenwich                  | Spring Boot 2.1.x                 |
-| Finchley                   | Spring Boot 2.0.x                 |
-| Edgware                    | Spring Boot 1.5.x                 |
 
 ## Final Thoughts
 

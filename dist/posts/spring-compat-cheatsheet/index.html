@@ -184,188 +184,7 @@ Spring Cloud.</p>
 <p>Spring has now published an awesome new <a href="https://spring.io/projects/generations">compatibility list</a>
 called Spring Support Mapping. It provides a matrix of which versions of different Spring dependencies
 are compatible with each other, including Spring Boot, Spring Framework and Spring Cloud.</p>
-<h2 id="why-version-compatibility-is-necessary">Why Version Compatibility is Necessary</h2>
-<p>Spring Boot simplifies dependency management through its starters and managed dependencies (BOM). Spring Cloud builds on
-this, adding its own layer of managed dependencies. These systems work reliably when the versions are aligned because:</p>
-<ul>
-<li>APIs Change: Libraries evolve. Methods get added, removed, or change signatures. Code compiled against one version may
-fail at runtime if a different, incompatible version is present.</li>
-<li>Bytecode Requirements: Newer Java versions introduce bytecode features older JVMs can’t handle. Conversely, older
-libraries might rely on APIs removed in newer JDKs. Your build tool (Gradle/Maven) also has minimum JDK requirements.</li>
-<li>Transitive Dependencies: The dependencies managed by Spring Boot and Spring Cloud have their own dependencies. A
-mismatch anywhere in this chain can cause conflicts.</li>
-</ul>
-<h2 id="gradle-and-java">Gradle and Java</h2>
-<p>Before even considering Spring Boot, your build tool itself needs a compatible JDK to run. Gradle, like any Java
-application, has minimum and recommended Java versions. Furthermore, Gradle supports compiling and testing code using
-different Java versions than the one it runs on, configured via Java toolchains.</p>
-<ul>
-<li>
-<p>Running Gradle: You need a compatible JDK installed and typically configured via JAVA_HOME or the Gradle daemon
-settings.</p>
-</li>
-<li>
-<p>Building Code: You configure sourceCompatibility and targetCompatibility in your build.gradle file, and ideally use
-Gradle’s Java toolchain support to ensure Gradle downloads and uses the specified JDK version for compilation and
-testing, regardless of the JDK it’s running on.</p>
-</li>
-</ul>
-<h3 id="common-errors-from-version-mismatches">Common Errors from Version Mismatches</h3>
-<p>When versions aren’t correctly aligned between Java, your build tool, Spring Boot, and potentially Spring Cloud, you
-might encounter errors like:</p>
-<ul>
-<li>
-<p>java.lang.ClassNotFoundException: The JVM can’t find a specific class file at runtime. This often points to a missing
-dependency or an incorrect version being loaded.</p>
-</li>
-<li>
-<p>java.lang.NoSuchMethodError: Code calls a method that existed at compile time, but is missing in the version of the
-library loaded at runtime. A classic sign of a version conflict.</p>
-</li>
-<li>
-<p>java.lang.AbstractMethodError: An attempt was made to call an abstract method, which can happen if library APIs
-changed between versions in incompatible ways.</p>
-</li>
-<li>
-<p>Compilation Failures: Often related to using Java language features not supported by the configured
-targetCompatibility bytecode level, or when Spring Boot/Cloud versions require APIs from a newer JDK than you’re
-using.</p>
-</li>
-<li>
-<p>Build Tool Errors: Gradle or Maven might fail if they are run with an incompatible JDK version (e.g., running Gradle 6
-with JDK 17 might cause issues).</p>
-</li>
-<li>
-<p>Spring Framework Issues: Problems like UnsatisfiedDependencyException or BeanCreationException during application
-startup can sometimes stem from underlying library incompatibilities caused by version mismatches.</p>
-</li>
-</ul>
-<h3 id="resolving-compatibility-issues">Resolving Compatibility Issues</h3>
-<p>Troubleshooting version conflicts involves a systematic approach:</p>
-<ul>
-<li>
-<p>Consult Official Documentation: This is the primary source of truth. Check the specific version requirements for
-Gradle, Spring Boot, and Spring Cloud.</p>
-</li>
-<li>
-<p>Use Spring Initializr: For new projects, start.spring.io pre-selects compatible versions, providing a solid starting
-point.</p>
-</li>
-<li>
-<p>Utilize Maven/Gradle BOMs: Import the spring-boot-dependencies Bill of Materials (BOM) and, if used, the
-spring-cloud-dependencies BOM for your specific release train. This helps ensure consistent versions for transitive
-dependencies. It’s generally recommended to let these BOMs manage versions unless you have a specific reason to
-override one.</p>
-</li>
-</ul>
-<p>Maven Example (pom.xml)</p>
-<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="xml"><code><span class="line"></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependencyManagement</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependencies</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">        &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependency</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">groupId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">org.springframework.cloud</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">groupId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">artifactId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">spring-cloud-dependencies</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">artifactId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">version</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">${spring-cloud.version}</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">version</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">type</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">pom</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">type</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">scope</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">import</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">scope</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">        &#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependency</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">        &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependency</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">groupId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">org.springframework.boot</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">groupId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">artifactId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">spring-boot-dependencies</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">artifactId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">version</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">${spring-boot.version}</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">version</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">type</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">pom</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">type</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">scope</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">import</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">scope</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">        &#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependency</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependencies</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependencyManagement</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
-<span class="line"></span></code></pre>
-<p>Gradle Example (build.gradle - using dependencyManagement plugin)</p>
-<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="groovy"><code><span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">dependencyManagement {</span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">    imports {</span></span>
-<span class="line"><span style="color:#C2C3C5;--shiki-dark:#637777">        //</span><span style="color:#C2C3C5;--shiki-dark:#637777;font-style:inherit;--shiki-dark-font-style:italic"> Import the BOMs</span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">        mavenBom </span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#22863A;--shiki-dark:#ECC48D">org.springframework.cloud:spring-cloud-dependencies:</span><span style="color:#22863A;--shiki-dark:#D3423E">${</span><span style="color:#22863A;--shiki-dark:#ECC48D">springCloudVersion</span><span style="color:#22863A;--shiki-dark:#D3423E">}</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#C2C3C5;--shiki-dark:#637777"> //</span><span style="color:#C2C3C5;--shiki-dark:#637777;font-style:inherit;--shiki-dark-font-style:italic"> Specify Cloud version</span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">        mavenBom </span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#22863A;--shiki-dark:#ECC48D">org.springframework.boot:spring-boot-dependencies:</span><span style="color:#22863A;--shiki-dark:#D3423E">${</span><span style="color:#22863A;--shiki-dark:#ECC48D">springBootVersion</span><span style="color:#22863A;--shiki-dark:#D3423E">}</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#C2C3C5;--shiki-dark:#637777"> //</span><span style="color:#C2C3C5;--shiki-dark:#637777;font-style:inherit;--shiki-dark-font-style:italic"> Specify Boot version</span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">    }</span></span>
-<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">}</span></span>
-<span class="line"></span></code></pre>
-<ul>
-<li>
-<p>Inspect the Dependency Tree: Use mvn dependency:tree or gradle dependencies (or gradle buildEnvironment) to see the
-resolved dependency versions. Identify conflicts where different versions of the same library are being requested. Use
-exclusions or explicitly declare needed versions if necessary.</p>
-</li>
-<li>
-<p>Verify Build Tool Configuration: Ensure your Gradle or Maven setup is compatible with the JDK you’re using to run the
-build. For Gradle, explicitly configure Java toolchains for compiling and testing.</p>
-</li>
-<li>
-<p>Test Consistently: Implement unit and integration tests to catch runtime errors early.</p>
-</li>
-</ul>
 <h2 id="compatibility-reference-tables">Compatibility Reference Tables</h2>
-<h3 id="gradle-and-java-compatibility">Gradle and Java Compatibility</h3>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<table><thead><tr><th align="left">Gradle Version</th><th align="left">Latest Supported Java Version</th></tr></thead><tbody><tr><td align="left">9.1.0</td><td align="left">Java 25</td></tr><tr><td align="left">8.14</td><td align="left">Java 24</td></tr><tr><td align="left">8.10</td><td align="left">Java 23</td></tr><tr><td align="left">8.8</td><td align="left">Java 22</td></tr><tr><td align="left">8.5</td><td align="left">Java 21</td></tr><tr><td align="left">8.3</td><td align="left">Java 20</td></tr><tr><td align="left">7.6</td><td align="left">Java 19</td></tr><tr><td align="left">7.5</td><td align="left">Java 18</td></tr><tr><td align="left">7.3</td><td align="left">Java 17</td></tr><tr><td align="left">7.0</td><td align="left">Java 16</td></tr><tr><td align="left">6.7</td><td align="left">Java 15</td></tr></tbody></table>
-<p>Key Points:</p>
-<ul>
-<li>Newer Gradle versions are generally required to support newer Java versions for running Gradle itself.</li>
-<li>While you might run Gradle 8 on JDK 17, you can still configure it to compile your project code for Java 8 or Java 11
-using toolchains.</li>
-<li>Always check the specific Gradle version’s documentation, as support details can change between minor releases.</li>
-</ul>
-<p>(<a href="https://docs.gradle.org/current/userguide/compatibility.html">https://docs.gradle.org/current/userguide/compatibility.html</a>)</p>
 <h3 id="java-version-compatibility-with-spring-boot">Java Version Compatibility with Spring Boot</h3>
 
 
@@ -495,6 +314,187 @@ Spring Boot version.</p>
 
 
 <table><thead><tr><th align="left">Spring Cloud Release Train</th><th align="left">Corresponding Spring Boot Version</th></tr></thead><tbody><tr><td align="left">2025.1.x (Oakwood)</td><td align="left">Spring Boot 4.0.x</td></tr><tr><td align="left">2025.0.x (Northfields)</td><td align="left">Spring Boot 3.5.x</td></tr><tr><td align="left">2024.0.x (Moorgate)</td><td align="left">Spring Boot 3.4.x</td></tr><tr><td align="left">2023.0.x (Leyton)</td><td align="left">Spring Boot 3.2.x / 3.3.x</td></tr><tr><td align="left">2022.0.x (Kilburn)</td><td align="left">Spring Boot 3.0.x / 3.1.x</td></tr><tr><td align="left">2021.0.x (Jubilee)</td><td align="left">Spring Boot 2.6.x / 2.7.x</td></tr><tr><td align="left">2020.0.x (Ilford)</td><td align="left">Spring Boot 2.4.x / 2.5.x</td></tr><tr><td align="left">Hoxton</td><td align="left">Spring Boot 2.2.x / 2.3.x</td></tr><tr><td align="left">Greenwich</td><td align="left">Spring Boot 2.1.x</td></tr><tr><td align="left">Finchley</td><td align="left">Spring Boot 2.0.x</td></tr><tr><td align="left">Edgware</td><td align="left">Spring Boot 1.5.x</td></tr></tbody></table>
+<h3 id="gradle-and-java-compatibility">Gradle and Java Compatibility</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th align="left">Gradle Version</th><th align="left">Latest Supported Java Version</th></tr></thead><tbody><tr><td align="left">9.1.0</td><td align="left">Java 25</td></tr><tr><td align="left">8.14</td><td align="left">Java 24</td></tr><tr><td align="left">8.10</td><td align="left">Java 23</td></tr><tr><td align="left">8.8</td><td align="left">Java 22</td></tr><tr><td align="left">8.5</td><td align="left">Java 21</td></tr><tr><td align="left">8.3</td><td align="left">Java 20</td></tr><tr><td align="left">7.6</td><td align="left">Java 19</td></tr><tr><td align="left">7.5</td><td align="left">Java 18</td></tr><tr><td align="left">7.3</td><td align="left">Java 17</td></tr><tr><td align="left">7.0</td><td align="left">Java 16</td></tr><tr><td align="left">6.7</td><td align="left">Java 15</td></tr></tbody></table>
+<p>Key Points:</p>
+<ul>
+<li>Newer Gradle versions are generally required to support newer Java versions for running Gradle itself.</li>
+<li>While you might run Gradle 8 on JDK 17, you can still configure it to compile your project code for Java 8 or Java 11
+using toolchains.</li>
+<li>Always check the specific Gradle version’s documentation, as support details can change between minor releases.</li>
+</ul>
+<p>(<a href="https://docs.gradle.org/current/userguide/compatibility.html">https://docs.gradle.org/current/userguide/compatibility.html</a>)</p>
+<h2 id="why-version-compatibility-is-necessary">Why Version Compatibility is Necessary</h2>
+<p>Spring Boot simplifies dependency management through its starters and managed dependencies (BOM). Spring Cloud builds on
+this, adding its own layer of managed dependencies. These systems work reliably when the versions are aligned because:</p>
+<ul>
+<li>APIs Change: Libraries evolve. Methods get added, removed, or change signatures. Code compiled against one version may
+fail at runtime if a different, incompatible version is present.</li>
+<li>Bytecode Requirements: Newer Java versions introduce bytecode features older JVMs can’t handle. Conversely, older
+libraries might rely on APIs removed in newer JDKs. Your build tool (Gradle/Maven) also has minimum JDK requirements.</li>
+<li>Transitive Dependencies: The dependencies managed by Spring Boot and Spring Cloud have their own dependencies. A
+mismatch anywhere in this chain can cause conflicts.</li>
+</ul>
+<h2 id="gradle-and-java">Gradle and Java</h2>
+<p>Before even considering Spring Boot, your build tool itself needs a compatible JDK to run. Gradle, like any Java
+application, has minimum and recommended Java versions. Furthermore, Gradle supports compiling and testing code using
+different Java versions than the one it runs on, configured via Java toolchains.</p>
+<ul>
+<li>
+<p>Running Gradle: You need a compatible JDK installed and typically configured via JAVA_HOME or the Gradle daemon
+settings.</p>
+</li>
+<li>
+<p>Building Code: You configure sourceCompatibility and targetCompatibility in your build.gradle file, and ideally use
+Gradle’s Java toolchain support to ensure Gradle downloads and uses the specified JDK version for compilation and
+testing, regardless of the JDK it’s running on.</p>
+</li>
+</ul>
+<h3 id="common-errors-from-version-mismatches">Common Errors from Version Mismatches</h3>
+<p>When versions aren’t correctly aligned between Java, your build tool, Spring Boot, and potentially Spring Cloud, you
+might encounter errors like:</p>
+<ul>
+<li>
+<p>java.lang.ClassNotFoundException: The JVM can’t find a specific class file at runtime. This often points to a missing
+dependency or an incorrect version being loaded.</p>
+</li>
+<li>
+<p>java.lang.NoSuchMethodError: Code calls a method that existed at compile time, but is missing in the version of the
+library loaded at runtime. A classic sign of a version conflict.</p>
+</li>
+<li>
+<p>java.lang.AbstractMethodError: An attempt was made to call an abstract method, which can happen if library APIs
+changed between versions in incompatible ways.</p>
+</li>
+<li>
+<p>Compilation Failures: Often related to using Java language features not supported by the configured
+targetCompatibility bytecode level, or when Spring Boot/Cloud versions require APIs from a newer JDK than you’re
+using.</p>
+</li>
+<li>
+<p>Build Tool Errors: Gradle or Maven might fail if they are run with an incompatible JDK version (e.g., running Gradle 6
+with JDK 17 might cause issues).</p>
+</li>
+<li>
+<p>Spring Framework Issues: Problems like UnsatisfiedDependencyException or BeanCreationException during application
+startup can sometimes stem from underlying library incompatibilities caused by version mismatches.</p>
+</li>
+</ul>
+<h3 id="resolving-compatibility-issues">Resolving Compatibility Issues</h3>
+<p>Troubleshooting version conflicts involves a systematic approach:</p>
+<ul>
+<li>
+<p>Consult Official Documentation: This is the primary source of truth. Check the specific version requirements for
+Gradle, Spring Boot, and Spring Cloud.</p>
+</li>
+<li>
+<p>Use Spring Initializr: For new projects, start.spring.io pre-selects compatible versions, providing a solid starting
+point.</p>
+</li>
+<li>
+<p>Utilize Maven/Gradle BOMs: Import the spring-boot-dependencies Bill of Materials (BOM) and, if used, the
+spring-cloud-dependencies BOM for your specific release train. This helps ensure consistent versions for transitive
+dependencies. It’s generally recommended to let these BOMs manage versions unless you have a specific reason to
+override one.</p>
+</li>
+</ul>
+<p>Maven Example (pom.xml)</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="xml"><code><span class="line"></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependencyManagement</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependencies</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">        &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependency</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">groupId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">org.springframework.cloud</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">groupId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">artifactId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">spring-cloud-dependencies</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">artifactId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">version</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">${spring-cloud.version}</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">version</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">type</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">pom</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">type</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">scope</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">import</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">scope</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">        &#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependency</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">        &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependency</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">groupId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">org.springframework.boot</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">groupId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">artifactId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">spring-boot-dependencies</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">artifactId</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">version</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">${spring-boot.version}</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">version</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">type</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">pom</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">type</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">            &#x3C;</span><span style="color:#22863A;--shiki-dark:#CAECE6">scope</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span><span style="color:#24292EFF;--shiki-dark:#D6DEEB">import</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">scope</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">        &#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependency</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">    &#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependencies</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#7FDBCA">&#x3C;/</span><span style="color:#22863A;--shiki-dark:#CAECE6">dependencyManagement</span><span style="color:#24292EFF;--shiki-dark:#7FDBCA">></span></span>
+<span class="line"></span></code></pre>
+<p>Gradle Example (build.gradle - using dependencyManagement plugin)</p>
+<pre class="astro-code astro-code-themes min-light night-owl" style="background-color:#ffffff;--shiki-dark-bg:#011627;color:#24292eff;--shiki-dark:#d6deeb; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="groovy"><code><span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">dependencyManagement {</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">    imports {</span></span>
+<span class="line"><span style="color:#C2C3C5;--shiki-dark:#637777">        //</span><span style="color:#C2C3C5;--shiki-dark:#637777;font-style:inherit;--shiki-dark-font-style:italic"> Import the BOMs</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">        mavenBom </span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#22863A;--shiki-dark:#ECC48D">org.springframework.cloud:spring-cloud-dependencies:</span><span style="color:#22863A;--shiki-dark:#D3423E">${</span><span style="color:#22863A;--shiki-dark:#ECC48D">springCloudVersion</span><span style="color:#22863A;--shiki-dark:#D3423E">}</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#C2C3C5;--shiki-dark:#637777"> //</span><span style="color:#C2C3C5;--shiki-dark:#637777;font-style:inherit;--shiki-dark-font-style:italic"> Specify Cloud version</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">        mavenBom </span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#22863A;--shiki-dark:#ECC48D">org.springframework.boot:spring-boot-dependencies:</span><span style="color:#22863A;--shiki-dark:#D3423E">${</span><span style="color:#22863A;--shiki-dark:#ECC48D">springBootVersion</span><span style="color:#22863A;--shiki-dark:#D3423E">}</span><span style="color:#22863A;--shiki-dark:#D9F5DD">"</span><span style="color:#C2C3C5;--shiki-dark:#637777"> //</span><span style="color:#C2C3C5;--shiki-dark:#637777;font-style:inherit;--shiki-dark-font-style:italic"> Specify Boot version</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">    }</span></span>
+<span class="line"><span style="color:#24292EFF;--shiki-dark:#D6DEEB">}</span></span>
+<span class="line"></span></code></pre>
+<ul>
+<li>
+<p>Inspect the Dependency Tree: Use mvn dependency:tree or gradle dependencies (or gradle buildEnvironment) to see the
+resolved dependency versions. Identify conflicts where different versions of the same library are being requested. Use
+exclusions or explicitly declare needed versions if necessary.</p>
+</li>
+<li>
+<p>Verify Build Tool Configuration: Ensure your Gradle or Maven setup is compatible with the JDK you’re using to run the
+build. For Gradle, explicitly configure Java toolchains for compiling and testing.</p>
+</li>
+<li>
+<p>Test Consistently: Implement unit and integration tests to catch runtime errors early.</p>
+</li>
+</ul>
 <h2 id="final-thoughts">Final Thoughts</h2>
 <p>Managing version compatibility in the Java and Spring ecosystem is a necessary part of development. While tools like
 Spring Boot and Gradle significantly help, understanding the requirements and relationships between the JDK, build tool,
