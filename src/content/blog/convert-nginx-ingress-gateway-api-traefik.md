@@ -1,3 +1,16 @@
+---
+author: StevenPG
+pubDatetime: 2025-11-15T12:00:00.000Z
+title: Convert Nginx Ingress to Gateway API with Traefik
+slug: convert-nginx-ingress-gateway-api-traefik
+featured: true
+draft: true
+
+ogImage: https://i.imgur.com/4ICZldG.jpeg
+tags:
+  - devops
+description: With Nginx Ingress being retired, users need to move to the new Gateway API using an available implementation. For this post, we're migrating to Traefik!
+---
 # Converting from Nginx Ingress to Traefik: Navigating the Gateway API Migration
 
 ## Table of Contents
