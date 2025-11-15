@@ -4,6 +4,7 @@ pubDatetime: 2025-11-15T12:00:00.000Z
 title: A Guide for Building with Java Modules
 slug: java-modules-guide
 featured: false
+draft: true
 ogImage: /assets/17e73d45-30ad-4daf-a92b-6333eec91b89.png
 tags:
   - gradle
