@@ -1,6 +1,6 @@
 ---
 author: StevenPG
-pubDatetime: 2025-05-16T12:00:00.000Z
+pubDatetime: 2025-05-15T12:00:00.000Z
 title: Should I use Java 25 Compact Object Headers?
 slug: should-i-use-java-25-compact-object-headers
 featured: false
