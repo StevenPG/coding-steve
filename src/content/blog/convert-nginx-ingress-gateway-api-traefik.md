@@ -15,7 +15,7 @@ description: With Nginx Ingress being retired, users need to move to the new Gat
 
 ## Table of Contents
 
-- [What is Ingress Nginx and How Am I Using It](#what-is-ingress-nginx-and-how-am-i-using-it)
+- [What is Ingress Nginx](#what-is-ingress-nginx-and-how-am-i-using-it)
 - [Why is it Being Retired/What Does it Being Retired Mean](#why-is-it-being-retiredwhat-does-it-being-retired-mean)
 - [What is the Gateway API](#what-is-the-gateway-api)
 - [Comparing Nginx Ingress Concepts with Gateway API Concepts](#comparing-nginx-ingress-concepts-with-gateway-api-concepts)
@@ -24,7 +24,7 @@ description: With Nginx Ingress being retired, users need to move to the new Gat
 - [What to Choose: Comparing Implementations and Choosing Traefik](#what-to-choose-comparing-implementations-and-choosing-traefik)
 - [Example Kubernetes Cluster with Real-World Examples](#example-kubernetes-cluster-with-real-world-examples)
 
-## What is Ingress Nginx and How Am I Using It
+## What is Ingress Nginx
 
 For years, Ingress Nginx has been the go-to solution for managing HTTP and HTTPS routing in Kubernetes clusters. If you're like me, you've probably been using it to expose services to the outside world, handle SSL termination, and manage traffic routing based on hostnames and paths.
 
