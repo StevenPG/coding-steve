@@ -14,7 +14,7 @@ description: With the release of Java 25, should you consider using Compact Obje
 
 # Should Java Developers Enable Compact Object Headers in Java 25?
 
-Java 25 introduces [JEP 519](https://openjdk.org/jeps/519), which adds support for compact object headers as an experimental feature. This is one of those improvements that sounds abstract but has real implications for both memory usage and CPU performance. Here we'll break down what this means for your applications and whether you should consider enabling it.
+Java 25 introduces [JEP 519](https://openjdk.org/jeps/519), which adds support for compact object headers as a production feature. This capability was experimental in Java 24 [JEP 450](https://openjdk.org/jeps/450). This is one of those improvements that sounds abstract but has real implications for both memory usage and CPU performance. Here we'll break down what this means for your applications and whether you should consider enabling it.
 
 ## What Are Compact Object Headers?
 
