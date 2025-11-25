@@ -70,19 +70,19 @@ Do not arbitrarily combine Spring Cloud trains and Spring Boot versions.
 Always check the documentation page for the specific Spring Cloud release train (e.g., 2023.0.1) to find its required
 Spring Boot version.
 
-| Spring Cloud Release Train | Corresponding Spring Boot Version |
-|:---------------------------|:----------------------------------|
-| 2025.1.x (Oakwood)         | Spring Boot 4.0.x                 |
-| 2025.0.x (Northfields)     | Spring Boot 3.5.x                 |
-| 2024.0.x (Moorgate)        | Spring Boot 3.4.x                 |
-| 2023.0.x (Leyton)          | Spring Boot 3.2.x / 3.3.x         |
-| 2022.0.x (Kilburn)         | Spring Boot 3.0.x / 3.1.x         |
-| 2021.0.x (Jubilee)         | Spring Boot 2.6.x / 2.7.x         |
-| 2020.0.x (Ilford)          | Spring Boot 2.4.x / 2.5.x         |
-| Hoxton                     | Spring Boot 2.2.x / 2.3.x         |
-| Greenwich                  | Spring Boot 2.1.x                 |
-| Finchley                   | Spring Boot 2.0.x                 |
-| Edgware                    | Spring Boot 1.5.x                 |
+| Spring Cloud Release Train                                                                                  | Corresponding Spring Boot Version                                                      |
+|:------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------|
+| [2025.1.x (Oakwood)](https://spring.io/blog/2025/11/25/spring-cloud-2025-1-0-aka-oakwood-has-been-released) | [Spring Boot 4.0.x](https://spring.io/blog/2025/11/20/spring-boot-4-0-0-available-now) |
+| [2025.0.x (Northfields)](https://spring.io/blog/2025/05/29/spring-cloud-2025-0-0-is-abvailable)             | Spring Boot 3.5.x                                                                      |
+| [2024.0.x (Moorgate)](https://spring.io/blog/2024/12/03/spring-cloud-2024-0-0)                              | Spring Boot 3.4.x                                                                      |
+| [2023.0.x (Leyton)](https://spring.io/blog/2023/12/06/spring-cloud-2023-0-0-aka-leyton-is-now-available)    | Spring Boot 3.2.x / 3.3.x                                                              |
+| 2022.0.x (Kilburn)                                                                                          | Spring Boot 3.0.x / 3.1.x                                                              |
+| 2021.0.x (Jubilee)                                                                                          | Spring Boot 2.6.x / 2.7.x                                                              |
+| 2020.0.x (Ilford)                                                                                           | Spring Boot 2.4.x / 2.5.x                                                              |
+| Hoxton                                                                                                      | Spring Boot 2.2.x / 2.3.x                                                              |
+| Greenwich                                                                                                   | Spring Boot 2.1.x                                                                      |
+| Finchley                                                                                                    | Spring Boot 2.0.x                                                                      |
+| Edgware                                                                                                     | Spring Boot 1.5.x                                                                      |
 
 ### Gradle and Java Compatibility
 
