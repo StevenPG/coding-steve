@@ -13,7 +13,6 @@ permissions:
 
 jobs:
   deploy-docs:
-    runs-on: self-hosted
     permissions:
       contents: write
       pull-requests: write
