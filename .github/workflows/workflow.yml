@@ -1,0 +1,56 @@
+name: Deploy Blog to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      deployments: write
+      issues: write
+      repository-projects: write
+    name: Deploy Blog to Cloudflare Pages
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Verify Node installation
+        run: |
+          which node
+          which npm
+          node --version
+          npm --version
+
+      - name: Install Wrangler
+        run: npm install -g wrangler
+
+      - name: Install & Build
+        run: |
+          npm install
+          npm run build
+        working-directory: .
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy ./dist --project-name=coding-steve
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
