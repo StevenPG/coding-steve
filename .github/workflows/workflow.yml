@@ -3,7 +3,7 @@ name: Deploy Blog to Cloudflare Pages
 on:
   push:
     branches:
-      - cloudflare-migration
+      - main
   workflow_dispatch:
 
 permissions:
