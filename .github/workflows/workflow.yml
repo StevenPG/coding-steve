@@ -1,4 +1,4 @@
-name: workflow.yaml
+name: Deploy Blog to Cloudflare Pages
 
 on:
   push:
@@ -12,9 +12,6 @@ permissions:
   issues: write
 
 jobs:
-  changes:
-    runs-on: self-hosted
-    # Set job outputs to values from filter step
   deploy-docs:
     runs-on: self-hosted
     permissions:
@@ -27,6 +24,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -44,4 +42,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy ./dist --project-name=stevenpg-blog
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}]
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
