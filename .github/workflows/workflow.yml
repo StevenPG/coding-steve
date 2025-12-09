@@ -1,0 +1,47 @@
+name: workflow.yaml
+
+on:
+  push:
+    branches:
+      - cloudflare-migration
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  changes:
+    runs-on: self-hosted
+    # Set job outputs to values from filter step
+  deploy-docs:
+    runs-on: self-hosted
+    permissions:
+      contents: write
+      pull-requests: write
+      deployments: write
+      issues: write
+      repository-projects: write
+    name: Deploy Blog to Cloudflare Pages
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install & Build
+        run: |
+          npm install
+          npm run build
+        working-directory: .
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy ./dist --project-name=stevenpg-blog
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}]
