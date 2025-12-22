@@ -264,46 +264,45 @@ Next, lets dive into the `src` folder:
 
 If we review this file, we see the following:
 
+![css example](../../../public/assets/substack/css-example-1.png)
 
 We can experiment and see what this controls, even without really understanding CSS. Lets change background from “white” to “green” and see how our webpage changes after we hit save (while running the application locally using instructions from the README):
 
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-4.png)
 
-
-
-
-
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-5.png)
 
 Pretty simple right? The CSS component is called “.app-header” and has a property called “background” that said “white”. We changed it to “green” and the app header’s background turned green!
 
 If we look over the file further, we see “.app-header h1”. I mentioned `h1` earlier in this post, and in an earlier post. It’s short for heading. So I think we can assume that the following CSS controls the heading for the page, and we know it’s a header inside .app-header, because .app-header is before h1.
 
+![claude example](../../../public/assets/substack/css-example-2.png)
 
 Lets change this color to “white”.
 
 And just like that, without any prompting and just some simple discovery and experimenting, we’ve completely changed the color palette of our application.
 
-
-
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-6.png)
 
 One of the major take-aways from this post isn’t that you need to become a developer to build products like this, but instead treat the AI as a partner that’s helping you learn AND doing tasks for you. Where you can, you should try to absorb some developer skills, if not only because it will allow you to supercharge your prompts with additional context!
 
 Alright, back to the explanations!
 
-App.tsx → This is the execution code version of the App.css. This file contains the entry point to our application, but at the React level. Where index.html was our foundation, these are our walls. Is unlikely to be changed by us.
+- App.tsx → This is the execution code version of the App.css. This file contains the entry point to our application, but at the React level. Where index.html was our foundation, these are our walls. Is unlikely to be changed by us.
 
-index.css → Lots of repeating here, but this is the .css file that pairs with the index.html. Used as a foundational file, with all other files extending from it. Unlikely we will want to make changes here.
+- index.css → Lots of repeating here, but this is the .css file that pairs with the index.html. Used as a foundational file, with all other files extending from it. Unlikely we will want to make changes here.
 
-main.tsx → This is our root tsx file, it also acts as an entrypoint, but if the App.tsx is the foundation, this is the actual property it rests upon. We probably won’t change this file at all.
+- main.tsx → This is our root tsx file, it also acts as an entrypoint, but if the App.tsx is the foundation, this is the actual property it rests upon. We probably won’t change this file at all.
 
-vite-env.d.ts → This file contains environment configurations for Vite. This should be auto-setup by your project-creating LLM, so not likely something we’re going to edit.
+- vite-env.d.ts → This file contains environment configurations for Vite. This should be auto-setup by your project-creating LLM, so not likely something we’re going to edit.
 
 Next, we’ll dig into the `components` folder to really get into the meat of the code
 
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-7.png)
 
 We’ll open KanbanColumn.tsx. We should always look at where it says `return (` near the bottom of the file usually, since that’s what defines the actual component.
 
-
-
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-8.png)
 
 Now, if we review this code without any deep coding knowledge, we can gather a lot of contextual information.
 
@@ -311,40 +310,37 @@ Just like before, we see all of the className fields that we could put in the se
 
 We won’t delve too much more into the code here, but we can give an example of something we find in TaskCard.tsx:
 
-
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-9.png)
 
 
 Even though we don’t know how this “getPriorityColor” might be used code-wise, we can tell that it’s determining the colors, so that’s easy to change.
 
-Using Search is a Superpower
+## Using Search is a Superpower
 Every editor and tool that allows you to edit code (for the most part) has a search function. While it can seem like searching for a needle in a haystack, utilizing the search is invaluable for devs and non-devs alike to find what they are looking for quickly. Nobody keeps an entire application in their mind. Even the most seasoned developers are using the search all of the time to find where they need to be.
 
 We can use our earlier example to change the content in our header. Here’s a refresher:
 
-
-
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-10.png)
 
 We’ve changed the color, but what if we want to change text on the page. Rather than ask an AI and potentially cause weird issues elsewhere in our application, we can just use the search!
 
 Strings of text especially are simply laid out in the code, so lets search for “Welcome to your Kanban Board!”
 
-
-
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-11.png)
 
 And there it is! Let’s open that file and see what it looks like.
 
-
-
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-12.png)
 
 I know this can be daunting because it’s straight into the project source code, but we’re going to use context clues and the search to supercharge our capabilities.
 
 Firstly, lets change that text!
 
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-13.png)
 
 We hit save, and just like magic:
 
-
-
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-14.png)
 
 Our text at the bottom now matches our new code.
 
@@ -352,12 +348,11 @@ But how can we use the search to continue to enable ourselves… well we see the
 
 Lets toss that in the search and see what comes up:
 
-
-
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-15.png)
 
 We see the welcome message on line 129 in the search, under App.tsx which is the file we’re currently in. But we also see it directs us EXACTLY to the relevant CSS for this. We have “.welcome-message {“, “.welcome-message h2 {“ and “.welcome-message p {“.
 
-If we look back at our main code, that maps to the open tags we have under the welcome-message div. So we now know where we can go to change the style of the <h2> tag and the <p>.
+If we look back at our main code, that maps to the open tags we have under the welcome-message div. So we now know where we can go to change the style of the `<h2>` tag and the `<p>`.
 
 This is how breaking things into smaller component pieces can make development and vibe-coding significantly easier, and thankfully AI does a good job following best practices.
 
@@ -365,17 +360,20 @@ You barely even have to know anything about the project to make styling changes 
 
 I’m glad you asked! The next section is about…
 
-How to Inspect
+### How to Inspect
 Browsers have a development mode that is super useful for figuring out stuff like “where is the code for this component”. Lets do a quick example:
 
 Say we want to remove the text on this button:
 
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-16.png)
 
 We search for “Add a task please” and find the following:
 
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-17.png)
 
 Then we delete the text and leave only the + emoji:
 
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-18.png)
 
 But now we’ve lost our place in the code, how do we find out where the code is for this button?
 
@@ -383,33 +381,33 @@ We use Chrome devtools!
 
 We’ll start by right-clicking the button and pressing inspect:
 
-
-
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-19.png)
 
 This will open up a bunch of tools, but what we care about is the “Elements” tab here:
 
-
-
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-20.png)
 
 From here, we get a LOT of context about where we can go to find our button. The clicked element should be highlighted, and the code won’t be identical to our React code, since this is straight HTML/CSS/JS instead of React, but the beauty of JSX is that a lot of it is still HTML and CSS.
 
 We can put nearly anything here into the search and find out button. Lets put the button class in, “btn btn-primary btn-large”.
 
-
-
+![claude example](../../../public/assets/substack/copilot-vibe-code-example-21.png)
 
 Just like that, we’re right back where we wanted to be!
 
-TypeScript and TSX
+## TypeScript and TSX
 Everything up until this point has been about JavaScript and JSX using React. But many of these code generation tools will use the latest and (by my opinion) one of the greatest changes to JavaScript, JSX and React; Typescript and TSX.
 
 Keeping this very high level, consider the following example:
 
+```typescript
 5 + 2 = 7
 a = 5
 a + 2 = 7
 c = a + 2
 c + 3 = 10
+```
+
 It reads like a little math puzzle, but it’s really showing the basics of “variables”. A variable is simply a name for a piece of data (at least for our current context).
 
 In the example, a gets set to 5, then c gets set to 5 + 2, and then c is 7.
@@ -422,23 +420,21 @@ These variables in JavaScript are simply containers for data, a literal variable
 
 However, in typescript we are doing JavaScript, with types! A type is simply a label that’s important to the programming language.
 
-So if we redo that example in typescript, it’d look like this:
-
 As someone vibe-coding this application, you probably won’t need to think too deeply about types, since it’s at the individual line level and most of what we’ve addressed is simple text manipulation.
 
-Summary
+## Summary
 Over this series, we’ve gone over the basics of what makes up a web page and some technical background around components relevant to a web application.
 
 This post is the first to really get into the weeds with how to actually DO new things in your project without a coding background.
 
 The next few posts are going to build on this, and introduce software development concepts but in a friendly, less-technical way that’s easy to digest and doesn’t require months of learning how to code. The goal isn’t to become senior developers here, it’s to help enable you to rely on the AI agent less, to save credits for the larger and more important changes.
 
-Next Post
+## Next Post
 The next two posts will go over two common and required concepts when implementing a web application that LLM implementations tend to ignore, and will include example prompts on how to validate the AI isn’t building a time bomb just out of view!
 
 Those posts are
 
-Pagination for Vibe-Coders
+- Pagination for Vibe-Coders
 
-Caching for Vibe-Coders
+- Caching for Vibe-Coders
     
