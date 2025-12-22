@@ -19,6 +19,11 @@ const { page } = Astro.props;
 <Layout title={`Posts | ${SITE.title}`}>
   <Header activeNav="posts" />
   <Main pageTitle="Posts" pageDesc="All the articles I've posted.">
+    <p class="all-posts-link">
+      <a href="/posts/all/" class="text-skin-accent underline-offset-4 hover:underline">
+        All Posts Single Page
+      </a>
+    </p>
     <ul>
       {
         page.data.map(({ data, slug }) => (
