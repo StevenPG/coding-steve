@@ -1,0 +1,57 @@
+---
+import Layout from "@layouts/Layout.astro";
+import Main from "@layouts/Main.astro";
+import Header from "@components/Header.astro";
+import Footer from "@components/Footer.astro";
+import Card from "@components/Card";
+import { getCollection } from "astro:content";
+import getSortedPosts from "@utils/getSortedPosts";
+import { SITE, LOCALE } from "@config";
+
+const posts = await getCollection("blog", ({ data }) => !data.draft);
+const sortedPosts = getSortedPosts(posts);
+
+type BlogEntry = typeof sortedPosts[number];
+
+const monthGroups = new Map<string, { label: string; items: BlogEntry[] }>();
+
+const formatter = new Intl.DateTimeFormat(
+  LOCALE.langTag?.[0] ?? LOCALE.lang,
+  { month: "long", year: "numeric" }
+);
+
+for (const entry of sortedPosts) {
+  const dt = new Date(entry.data.modDatetime ?? entry.data.pubDatetime);
+  const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
+  if (!monthGroups.has(key)) {
+    monthGroups.set(key, { label: formatter.format(dt), items: [] });
+  }
+  monthGroups.get(key)!.items.push(entry);
+}
+---
+
+<Layout title={`All Posts by Month | ${SITE.title}`}>
+  <Header activeNav="posts" />
+  <Main pageTitle="All Posts" pageDesc="Every article on one page, grouped by month.">
+    {Array.from(monthGroups.values()).map(group => (
+      <section class="month-group">
+        <h2>{group.label}</h2>
+        <ul>
+          {group.items.map(({ data, slug }) => (
+            <Card href={`/posts/${slug}/`} frontmatter={data} secHeading={false} />
+          ))}
+        </ul>
+      </section>
+    ))}
+  </Main>
+  <Footer />
+</Layout>
+
+<style>
+  .month-group {
+    @apply pb-6 pt-8;
+  }
+  .month-group h2 {
+    @apply text-2xl font-semibold tracking-wide;
+  }
+</style>
