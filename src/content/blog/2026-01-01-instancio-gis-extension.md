@@ -1,7 +1,7 @@
 ---
 author: StevenPG
-pubDatetime: 2026-01-01T01:00:00.000Z
-title: "Writing an Instancio Exception"
+pubDatetime: 2026-01-01T05:00:00.000Z
+title: "Writing an Instancio Extension Library"
 slug: writing-instancio-extension
 featured: false
 ogImage: /assets/default-og-image.png
