@@ -1,51 +1,47 @@
 ---
 layout: ../layouts/OSSLayout.astro
-title: "OSS"
+title: "Open Source"
 ---
 
-As part of my career in this field, I'm trying to give back to the open source community every
-time I get a good opportunity. This page is intended to categorize and document my open source
-contributions over the years, just as a summary and maybe as an example to anyone else who may
-come across this and be similar to me.
+I am a passionate advocate for open-source software and believe in giving back to the community that enables so much of our industry's innovation. This page highlights my active participation in the ecosystem, ranging from maintaining my own libraries to contributing improvements and bug fixes to widely-used frameworks.
 
-# My Contributions
+## My Projects
 
-### Spring Cloud Streams Samples
+### [instancio-gis](https://github.com/stevenpg/instancio-gis)
+**Core Maintainer**
 
-I've committed two separate examples, the first was an example that was missing from the
-documentation on setting up a batch producer for kafka, and the second were examples of
-RecordRecoverableProcessor and DltAwareProcessor.
-https://github.com/spring-cloud/spring-cloud-stream-samples/commit/547ca663c581c22c5fe212aba560552d3cada061
+An extension for the [Instancio](https://www.instancio.org/) library that enables automated generation of geospatial objects (JTS) for Java testing.
 
-One of the issues that resulted in the samples being added 
-was: https://github.com/spring-cloud/spring-cloud-stream-samples/issues/239
+*   **Impact:** Simplifies the testing of GIS-enabled applications by removing the boilerplate required to create valid, complex geometries.
+*   **Technologies:** Java, JTS (Java Topology Suite), Instancio SPI.
+*   **Key Achievement:** Implemented a seamless integration using Java SPI, allowing users to generate random, valid Polygons, Points, and LineStrings with zero configuration.
+*   **Blog Post:** [Writing an Instancio Extension Library](/posts/writing-instancio-extension/)
 
-### Spring Cloud Streams
+---
 
-I'm a MASSIVE fan of Spring Cloud Streams, so I brought up the following issues to one of the
-maintainers about a gap in the API: https://github.com/spring-cloud/spring-cloud-stream/issues/2776
+## Contributions
 
-From there, that resulted in the following issue being opened, where I chatted with the maintainer
-about how to finalize the implementation: https://github.com/spring-cloud/spring-cloud-stream/issues/2779
+### Spring Cloud Stream
 
-The final implementation ended up being the RecordRecoverableProcessor and DltAwareProcessor objects available
-for the kafka-streams binder. I added the samples for them to save the maintainer some
-time: https://github.com/spring-cloud/spring-cloud-stream-samples/commit/13bc86a240fc5cda77f6a01075fe687a599e7fe7
+I am a frequent user and contributor to the Spring Cloud Stream ecosystem, focusing on improving the developer experience and expanding API capabilities.
 
-Finally, I tacked on a little trace log: https://github.com/spring-cloud/spring-cloud-stream/issues/2802
-
-And while I didn't write much of any of the code in the actual library, it feels good to have left a small mark
-on a library I use a ton!
+*   **API Enhancement:** Identified and proposed a gap in the Kafka Streams binder API for recoverable processors. Collaborated with maintainers to refine the implementation of `RecordRecoverableProcessor` and `DltAwareProcessor`.
+    *   [Issue #2776: Gap in API](https://github.com/spring-cloud/spring-cloud-stream/issues/2776)
+    *   [Issue #2779: Implementation Discussion](https://github.com/spring-cloud/spring-cloud-stream/issues/2779)
+*   **Documentation & Samples:** Contributed high-quality examples to the official samples repository to help other developers implement advanced patterns.
+    *   [Kafka Batch Producer Sample](https://github.com/spring-cloud/spring-cloud-stream-samples/commit/547ca663c581c22c5fe212aba560552d3cada061)
+    *   [Recoverable Processor Samples](https://github.com/spring-cloud/spring-cloud-stream-samples/commit/13bc86a240fc5cda77f6a01075fe687a599e7fe7)
+*   **Observability:** Added targeted trace logging to assist in debugging complex stream processing issues.
+    *   [Issue #2802: Trace Log Addition](https://github.com/spring-cloud/spring-cloud-stream/issues/2802)
 
 ### Instancio
 
-Instancio is an instantiation and testing library. I opened up an issue to add Spatial objects
-https://github.com/instancio/instancio/issues/951 and the maintainer suggested I add them, so I did!
+Contributed to the core library to expand its built-in generation capabilities.
 
-https://github.com/instancio/instancio/commit/58a6677b4eeb99d8b0f7c534868fc0f492d8db4a
+*   **Spatial Support:** Implemented native support for generating Spatial objects, reducing the need for custom generators in many common testing scenarios.
+    *   [Issue #951: Add Spatial Support](https://github.com/instancio/instancio/issues/951)
+    *   [Additional Spatial Contribution](https://github.com/instancio/instancio/commit/58a6677b4eeb99d8b0f7c534868fc0f492d8db4a)
 
-They were accepted and are available to any users to generate spatial coordinates with!
+---
 
-# My Open Source Software
-
-Nothing here just yet...
+> Leaving a small mark on the libraries I use every day is my way of supporting the tools that support my career.

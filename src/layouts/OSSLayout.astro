@@ -19,10 +19,59 @@ const { frontmatter } = Astro.props;
   <Header activeNav="oss" />
   <Breadcrumbs />
   <main id="main-content">
-    <section id="about" class="prose mb-28 max-w-3xl prose-img:border-0">
-      <h1 class="text-2xl tracking-wider sm:text-3xl">{frontmatter.title}</h1>
+    <section id="oss" class="prose mb-28 max-w-3xl prose-img:border-0">
+      <h1 class="text-3xl tracking-wider sm:text-4xl">{frontmatter.title}</h1>
       <slot />
     </section>
   </main>
   <Footer />
 </Layout>
+
+<style>
+  #main-content {
+    @apply mx-auto max-w-3xl px-4;
+  }
+  #oss {
+    @apply max-w-3xl;
+  }
+
+  /* Professional touches for the OSS page */
+  :global(.prose h2) {
+    @apply mt-12 mb-6 border-b border-skin-line pb-2 font-bold !text-skin-accent;
+  }
+  :global(.prose h3) {
+    @apply mt-8 mb-2 text-xl font-bold !not-italic !text-skin-base;
+  }
+  :global(.prose h3 a) {
+    @apply no-underline hover:underline hover:text-skin-accent transition-colors;
+  }
+  :global(.prose ul) {
+    @apply list-none pl-0;
+  }
+  :global(.prose li) {
+    @apply mb-4 relative pl-6;
+  }
+  :global(.prose li::before) {
+    content: "→";
+    @apply absolute left-0 text-skin-accent font-bold;
+  }
+  :global(.prose li ul) {
+    @apply mt-2 mb-0;
+  }
+  :global(.prose li ul li) {
+    @apply mb-1 text-sm opacity-90;
+  }
+  :global(.prose li ul li::before) {
+    content: "•";
+    @apply text-skin-base font-normal;
+  }
+  :global(.prose blockquote) {
+    @apply mt-16 border-l-4 border-skin-accent bg-skin-card/30 py-4 px-6 rounded-r-lg italic;
+  }
+  :global(.prose blockquote p) {
+    @apply m-0;
+  }
+  :global(.prose strong) {
+    @apply text-skin-accent font-semibold;
+  }
+</style>
