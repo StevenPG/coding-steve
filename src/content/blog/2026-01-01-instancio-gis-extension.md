@@ -34,14 +34,14 @@ void manualSetup() {
 
   // The “Old” Way
   Address address = new Address();
-  address.setStreet(”123 Main St”);
-  address.setCity(”New York”);
-  address.setZip(”10001”);
+  address.setStreet("123 Main St");
+  address.setCity("New York");
+  address.setZip("10001");
 
   Customer customer = new Customer();
   customer.setId(UUID.randomUUID());
-  customer.setName(”John Doe”);
-  customer.setAddress(address);
+  customer.setName("John Doe");
+  address.setAddress(address);
   customer.setActive(true);
 
   // Finally, the test...
@@ -68,7 +68,7 @@ It’s also incredibly easy to do additional configuration on a created object, 
 
 ```java
 Customer customer = Instancio.of(Customer.class)
-    .set(field(Customer::getName), “Steve”)
+    .set(field(Customer::getName), "Steve")
     .create();
 ```
 
@@ -213,7 +213,7 @@ To summarize:
 
 ### Real World Use Case: Third Party Geographical Libraries
 
-I recently built an extension library to handle geospatial objects. You can find the library here. There are many types and tests to use as reference.
+I recently built an extension library to handle geospatial objects. You can find the library [here on GitHub](https://github.com/stevenpg/instancio-gis). There are many types and tests to use as reference.
 
 Working with Geometry in tests is notoriously annoying because valid geometries require specific coordinate structures (e.g., a Polygon ring must close).
 
@@ -242,7 +242,7 @@ If you built your generator to accept hints, you can still customize it within t
 ```java
 // If your generator supports custom specs
 Point p = Instancio.of(Point.class)
-    .generate(field(Point::class), gen -> gen.spatial().coordinateSystem(”WGS84”))
+    .generate(field(Point::class), gen -> gen.spatial().coordinateSystem("WGS84"))
     .create();
 ```
 
