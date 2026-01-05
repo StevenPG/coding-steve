@@ -41,7 +41,7 @@ void manualSetup() {
   Customer customer = new Customer();
   customer.setId(UUID.randomUUID());
   customer.setName("John Doe");
-  address.setAddress(address);
+  customer.setAddress(address);
   customer.setActive(true);
 
   // Finally, the test...
