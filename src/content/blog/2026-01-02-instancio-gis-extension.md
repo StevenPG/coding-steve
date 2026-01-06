@@ -1,6 +1,6 @@
 ---
 author: StevenPG
-pubDatetime: 2026-01-01T05:00:00.000Z
+pubDatetime: 2026-01-02T05:00:00.000Z
 title: "Writing an Instancio Extension Library"
 slug: writing-instancio-extension
 featured: false
