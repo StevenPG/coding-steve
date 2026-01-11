@@ -394,19 +394,19 @@ spring:
             provider: keycloak
 
           # Second registration for a different service
-          github-api:
-            client-id: ${GITHUB_CLIENT_ID}
-            client-secret: ${GITHUB_CLIENT_SECRET}
+          partner-api:
+            client-id: ${PARTNER_CLIENT_ID}
+            client-secret: ${PARTNER_CLIENT_SECRET}
             authorization-grant-type: client_credentials
-            scope: read:user,repo
-            provider: github
+            scope: orders:read,inventory:read
+            provider: partner
 
         provider:
           keycloak:
             token-uri: ${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token
             issuer-uri: ${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}
-          github:
-            token-uri: https://github.com/login/oauth/access_token
+          partner:
+            token-uri: https://auth.partner-company.com/oauth2/token
 ```
 
 ### OAuth2AuthorizedClientManager
@@ -562,13 +562,13 @@ public class MultiClientConfig {
     }
 
     @Bean
-    public RestClient githubRestClient(OAuth2AuthorizedClientManager manager) {
+    public RestClient partnerRestClient(OAuth2AuthorizedClientManager manager) {
         OAuth2ClientHttpRequestInterceptor interceptor =
                 new OAuth2ClientHttpRequestInterceptor(manager);
-        interceptor.setClientRegistrationIdResolver(request -> "github-api");
+        interceptor.setClientRegistrationIdResolver(request -> "partner-api");
 
         return RestClient.builder()
-                .baseUrl("https://api.github.com")
+                .baseUrl("https://api.partner-company.com")
                 .requestInterceptor(interceptor)
                 .build();
     }
@@ -802,7 +802,7 @@ The key concept in Spring Boot 4's HTTP clients is **groups**. A group is a set 
 // Multiple groups for different API providers
 @Configuration
 @ImportHttpServices(group = "keycloak", basePackages = "com.example.clients.keycloak")
-@ImportHttpServices(group = "github", basePackages = "com.example.clients.github")
+@ImportHttpServices(group = "partner", basePackages = "com.example.clients.partner")
 @ImportHttpServices(group = "internal", basePackages = "com.example.clients.internal")
 public class HttpClientConfig {
 }
@@ -810,7 +810,7 @@ public class HttpClientConfig {
 // Or import specific types
 @Configuration
 @ImportHttpServices(group = "keycloak", types = {UserService.class, RoleService.class})
-@ImportHttpServices(group = "github", types = {RepoService.class, IssueService.class})
+@ImportHttpServices(group = "partner", types = {OrderService.class, InventoryService.class})
 public class HttpClientConfig {
 }
 ```
@@ -836,9 +836,9 @@ spring:
         read-timeout: 5s
         connect-timeout: 1s
 
-      # GitHub API
-      github:
-        base-url: https://api.github.com
+      # Partner API
+      partner:
+        base-url: https://api.partner-company.com
         read-timeout: 15s
 
       # Internal microservices
@@ -946,17 +946,17 @@ spring:
             authorization-grant-type: client_credentials
             scope: openid,profile
             provider: keycloak
-          github-api:
-            client-id: ${GITHUB_CLIENT_ID}
-            client-secret: ${GITHUB_CLIENT_SECRET}
+          partner-api:
+            client-id: ${PARTNER_CLIENT_ID}
+            client-secret: ${PARTNER_CLIENT_SECRET}
             authorization-grant-type: client_credentials
-            scope: read:user,repo
-            provider: github
+            scope: orders:read,inventory:read
+            provider: partner
         provider:
           keycloak:
             token-uri: ${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token
-          github:
-            token-uri: https://github.com/login/oauth/access_token
+          partner:
+            token-uri: https://auth.partner-company.com/oauth2/token
 
   http:
     # Global settings
@@ -969,8 +969,8 @@ spring:
       keycloak:
         base-url: https://api.internal.example.com
         read-timeout: 5s
-      github:
-        base-url: https://api.github.com
+      partner:
+        base-url: https://api.partner-company.com
         read-timeout: 15s
 ```
 
@@ -985,14 +985,14 @@ public interface InternalApiClient {
 }
 
 @HttpExchange
-@ClientRegistrationId("github-api")
-public interface GitHubApiClient {
+@ClientRegistrationId("partner-api")
+public interface PartnerApiClient {
 
-    @GetExchange("/user")
-    GitHubUser getCurrentUser();
+    @GetExchange("/orders/{orderId}")
+    Order getOrder(@PathVariable String orderId);
 
-    @GetExchange("/repos/{owner}/{repo}")
-    Repository getRepository(@PathVariable String owner, @PathVariable String repo);
+    @GetExchange("/inventory/{sku}")
+    InventoryStatus getInventory(@PathVariable String sku);
 }
 ```
 
@@ -1000,7 +1000,7 @@ public interface GitHubApiClient {
 // Configuration
 @Configuration
 @ImportHttpServices(group = "keycloak", types = InternalApiClient.class)
-@ImportHttpServices(group = "github", types = GitHubApiClient.class)
+@ImportHttpServices(group = "partner", types = PartnerApiClient.class)
 public class HttpClientConfig {
 
     @Bean
@@ -1036,11 +1036,11 @@ public class HttpClientConfig {
 public class MyService {
 
     private final InternalApiClient internalApi;  // OAuth2 automatic
-    private final GitHubApiClient githubApi;      // Different OAuth2 client, automatic
+    private final PartnerApiClient partnerApi;    // Different OAuth2 client, automatic
 
     public void doWork() {
         User user = internalApi.getUser(123L);  // Uses keycloak-service token
-        GitHubUser ghUser = githubApi.getCurrentUser();  // Uses github-api token
+        Order order = partnerApi.getOrder("ORD-123");  // Uses partner-api token
     }
 }
 ```
@@ -1499,9 +1499,9 @@ logging:
     org.springframework.security.oauth2.client: DEBUG
 ```
 
-## Real-World Example: Calling GitHub API
+## Real-World Example: Calling a Partner API
 
-Complete example calling GitHub's API with OAuth2:
+Complete example calling a partner's B2B API with OAuth2 client credentials:
 
 ```yaml
 # application.yml
@@ -1510,48 +1510,51 @@ spring:
     oauth2:
       client:
         registration:
-          github:
-            client-id: ${GITHUB_CLIENT_ID}
-            client-secret: ${GITHUB_CLIENT_SECRET}
+          partner-api:
+            client-id: ${PARTNER_CLIENT_ID}
+            client-secret: ${PARTNER_CLIENT_SECRET}
             authorization-grant-type: client_credentials
-            scope: read:user,repo
+            scope: orders:read,orders:write,inventory:read
         provider:
-          github:
-            token-uri: https://github.com/login/oauth/access_token
+          partner-api:
+            token-uri: https://auth.partner-company.com/oauth2/token
 ```
 
 ```java
-@HttpExchange(url = "https://api.github.com", accept = "application/vnd.github+json")
-public interface GitHubClient {
+@HttpExchange(url = "https://api.partner-company.com/v1", accept = "application/json")
+public interface PartnerApiClient {
 
-    @GetExchange("/user")
-    GitHubUser getCurrentUser();
+    @GetExchange("/orders/{orderId}")
+    Order getOrder(@PathVariable String orderId);
 
-    @GetExchange("/users/{username}/repos")
-    List<Repository> getUserRepos(@PathVariable String username);
+    @GetExchange("/orders")
+    List<Order> getOrdersByStatus(@RequestParam String status);
 
-    @GetExchange("/repos/{owner}/{repo}")
-    Repository getRepository(@PathVariable String owner, @PathVariable String repo);
+    @PostExchange("/orders")
+    Order createOrder(@RequestBody CreateOrderRequest request);
+
+    @GetExchange("/inventory/{sku}")
+    InventoryStatus getInventory(@PathVariable String sku);
 }
 
 @Configuration
-public class GitHubClientConfig {
+public class PartnerApiClientConfig {
 
     @Bean
-    public GitHubClient gitHubClient(OAuth2AuthorizedClientManager manager) {
+    public PartnerApiClient partnerApiClient(OAuth2AuthorizedClientManager manager) {
         OAuth2ClientHttpRequestInterceptor oauth2Interceptor =
                 new OAuth2ClientHttpRequestInterceptor(manager);
-        oauth2Interceptor.setClientRegistrationIdResolver(request -> "github");
+        oauth2Interceptor.setClientRegistrationIdResolver(request -> "partner-api");
 
         RestClient restClient = RestClient.builder()
-                .defaultHeader("X-GitHub-Api-Version", "2022-11-28")
+                .defaultHeader("X-Api-Version", "2024-01-01")
                 .requestInterceptor(oauth2Interceptor)
                 .build();
 
         return HttpServiceProxyFactory
                 .builderFor(RestClientAdapter.create(restClient))
                 .build()
-                .createClient(GitHubClient.class);
+                .createClient(PartnerApiClient.class);
     }
 }
 ```
