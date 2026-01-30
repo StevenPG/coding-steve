@@ -19,6 +19,10 @@ TODO
 
 - Experiment live with some of the tooling
 - Link the matrix of what is supported by each, e.g. nginx route (I need UDPRoute :[ )
+- https://docs.nginx.com/nginx-gateway-fabric/overview/gateway-api-compatibility/
+- https://github.com/kubernetes-sigs/gateway-api/blob/main/conformance/reports/v1.4.0/traefik-traefik/experimental-v3.6.0-default-report.yaml
+- https://gateway.envoyproxy.io/docs/tasks/traffic/
+- https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/
 
 ## Table of Contents
 
