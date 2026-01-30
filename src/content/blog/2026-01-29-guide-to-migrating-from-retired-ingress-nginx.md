@@ -15,6 +15,11 @@ description: A comprehensive guide to migrating from the retiring ingress-nginx 
 
 # Guide to Migrating From Retired Ingress Nginx
 
+TODO
+
+- Experiment live with some of the tooling
+- Link the matrix of what is supported by each, e.g. nginx route (I need UDPRoute :[ )
+
 ## Table of Contents
 
 [[toc]]
