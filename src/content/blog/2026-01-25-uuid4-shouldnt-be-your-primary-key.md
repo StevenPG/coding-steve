@@ -29,7 +29,7 @@ Before we dive into the UUID discussion, let's address the elephant in the room:
 
 Sequential IDs are great for performance. They're compact, indexed efficiently, and insert in order. But they come with a significant problem in many modern applications.
 
-The classic advice I've saw on online once is: "never make your primary key customer data." But when you need to expose IDs externally, prevent enumeration attacks, or generate IDs across distributed systems without coordination, you need something else.
+The classic advice I've seen online once is: "never make your primary key customer data." But when you need to expose IDs externally, prevent enumeration attacks, or generate IDs across distributed systems without coordination, you need something else.
 
 What really sold me on time-sorted identifiers was realizing that UUID7 embeds the creation timestamp directly in the ID. This means you can often skip adding a separate `created_at` column entirely. The timestamp is right there in the primary key, extractable when needed. That's one less column to maintain, one less index to worry about, and a cleaner schema overall.
 
