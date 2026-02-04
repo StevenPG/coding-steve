@@ -15,6 +15,8 @@ description: Attempting to use Logbook with Spring Boot 4 (broken on arrival)
 
 > **Update (February 2026):** This issue has been resolved! Logbook 4.x now fully supports Spring Boot 4. See my follow-up post: [Spring Boot 4 and Logbook: It Works Now!](/posts/spring-boot-4-logbook-now-works)
 
+----
+
 # Spring Boot 4 and Logbook Compatibility Issue: ClassNotFoundException
 
 If you're upgrading to Spring Boot 4 and using [Zalando's Logbook library](https://github.com/zalando/logbook) for HTTP request/response logging, you've likely encountered this frustrating error:
