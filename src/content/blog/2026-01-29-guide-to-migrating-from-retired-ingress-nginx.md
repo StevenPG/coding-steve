@@ -17,6 +17,27 @@ description: A comprehensive guide to migrating from the retiring ingress-nginx 
 
 TODO
 
+TODO - add links to each architecture and how they work
+
+- https://docs.nginx.com/nginx-gateway-fabric/overview/gateway-architecture/
+- Adding monitoring: https://docs.nginx.com/nginx-gateway-fabric/monitoring/prometheus/
+
+- maybe only go into detail on nginx gateway fabric?
+
+# TODO - investigate for cert-manager
+        certificateRefs:
+          - group: null
+            kind: null
+            name: my-tls
+
+# TODO samples
+- nginx
+- traefik
+- envoy
+- istio
+
+# Gateway steps from example
+
 - Experiment live with some of the tooling
 - Link the matrix of what is supported by each, e.g. nginx route (I need UDPRoute :[ )
 - https://docs.nginx.com/nginx-gateway-fabric/overview/gateway-api-compatibility/
@@ -42,42 +63,40 @@ Let's walk through what's changing, why, and how to get your clusters onto a sup
 
 Before we talk about migration, let's establish a baseline. Ingress-nginx is (was?) the most popular ingress controller in the Kubernetes ecosystem. It wraps the battle-tested NGINX reverse proxy and integrates it with Kubernetes through the Ingress resource.
 
-If you're running ingress-nginx, your setup probably looks something like this:
+If you're running ingress-nginx, your setup probably looks something like this production ingress from my work, anonymized for this post:
 
 ```yaml
-# A typical ingress-nginx Ingress resource
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: my-application
+  name: test-ingress
+  namespace: my-namespace
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    # Rewrite the name so my-host.com/direct/myservice/myPath passes
+    # only /myPath to the backend service
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # Works with cert manager to provision certificates and force SSL
+    cert-manager.io/cluster-issuer: my-issuer
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
-  ingressClassName: nginx
+  ingressClassName: "nginx"
   tls:
     - hosts:
-        - app.example.com
-      secretName: app-tls-secret
+        - my-host.com
+      secretName: my-tls
   rules:
-    - host: app.example.com
+    - host: my-host.com
       http:
         paths:
-          - path: /api
+          # /api/myservice(/|$)(.*) matches /api/myservice/myPath
+          # /myPath is forwarded to the backend service
+          - path: /api/myservice(/|$)(.*)
             pathType: Prefix
             backend:
               service:
-                name: api-service
+                name: "my-service"
                 port:
                   number: 8080
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: frontend-service
-                port:
-                  number: 80
 ```
 
 You might also be using:
@@ -114,11 +133,11 @@ The [official announcement from the Kubernetes project](https://kubernetes.io/bl
 
 Let's be clear about the timeline:
 
-| Date | What Happens |
-|------|--------------|
-| November 2025 | Retirement announced |
-| March 2026 | Final release, security patches only |
-| September 2026 | End of security patches |
+| Date           | What Happens                         |
+|----------------|--------------------------------------|
+| November 2025  | Retirement announced                 |
+| March 2026     | Final release, security patches only |
+| September 2026 | End of security patches              |
 
 After March 2026, you won't get new features. After September 2026, you won't get security fixes. You can technically keep running it forever, but you'll be accumulating technical debt and security risk.
 
@@ -197,16 +216,16 @@ The separation might seem like more YAML at first, but it enables:
 
 Let's map the concepts you know from ingress-nginx to their Gateway API equivalents:
 
-| Ingress Nginx Concept | Gateway API Equivalent | Notes |
-|-----------------------|------------------------|-------|
-| IngressClass | GatewayClass | Defines which controller handles resources |
-| Ingress Controller (deployment) | Gateway | The actual proxy/load balancer |
-| Ingress resource | HTTPRoute, GRPCRoute, TCPRoute, etc. | Routing rules |
-| `nginx.ingress.kubernetes.io/*` annotations | Route filters, Policy resources | Native API instead of annotations |
-| TLS secret reference | Gateway listener TLS config | Cleaner TLS configuration |
-| Rewrite rules | HTTPRoute URLRewrite filter | Built into the API |
-| Rate limiting annotations | BackendTrafficPolicy (impl-specific) | Varies by implementation |
-| Custom NGINX snippets | Implementation-specific CRDs | No direct equivalent |
+| Ingress Nginx Concept                       | Gateway API Equivalent               | Notes                                      |
+|---------------------------------------------|--------------------------------------|--------------------------------------------|
+| IngressClass                                | GatewayClass                         | Defines which controller handles resources |
+| Ingress Controller (deployment)             | Gateway                              | The actual proxy/load balancer             |
+| Ingress resource                            | HTTPRoute, GRPCRoute, TCPRoute, etc. | Routing rules                              |
+| `nginx.ingress.kubernetes.io/*` annotations | Route filters, Policy resources      | Native API instead of annotations          |
+| TLS secret reference                        | Gateway listener TLS config          | Cleaner TLS configuration                  |
+| Rewrite rules                               | HTTPRoute URLRewrite filter          | Built into the API                         |
+| Rate limiting annotations                   | BackendTrafficPolicy (impl-specific) | Varies by implementation                   |
+| Custom NGINX snippets                       | Implementation-specific CRDs         | No direct equivalent                       |
 
 ### What's Harder in Gateway API
 
@@ -236,25 +255,32 @@ For smaller deployments or when you want precise control, manual conversion is s
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: my-app
+  name: test-ingress
+  namespace: my-namespace
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Rewrite the name so my-host.com/direct/myservice/myPath passes
+    # only /myPath to the backend service
     nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # Works with cert manager to provision certificates and force SSL
+    cert-manager.io/cluster-issuer: my-issuer
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
-  ingressClassName: nginx
+  ingressClassName: "nginx"
   tls:
     - hosts:
-        - app.example.com
-      secretName: app-tls
+        - my-host.com
+      secretName: my-tls
   rules:
-    - host: app.example.com
+    - host: my-host.com
       http:
         paths:
-          - path: /api(/|$)(.*)
-            pathType: ImplementationSpecific
+          # /api/myservice(/|$)(.*) matches /api/myservice/myPath
+          # /myPath is forwarded to the backend service
+          - path: /api/myservice(/|$)(.*)
+            pathType: Prefix
             backend:
               service:
-                name: api-service
+                name: "my-service"
                 port:
                   number: 8080
 ```
@@ -264,44 +290,47 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: my-gateway
-  namespace: gateway-system
+  name: nginx
+  namespace: my-namespace
 spec:
-  gatewayClassName: <your-implementation>
+  gatewayClassName: nginx
   listeners:
-    - name: https
+    # HTTP Listener explicitly configured, as consumed by the gateway
+    - hostname: my-host.com
+      name: my-host-com-http
+      port: 80
+      protocol: HTTP
+    # HTTPS Listener explicitly configured, as consumed by the gateway
+    - hostname: my-host.com
+      name: my-host-com-https
       port: 443
       protocol: HTTPS
-      hostname: app.example.com
       tls:
-        mode: Terminate
+        # TODO - investigate for cert-manager
         certificateRefs:
-          - name: app-tls
+          - group: null
+            kind: null
+            name: my-tls
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: my-app
+  name: test-ingress-my-host-com
+  namespace: my-namespace
 spec:
-  parentRefs:
-    - name: my-gateway
-      namespace: gateway-system
   hostnames:
-    - app.example.com
+    - my-host.com
+  # ParentRef is required to associate the route with the gateway
+  parentRefs:
+    - name: nginx
   rules:
-    - matches:
+    - backendRefs:
+        - name: my-service
+          port: 8080
+      matches:
         - path:
             type: PathPrefix
-            value: /api
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /
-      backendRefs:
-        - name: api-service
-          port: 8080
+            value: /api/myservice(/|$)(.*)
 ```
 
 ### Using ingress2gateway
@@ -317,6 +346,9 @@ kubectl get ingress -n my-namespace -o yaml | ingress2gateway print
 
 # Convert and apply directly
 kubectl get ingress -n my-namespace -o yaml | ingress2gateway print | kubectl apply -f -
+
+# Work on an external file
+ingress2gateway print --input-file my-ingress.yaml --providers=nginx
 ```
 
 **Caveats with ingress2gateway:**
@@ -330,15 +362,15 @@ Here's where the real decision-making happens. You have several excellent option
 
 ### Implementation Comparison
 
-| Feature | Traefik | NGINX Gateway Fabric | Envoy Gateway | Istio Gateway |
-|---------|---------|---------------------|---------------|---------------|
-| Maturity | High | Medium | Medium | High |
-| Gateway API Conformance | Full | Partial | Full | Full |
-| gRPC Support | Yes | Yes | Yes | Yes |
-| UDP Routes | Yes | No | Yes | Yes |
-| Learning Curve | Low | Low (if coming from NGINX) | Medium | High |
-| Additional Features | Middleware, Let's Encrypt | NGINX familiarity | Envoy ecosystem | Full service mesh |
-| Resource Overhead | Low | Low | Medium | High |
+| Feature                 | Traefik                   | NGINX Gateway Fabric       | Envoy Gateway   | Istio Gateway     |
+|-------------------------|---------------------------|----------------------------|-----------------|-------------------|
+| Maturity                | High                      | Medium                     | Medium          | High              |
+| Gateway API Conformance | Full                      | Partial                    | Full            | Full              |
+| gRPC Support            | Yes                       | Yes                        | Yes             | Yes               |
+| UDP Routes              | Yes                       | No                         | Yes             | Yes               |
+| Learning Curve          | Low                       | Low (if coming from NGINX) | Medium          | High              |
+| Additional Features     | Middleware, Let's Encrypt | NGINX familiarity          | Envoy ecosystem | Full service mesh |
+| Resource Overhead       | Low                       | Low                        | Medium          | High              |
 
 ### Traefik
 
@@ -376,9 +408,9 @@ helm install traefik traefik/traefik \
 - Backed by F5/NGINX Inc.
 - Good documentation
 - Lower learning curve for NGINX users
+- Supports UDPRoute (good for me!)
 
 **Cons:**
-- [Doesn't support UDPRoute](https://docs.nginx.com/nginx-gateway-fabric/overview/gateway-api-compatibility/)
 - Newer project, still maturing
 - Some advanced features require NGINX Plus
 
@@ -387,8 +419,6 @@ helm install traefik traefik/traefik \
 kubectl apply -f https://github.com/nginx/nginx-gateway-fabric/releases/download/v1.5.0/crds.yaml
 kubectl apply -f https://github.com/nginx/nginx-gateway-fabric/releases/download/v1.5.0/nginx-gateway.yaml
 ```
-
-**Important Note:** If you're using UDP services with ingress-nginx, NGINX Gateway Fabric is not a direct replacement. You'll need to choose a different implementation or maintain a separate solution for UDP traffic.
 
 <!-- TODO: Add your NGINX Gateway Fabric sample configuration here -->
 
