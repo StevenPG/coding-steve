@@ -1,0 +1,16 @@
+# Traefik Gateway
+# The "traefik" GatewayClass is auto-created by the Helm chart
+# when providers.kubernetesGateway.enabled=true
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: traefik-gateway
+spec:
+  gatewayClassName: traefik
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: Same
