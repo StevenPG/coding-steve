@@ -150,6 +150,9 @@ The [Gateway API](https://gateway-api.sigs.k8s.io/) is a collection of Kubernete
 Gateway API introduces a clear separation of concerns through three main resource types:
 
 **GatewayClass** - Defines the controller implementation (similar to IngressClass)
+
+Very often, this is provided by your chosen implementation provider.
+
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
 kind: GatewayClass
@@ -202,6 +205,10 @@ spec:
         - name: api-service
           port: 8080
 ```
+
+Here's the official diagram that lays out the architecture clearly:
+
+![Gateway API Architecture Diagram](/public/assets/gatewayapi/officialgatewaydiagram.png)
 
 ### Why This Design is Better
 
@@ -306,7 +313,6 @@ spec:
       port: 443
       protocol: HTTPS
       tls:
-        # TODO - investigate for cert-manager
         certificateRefs:
           - group: null
             kind: null
@@ -372,6 +378,184 @@ Here's where the real decision-making happens. You have several excellent option
 | Additional Features     | Middleware, Let's Encrypt | NGINX familiarity          | Envoy ecosystem | Full service mesh |
 | Resource Overhead       | Low                       | Low                        | Medium          | High              |
 
+The first piece of using the Gateway API is simply installing the Gateway API CRDs.
+
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.0/standard-install.yaml
+```
+
+This is our test application, a simple HTTP application:
+
+<details>
+
+<summary>Sample Target Application</summary>
+
+**Deployment & Service**
+
+```yaml
+# httpbin - Echo server for Gateway API testing
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpbin
+  labels:
+    app: httpbin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpbin
+  template:
+    metadata:
+      labels:
+        app: httpbin
+    spec:
+      containers:
+        - name: httpbin
+          image: kong/httpbin:latest
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /get
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin
+  labels:
+    app: httpbin
+spec:
+  selector:
+    app: httpbin
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+```
+</details>
+
+Next, the best part. We can simply create a single Gateway resource and attach our HTTPRoute to it.
+
+These will work (once we link them via the gatewayClassName) across all of our different examples:
+
+<details>
+
+<summary>Universal Gateway API Resources</summary>
+
+We'll be updated the Gateway resource based on our chosen implementation, but
+here is the basic structure as part of the traefik example.
+
+```yaml
+# Traefik Gateway
+# The "traefik" GatewayClass is auto-created by the Helm chart
+# when providers.kubernetesGateway.enabled=true
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: gateway
+spec:
+  # Connects to our gateway implementation
+  gatewayClassName: traefik
+  listeners:
+    - name: http
+      port: 8000
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: Same
+```
+
+And our HTTPRoute:
+
+```yaml
+# HTTPRoute 1: Exact path routing
+# /api/get -> httpbin /get
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: httpbin-get
+spec:
+  parentRefs:
+    - name: test-gateway
+  rules:
+    - matches:
+        - path:
+            type: Exact
+            value: /api/get
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /get
+      backendRefs:
+        - name: httpbin
+          port: 80
+---
+# HTTPRoute 2: Path prefix matching
+# /api/anything/* -> httpbin /anything/*
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: httpbin-anything
+spec:
+  parentRefs:
+    - name: test-gateway
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/anything
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /anything
+      backendRefs:
+        - name: httpbin
+          port: 80
+---
+# HTTPRoute 3: Header-based routing
+# Requests with X-Test-Route: canary -> httpbin /headers
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: httpbin-header-canary
+spec:
+  parentRefs:
+    - name: test-gateway
+  rules:
+    - matches:
+        - headers:
+            - name: X-Test-Route
+              value: canary
+          path:
+            type: PathPrefix
+            value: /api
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /headers
+      backendRefs:
+        - name: httpbin
+          port: 80
+
+```
+
+</details>
+
+Here's our HTTPRoute resources in visualized by Headlamp
+
+![HTTPRoutes visualized in Headlamp](/public/assets/gatewayapi/headlamp_httproutes.png)
+
 ### Traefik
 
 [Traefik](https://doc.traefik.io/traefik/v3.6/reference/install-configuration/providers/kubernetes/kubernetes-gateway/) is an excellent choice if you want a straightforward migration path with minimal operational overhead.
@@ -397,7 +581,18 @@ helm install traefik traefik/traefik \
   --set "providers.kubernetesGateway.enabled=true"
 ```
 
-<!-- TODO: Add your Traefik sample configuration here -->
+Deploying our resources laid out above is as simple as:
+```bash
+kubectl apply -f ./mylocal/gateway.yaml
+kubectl apply -f ./mylocal/httproutes.yaml
+```
+
+Just that like, with a basic Traefik installation and the configuration of the Gateway API
+components, we have a working Gateway system that can easily replace Ingress-Nginx.
+
+![Traefik Dashboard showing HTTPRoutes](/public/assets/gatewayapi/traefik_httproutes.png)
+
+The rules are implemented exactly as a native Traefik ingress resource.
 
 ### NGINX Gateway Fabric
 
@@ -416,13 +611,42 @@ helm install traefik traefik/traefik \
 
 **Installation:**
 ```bash
-kubectl apply -f https://github.com/nginx/nginx-gateway-fabric/releases/download/v1.5.0/crds.yaml
-kubectl apply -f https://github.com/nginx/nginx-gateway-fabric/releases/download/v1.5.0/nginx-gateway.yaml
+helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric --create-namespace -n nginx-gateway --set nginx.service.type=NodePort --set-json 'nginx.service.nodePorts=[{"port":31437,"listenerPort":80}, {"port":30478,"listenerPort":8443}]'
 ```
 
-<!-- TODO: Add your NGINX Gateway Fabric sample configuration here -->
+Now that we've created our Nginx Gateway Fabric deployment and we already have our resources, we'll update our gateway to point to
+the gateway-class. It'll change from "traefik" to "nginx".
+
+Let's validate everything set up properly:
+
+```bash
+# This is our gateway resource, so we can use kubectl port-forward to test it
+kubectl port-forward svc/test-gateway-nginx 8080:8000
+```
+
+```bash
+❯ curl -s -H "Host: httpbin.example.com" http://localhost:8080/api/get
+{
+  "args":{},
+  "headers": {
+      "Accept":"*/*",
+      "Host":"httpbin.example.com",
+      "User-Agent":"curl/8.7.1",
+      "X-Forwarded-Host":"httpbin.example.com"
+  },
+  "origin":"127.0.0.1",
+  "url":"http://httpbin.example.com/get"
+}
+```
+
+It worked! Just as easy as the Traefik example. We simply deployed the Gateway API resources and the Gateway Fabric controller took care of the rest.
+
+The only important part was updating our gatewayClassName to **nginx** from **traefik**.
+
 
 ### Envoy Gateway
+
+# TODO - envoy gateway
 
 [Envoy Gateway](https://gateway.envoyproxy.io/) brings the power of Envoy proxy with a focus on simplicity and Gateway API compliance.
 
@@ -448,6 +672,8 @@ helm install eg oci://docker.io/envoyproxy/gateway-helm \
 <!-- TODO: Add your Envoy Gateway sample configuration here -->
 
 ### Istio Gateway
+
+## TODO Istio gateway
 
 [Istio](https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/) provides Gateway API support as part of its service mesh functionality. Choose this if you're already using Istio or plan to adopt service mesh capabilities.
 
@@ -476,12 +702,14 @@ kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/downloa
 
 For most teams migrating from ingress-nginx:
 
-1. **Start with Traefik** if you want the easiest path forward with minimal operational overhead
-2. **Choose NGINX Gateway Fabric** if your team knows NGINX well and you don't need UDP routes
+1. **Start with Traefik** if you want the easiest path forward with minimal operational overhead and like an easily deployable dashboard.
+2. **Choose NGINX Gateway Fabric** if your team knows NGINX well already or you're using NGINX Plus
 3. **Pick Envoy Gateway** if you want strong Envoy ecosystem integration and full conformance
 4. **Go with Istio** only if you're already invested in service mesh or have specific requirements that justify the complexity
 
 ## Step-by-Step Migration Tutorial
+
+TODO - nginx fabric
 
 Let's walk through a complete migration from ingress-nginx to Gateway API using [PLACEHOLDER: chosen implementation]. This tutorial assumes you have a working Kubernetes cluster with ingress-nginx currently deployed.
 
@@ -515,7 +743,7 @@ Document any custom annotations, snippets, or ConfigMap customizations you're us
 
 ```bash
 # Install Gateway API CRDs
-kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.0/standard-install.yaml
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.0/standard-install.yaml
 
 # Verify CRDs are installed
 kubectl get crds | grep gateway
@@ -523,26 +751,45 @@ kubectl get crds | grep gateway
 
 ### Step 3: Deploy Your Chosen Gateway Implementation
 
-<!-- TODO: Add specific installation steps for your chosen implementation -->
+We'll use Traefik as an example here
 
 ```bash
-# [PLACEHOLDER: Installation commands]
+helm repo add traefik https://traefik.github.io/charts
+helm repo update
+helm install traefik traefik/traefik \
+  --namespace traefik \
+  --create-namespace \
+  --set "providers.kubernetesGateway.enabled=true"
+
 ```
 
 ### Step 4: Create Your Gateway Resource
 
-<!-- TODO: Add your Gateway resource configuration -->
-
 ```yaml
-# [PLACEHOLDER: Gateway configuration]
+# Traefik Gateway
+# The "traefik" GatewayClass is auto-created by the Helm chart
+# when providers.kubernetesGateway.enabled=true
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: gateway
+spec:
+  # Connects to our gateway implementation
+  gatewayClassName: traefik
+  listeners:
+    - name: http
+      port: 8000
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: Same
+
 ```
 
 ### Step 5: Convert Your Routes
 
-<!-- TODO: Add HTTPRoute examples -->
-
 ```yaml
-# [PLACEHOLDER: HTTPRoute configuration]
+kubectl get ingress -n my-namespace -o yaml | ingress2gateway print | kubectl apply -f -
 ```
 
 ### Step 6: Test the New Configuration
@@ -558,16 +805,7 @@ curl -v https://app.example.com/api/health
 curl -v -H "X-Custom-Header: test" https://app.example.com/api/test
 ```
 
-### Step 7: Verify gRPC (if applicable)
-
-<!-- TODO: Add gRPC testing examples -->
-
-```bash
-# Test gRPC endpoint
-grpcurl -plaintext your-gateway-ip:443 list
-```
-
-### Step 8: Migrate Traffic
+### Step 7: Migrate Traffic
 
 Once testing is complete, you can migrate traffic:
 
@@ -589,38 +827,6 @@ helm uninstall ingress-nginx -n ingress-nginx
 
 # Clean up old Ingress resources (optional, after verification)
 kubectl delete ingress --all-namespaces --all
-```
-
-## Complete Working Example
-
-Here's a complete example demonstrating HTTP routing, TLS termination, and path-based routing with [PLACEHOLDER: chosen implementation].
-
-<!-- TODO: Add complete working example with all resources -->
-
-```yaml
-# [PLACEHOLDER: Complete example configuration]
-```
-
-### Testing the Example
-
-```bash
-# Deploy the example
-kubectl apply -f example-gateway-setup.yaml
-
-# Get the Gateway IP
-export GATEWAY_IP=$(kubectl get gateway example-gateway -o jsonpath='{.status.addresses[0].value}')
-
-# Test the frontend
-curl http://$GATEWAY_IP/
-# Expected: Response from frontend-service
-
-# Test the API
-curl http://$GATEWAY_IP/api/health
-# Expected: Response from api-service
-
-# Test with HTTPS
-curl -k https://$GATEWAY_IP/api/health
-# Expected: Same response, over HTTPS
 ```
 
 ## Troubleshooting Common Issues

@@ -113,6 +113,10 @@ kubectl get gatewayclass
 
 ### Deploy Gateway Resources
 
+Note: Traefik's Gateway listener port must match a Traefik entrypoint. The default Helm
+chart uses port 8000 for the `web` entrypoint (the Service maps external 80 → container
+8000), so `gateway.yaml` specifies port 8000.
+
 ```bash
 kubectl apply -f traefik/gateway.yaml
 kubectl apply -f traefik/httproutes.yaml
@@ -125,25 +129,32 @@ kubectl get gateway traefik-gateway
 kubectl get httproute
 ```
 
-### Test with Port-Forward
+### Test
+
+If your environment provides a LoadBalancer (e.g. Docker Desktop), the Traefik service
+will have `EXTERNAL-IP: localhost` and you can curl port 80 directly. Otherwise, use a
+port-forward:
 
 ```bash
-# Start port-forward in the background
+# (Skip if LoadBalancer gives you localhost)
 kubectl port-forward -n traefik svc/traefik 8080:80 &
+# Then replace localhost:80 with localhost:8080 in the curls below
+```
 
+```bash
 # Exact path routing
-curl -s -H "Host: httpbin.example.com" http://localhost:8080/api/get | head -20
+curl -s -H "Host: httpbin.example.com" http://localhost:80/api/get | head -20
 # Expected: JSON response from httpbin /get endpoint
 
 # Path prefix matching
-curl -s -H "Host: httpbin.example.com" http://localhost:8080/api/anything/hello
+curl -s -H "Host: httpbin.example.com" http://localhost:80/api/anything/hello
 # Expected: JSON response from httpbin /anything/hello endpoint
 
 # Header-based routing
-curl -s -H "Host: httpbin.example.com" -H "X-Test-Route: canary" http://localhost:8080/api/headers
+curl -s -H "Host: httpbin.example.com" -H "X-Test-Route: canary" http://localhost:80/api
 # Expected: JSON response from httpbin /headers, showing your custom header
 
-# Stop port-forward
+# (If you started a port-forward, stop it)
 kill %1
 ```
 
