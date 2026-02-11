@@ -29,8 +29,8 @@ Spring Cloud.
 * [Java Version Compatibility with Spring Boot](#java-version-compatibility-with-spring-boot)
 * [Spring Cloud Compatibility with Spring Boot](#spring-cloud-compatibility-with-spring-boot)
 
-### Spring Support Mapping - NEW August 2025
-Spring has now published an awesome new [compatibility list](https://spring.io/projects/generations) 
+### Spring Support Mapping
+Spring has now published a [compatibility list](https://spring.io/projects/generations) 
 called Spring Support Mapping. It provides a matrix of which versions of different Spring dependencies
 are compatible with each other, including Spring Boot, Spring Framework and Spring Cloud.
 
@@ -40,6 +40,7 @@ are compatible with each other, including Spring Boot, Spring Framework and Spri
 
 | Spring Boot Version | Compatible Java Versions (Min - Max Targeted) |
 |:--------------------|:----------------------------------------------|
+| 4.1.x               | Java 21 - 25                                  |
 | 4.0.x               | Java 21 - 25                                  |
 | 3.5.x               | Java 17 - 25                                  |
 | 3.4.x               | Java 17 - 25                                  |
@@ -88,7 +89,7 @@ Spring Boot version.
 
 | Gradle Version | Latest Supported Java Version |
 |:---------------|:------------------------------|
-| 9.1.0          | Java 25                       |
+| 9.x.x          | Java 25                       |
 | 8.14           | Java 24                       |
 | 8.10           | Java 23                       |
 | 8.8            | Java 22                       |
