@@ -10,40 +10,10 @@ tags:
   - devops
   - gateway-api
   - infrastructure
-description: A comprehensive guide to migrating from the retiring ingress-nginx controller to the Kubernetes Gateway API, covering implementation options like Traefik, NGINX Gateway Fabric, Envoy Gateway, and Istio.
+description: A comprehensive guide to migrating from the retiring ingress-nginx controller to the Kubernetes Gateway API, covering implementation options like Traefik, NGINX Gateway Fabric, and Envoy Gateway.
 ---
 
 # Guide to Migrating From Retired Ingress Nginx
-
-TODO
-
-TODO - add links to each architecture and how they work
-
-- https://docs.nginx.com/nginx-gateway-fabric/overview/gateway-architecture/
-- Adding monitoring: https://docs.nginx.com/nginx-gateway-fabric/monitoring/prometheus/
-
-- maybe only go into detail on nginx gateway fabric?
-
-# TODO - investigate for cert-manager
-        certificateRefs:
-          - group: null
-            kind: null
-            name: my-tls
-
-# TODO samples
-- nginx
-- traefik
-- envoy
-- istio
-
-# Gateway steps from example
-
-- Experiment live with some of the tooling
-- Link the matrix of what is supported by each, e.g. nginx route (I need UDPRoute :[ )
-- https://docs.nginx.com/nginx-gateway-fabric/overview/gateway-api-compatibility/
-- https://github.com/kubernetes-sigs/gateway-api/blob/main/conformance/reports/v1.4.0/traefik-traefik/experimental-v3.6.0-default-report.yaml
-- https://gateway.envoyproxy.io/docs/tasks/traffic/
-- https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/
 
 ## Table of Contents
 
@@ -646,8 +616,6 @@ The only important part was updating our gatewayClassName to **nginx** from **tr
 
 ### Envoy Gateway
 
-# TODO - envoy gateway
-
 [Envoy Gateway](https://gateway.envoyproxy.io/) brings the power of Envoy proxy with a focus on simplicity and Gateway API compliance.
 
 **Pros:**
@@ -664,39 +632,45 @@ The only important part was updating our gatewayClassName to **nginx** from **tr
 **Installation:**
 ```bash
 helm install eg oci://docker.io/envoyproxy/gateway-helm \
-  --version v1.2.0 \
-  --namespace envoy-gateway-system \
+  --version v1.6.3 -n envoy-gateway-system \
   --create-namespace
 ```
 
-<!-- TODO: Add your Envoy Gateway sample configuration here -->
+If you've already created the gateway-api CRDs, you can add `--skip-crds` to skip the CRD installation.
 
-### Istio Gateway
+Next, apply our Gateway resource using `kubectl apply -f`
 
-## TODO Istio gateway
-
-[Istio](https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/) provides Gateway API support as part of its service mesh functionality. Choose this if you're already using Istio or plan to adopt service mesh capabilities.
-
-**Pros:**
-- Full Gateway API support
-- Integrated with Istio service mesh features (mTLS, observability, traffic management)
-- Mature, battle-tested in production
-- Extensive feature set
-
-**Cons:**
-- Significant operational complexity
-- Higher resource overhead
-- Overkill if you just need ingress
-- Steeper learning curve
-
-**Installation:**
-```bash
-# Install Istio with Gateway API support
-istioctl install --set profile=minimal
-kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.0/standard-install.yaml
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: eg
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
 ```
 
-<!-- TODO: Add your Istio Gateway sample configuration here -->
+We update our existing Gateway to point to "eg" instead of "nginx":
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: test-gateway
+spec:
+  gatewayClassName: eg
+  listeners:
+    - name: http
+      port: 8000
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: Same
+```
+
+We can see, just like with Traefik, Envoy Gateway automatically set up HTTP route mappings
+internally for the Gateway API components.
+
+![Gateway API set up in envoy admin interface](/public/assets/gatewayapi/envoyadmininterface.png)
 
 ### My Recommendation
 
@@ -705,17 +679,14 @@ For most teams migrating from ingress-nginx:
 1. **Start with Traefik** if you want the easiest path forward with minimal operational overhead and like an easily deployable dashboard.
 2. **Choose NGINX Gateway Fabric** if your team knows NGINX well already or you're using NGINX Plus
 3. **Pick Envoy Gateway** if you want strong Envoy ecosystem integration and full conformance
-4. **Go with Istio** only if you're already invested in service mesh or have specific requirements that justify the complexity
 
 ## Step-by-Step Migration Tutorial
-
-TODO - nginx fabric
 
 Let's walk through a complete migration from ingress-nginx to Gateway API using [PLACEHOLDER: chosen implementation]. This tutorial assumes you have a working Kubernetes cluster with ingress-nginx currently deployed.
 
 ### Prerequisites
 
-- Kubernetes cluster (1.26+)
+- Kubernetes cluster (1.34+)
 - kubectl configured
 - Helm 3.x installed
 - Existing ingress-nginx deployment
@@ -896,4 +867,3 @@ The Gateway API ecosystem is mature enough for production use. The tooling exist
 - [NGINX Gateway Fabric](https://docs.nginx.com/nginx-gateway-fabric/)
 - [NGINX Gateway Fabric API Compatibility](https://docs.nginx.com/nginx-gateway-fabric/overview/gateway-api-compatibility/)
 - [Envoy Gateway](https://gateway.envoyproxy.io/)
-- [Istio Gateway API Support](https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/)
