@@ -23,7 +23,7 @@ An extension for the [Instancio](https://www.instancio.org/) library that enable
 
 ### Spring Cloud Stream
 
-I am a frequent user and contributor to the Spring Cloud Stream ecosystem, focusing on improving the developer experience and expanding API capabilities.
+I am a frequent user and occasional contributor to the Spring Cloud Stream ecosystem, focusing on improving the developer experience and expanding API capabilities.
 
 *   **API Enhancement:** Identified and proposed a gap in the Kafka Streams binder API for recoverable processors. Collaborated with maintainers to refine the implementation of `RecordRecoverableProcessor` and `DltAwareProcessor`.
     *   [Issue #2776: Gap in API](https://github.com/spring-cloud/spring-cloud-stream/issues/2776)
@@ -33,6 +33,14 @@ I am a frequent user and contributor to the Spring Cloud Stream ecosystem, focus
     *   [Recoverable Processor Samples](https://github.com/spring-cloud/spring-cloud-stream-samples/commit/13bc86a240fc5cda77f6a01075fe687a599e7fe7)
 *   **Observability:** Added targeted trace logging to assist in debugging complex stream processing issues.
     *   [Issue #2802: Trace Log Addition](https://github.com/spring-cloud/spring-cloud-stream/issues/2802)
+
+### Headlamp (Kubernetes SIGs)
+
+[Headlamp](https://headlamp.dev/) is a Kubernetes web UI maintained under kubernetes-sigs. It provides an extensible, user-friendly dashboard for managing Kubernetes clusters.
+
+*   **Feature: ClusterTable Settings Persistence:** Implemented localStorage persistence for ClusterTable column visibility, sorting, and filter settings. Lifted shared table settings helpers out of ResourceTable into a reusable module, enabling the ClusterTable to retain user customizations across page navigations and browser refreshes.
+    *   [Issue #4711: ClusterTable does not store table settings between page reloads](https://github.com/kubernetes-sigs/headlamp/issues/4711)
+    *   [PR #4712: Lift up tableSettings helpers and add localStorage to ClusterTable](https://github.com/kubernetes-sigs/headlamp/pull/4712) (Merged — [v0.40.1](https://github.com/kubernetes-sigs/headlamp/releases/tag/v0.40.1))
 
 ### Instancio
 
@@ -44,4 +52,4 @@ Contributed to the core library to expand its built-in generation capabilities.
 
 ---
 
-> Leaving a small mark on the libraries I use every day is my way of supporting the tools that support my career.
+> "Talk is cheap. Show me the code." — Linus Torvalds
