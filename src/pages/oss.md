@@ -40,7 +40,11 @@ I am a frequent user and occasional contributor to the Spring Cloud Stream ecosy
 
 *   **Feature: ClusterTable Settings Persistence:** Implemented localStorage persistence for ClusterTable column visibility, sorting, and filter settings. Lifted shared table settings helpers out of ResourceTable into a reusable module, enabling the ClusterTable to retain user customizations across page navigations and browser refreshes.
     *   [Issue #4711: ClusterTable does not store table settings between page reloads](https://github.com/kubernetes-sigs/headlamp/issues/4711)
-    *   [PR #4712: Lift up tableSettings helpers and add localStorage to ClusterTable](https://github.com/kubernetes-sigs/headlamp/pull/4712) (Merged — [v0.40.1](https://github.com/kubernetes-sigs/headlamp/releases/tag/v0.40.1))
+    *   [PR #4712: Lift up tableSettings helpers and add localStorage to ClusterTable](https://github.com/kubernetes-sigs/headlamp/pull/4712) (Merged — [v0.41.0](https://github.com/kubernetes-sigs/headlamp/releases/tag/v0.41.0))
+
+*   **Bug Fix: Cluster Rename with Special Characters:** Diagnosed and fixed a backend bug where clusters with special characters in their names (e.g., AWS EKS clusters containing forward slashes) would silently disappear from the UI after being renamed. The root cause was a mismatch between how Headlamp rendered the cluster name and how the backend identified it during a rename operation.
+    *   [Issue #4813: Cluster rename bug with special characters](https://github.com/kubernetes-sigs/headlamp/issues/4813)
+    *   [PR #4819: Backend cluster rename bug clusters with special characters](https://github.com/kubernetes-sigs/headlamp/pull/4819) (Merged — [v0.41.0](https://github.com/kubernetes-sigs/headlamp/releases/tag/v0.41.0))
 
 ### Instancio
 
