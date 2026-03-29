@@ -638,7 +638,7 @@ public class AudienceWritingOAuth2AccessTokenResponseClient implements
 }
 ```
 
-The demo files are available here: https://github.com](https://github.com/StevenPG/spring-security-oauth2-client-credentials-demo
+The demo files are available [here](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/spring-security-oauth2-client-credentials-demo)
 
 Sample Output from the test project!
 

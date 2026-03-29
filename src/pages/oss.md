@@ -17,6 +17,16 @@ An extension for the [Instancio](https://www.instancio.org/) library that enable
 *   **Key Achievement:** Implemented a seamless integration using Java SPI, allowing users to generate random, valid Polygons, Points, and LineStrings with zero configuration.
 *   **Blog Post:** [Writing an Instancio Extension Library](/posts/writing-instancio-extension/)
 
+### [spring-boot-starter-page-jackson3](https://github.com/StevenPG/spring-boot-starter-page-jackson3)
+**Core Maintainer**
+
+A Spring Boot 4 auto-configuration starter that fills a gap in the Spring ecosystem: Jackson 3 cannot deserialize `org.springframework.data.domain.Page<T>` out of the box when consuming paginated REST responses.
+
+*   **Impact:** Eliminates the need for copy-pasting a `RestPage` workaround into every project that consumes paginated APIs in Spring Boot 4.
+*   **Technologies:** Java, Spring Boot 4, Spring Data Commons 4, Jackson 3, Gradle.
+*   **Key Achievement:** Identified the root cause (Spring Data's `PageModule` is serialization-only), diagnosed a misleading null-primitive error that masked the actual fix, and published a minimal zero-config solution to Maven Central.
+*   **Blog Post:** [Fixing Page<T> Deserialization in Spring Boot 4 with Jackson 3](/posts/spring-boot-4-page-deserialization-jackson3)
+
 ---
 
 ## Contributions

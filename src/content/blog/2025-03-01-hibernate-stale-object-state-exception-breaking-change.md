@@ -30,7 +30,7 @@ The update is documented at the following jboss link: https://docs.jboss.org/hib
 
 **Technical Details:**
 
-A demo is available here: https://github.com/StevenPG/HibernateBreakingChangeDemo
+A demo is available here: https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/HibernateBreakingChangeDemo
 
 **Compilation Errors:**
 

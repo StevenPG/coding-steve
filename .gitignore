@@ -3,6 +3,8 @@ dist/ - This is the deployment
 .output/
 out/
 
+.idea/
+
 # dependencies
 node_modules/
 
