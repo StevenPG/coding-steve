@@ -1,6 +1,6 @@
 ---
 author: StevenPG
-pubDatetime: 2026-04-02T12:00:00.000Z
+pubDatetime: 2026-03-31T12:00:00.000Z
 title: Stop Guessing Your GraalVM Native Image Metadata
 slug: graalvm-native-metadata-from-tests
 featured: true
