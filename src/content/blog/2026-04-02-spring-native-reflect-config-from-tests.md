@@ -53,6 +53,8 @@ We're building a **plugin loader** service. It stores plugin class names in a Po
 
 The stack: Spring Boot 4, Spring JDBC (JdbcTemplate), PostgreSQL via Testcontainers, Gradle (Groovy DSL), and the GraalVM Native Build Tools Gradle plugin.
 
+The full source is on GitHub: [StevenPG/DemosAndArticleContent — spring-native-reflect-config-from-tests](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/spring-native-reflect-config-from-tests)
+
 ## build.gradle
 
 ```groovy
