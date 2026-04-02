@@ -3,7 +3,7 @@ author: StevenPG
 pubDatetime: 2026-03-31T12:00:00.000Z
 title: "Fixing Page<T> Deserialization in Spring Boot 4 with Jackson 3"
 slug: spring-boot-4-page-deserialization-jackson3
-featured: false
+featured: true
 ogImage: /assets/default-og-image.png
 tags:
   - software
