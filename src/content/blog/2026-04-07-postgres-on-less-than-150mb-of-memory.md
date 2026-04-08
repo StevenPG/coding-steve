@@ -22,7 +22,7 @@ description: A deep dive into every PostgreSQL configuration property needed to 
 My goal is to make posts like this the SIMPLEST place on the internet to learn how to do things
 that caused me trouble. That way, if this is found, someone doesn't have to do the same digging I had to do.
 
-In this post, we're going to run a real PostgreSQL instance inside a Docker container with a hard memory limit of **140MB**. Not a toy database. A real, queryable, benchmarkable Postgres instance that you could run alongside your application on a cheap 500MB VPS.
+In this post, we're going to run a real PostgreSQL instance inside a Docker container with a hard memory limit of **140MB**. Not a toy database. A real, queryable, benchmarkable Postgres instance that you could run alongside your application on a cheap 500MB VPS, a service kiosk, or an embedded device.
 
 I got interested in this because I wanted to run Postgres on a tiny VPS alongside other services, and every guide I found either said "just give it more RAM" or hand-waved through the configuration without explaining *why* each setting matters. So I dug into the PostgreSQL docs, tuned every relevant knob, and validated the whole thing actually works under load.
 
@@ -32,7 +32,11 @@ Everything in this post is reproducible. The full demo, including Docker Compose
 
 The most obvious reason: cheap VPS hosting. You can get a 500MB VPS for a few dollars a month, and if you want to run Postgres alongside your application and a reverse proxy, you need Postgres to be a good neighbor.
 
-But even beyond cost, understanding how PostgreSQL uses memory is valuable. Every setting we're going to tune has a direct impact on how your database behaves. Whether you're running on a 500MB VPS or a 64GB production server, knowing what these knobs do helps you make better decisions.
+But VPS hosting isn't the only use case. Think about **service kiosks** — those check-in terminals at airports, self-order screens at restaurants, or point-of-sale systems at retail stores. These devices often run on constrained hardware with 512MB–1GB of total RAM, and they need a local database to function when the network goes down. Running SQLite is the common answer, but if your backend already speaks Postgres and you want schema parity between the kiosk and the server, a minimal Postgres instance is a real option.
+
+The same applies to **embedded environments** — industrial controllers, IoT gateways, or edge computing nodes that collect and process data locally before syncing upstream. These devices might be running on a Raspberry Pi or similar ARM boards with limited memory. If your edge application needs relational queries, transactions, or just the comfort of a real database engine, Postgres can fit if you tune it right.
+
+And beyond any specific deployment target, understanding how PostgreSQL uses memory is valuable. Every setting we're going to tune has a direct impact on how your database behaves. Whether you're running on an airport kiosk, a Raspberry Pi, a 500MB VPS, or a 64GB production server, knowing what these knobs do helps you make better decisions.
 
 # The Setup
 
@@ -309,39 +313,43 @@ Once you have the container running, you can verify the configuration was loaded
 
 ## Connection Test
 
-<!-- TODO: Replace with actual output from your validated run -->
-
 ```
-$ ./scripts/connection-test.sh
+> ./scripts/connection-test.sh
 Connecting to localhost:5432 as appuser…
 
-        version
-------------------------
- PostgreSQL 18.x ...
+                                            version                                            
+-----------------------------------------------------------------------------------------------
+ PostgreSQL 18.3 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+(1 row)
 
-     name              | setting | unit
------------------------+---------+------
- effective_cache_size  | 16384   | 8kB
- max_connections       | 25      |
- shared_buffers        | 4096    | 8kB
- work_mem              | 2048    | kB
- ...
+         name         | setting | unit |                               short_desc                               
+----------------------+---------+------+------------------------------------------------------------------------
+ effective_cache_size | 16384   | 8kB  | Sets the planner's assumption about the total size of the data caches.
+ maintenance_work_mem | 16384   | kB   | Sets the maximum memory to be used for maintenance operations.
+ max_connections      | 25      |      | Sets the maximum number of concurrent connections.
+ max_worker_processes | 2       |      | Maximum number of concurrent worker processes.
+ shared_buffers       | 4096    | 8kB  | Sets the number of shared memory buffers used by the server.
+ wal_buffers          | 512     | 8kB  | Sets the number of disk-page buffers in shared memory for WAL.
+ work_mem             | 2048    | kB   | Sets the maximum memory to be used for query workspaces.
+(7 rows)
+
+
+Connection test passed.
 ```
 
 The `setting` values might look odd — they're in the unit shown in the `unit` column. `shared_buffers = 4096` in units of `8kB` is `4096 * 8KB = 32MB`. PostgreSQL stores everything internally in 8KB page units.
 
 ## Memory Check
 
-<!-- TODO: Replace with actual output from your validated run -->
-
 ```
-$ ./scripts/memory-check.sh
-14:23:01               87.4 MB  /  140 MB limit  (62%)
+> ./scripts/memory-check.sh   
+22:13:07               \033[0;32m  22.0 MB\033[0m  /  140 MB limit  (\033[0;32m15%\033[0m)
 
   PostgreSQL internals:
-   db_size | active_connections | shared_buffers | work_mem
-  ---------+--------------------+----------------+----------
-   8473 kB |                  2 | 33554432B      | 2097152B
+ db_size | active_connections | shared_buffers | work_mem 
+---------+--------------------+----------------+----------
+ 7678 kB |                  9 | 4096B          | 2048B
+(1 row)
 ```
 
 At idle with 2 connections, we're sitting at about 62% of our memory limit. Plenty of headroom.
@@ -355,23 +363,144 @@ The demo repo includes a `bench.sh` script that wraps `pgbench` — PostgreSQL's
 ./scripts/bench.sh 5 3 60   # smaller data set, fewer clients, longer run
 ```
 
-<!-- TODO: Replace with actual benchmark output from your validated run -->
+Benchmark Execution
+```
+❯ ./scripts/bench.sh 5 3 60
+================================================================
+ PostgreSQL minimal-memory benchmark
+ Target: localhost:5432/appdb
+ Scale: 5  |  Clients: 3  |  Duration: 60s
+================================================================
+
+[1/3] Initialising pgbench tables (scale=5)…
+dropping old tables...
+creating tables...
+generating data (client-side)...
+vacuuming...                                                                              
+creating primary keys...
+done in 0.36 s (drop tables 0.02 s, create tables 0.00 s, client-side generate 0.22 s, vacuum 0.04 s, primary keys 0.07 s).
+
+[2/3] Read-only benchmark (3 clients, 60s)…
+pgbench (18.3)
+starting vacuum...end.
+progress: 5.0 s, 18242.9 tps, lat 0.164 ms stddev 0.043, 0 failed
+progress: 10.0 s, 18254.4 tps, lat 0.164 ms stddev 0.039, 0 failed
+progress: 15.0 s, 18621.6 tps, lat 0.161 ms stddev 0.023, 0 failed
+progress: 20.0 s, 18574.8 tps, lat 0.161 ms stddev 0.027, 0 failed
+progress: 25.0 s, 18568.9 tps, lat 0.162 ms stddev 0.025, 0 failed
+progress: 30.0 s, 18511.7 tps, lat 0.162 ms stddev 0.033, 0 failed
+progress: 35.0 s, 18646.4 tps, lat 0.161 ms stddev 0.026, 0 failed
+progress: 40.0 s, 18643.7 tps, lat 0.161 ms stddev 0.025, 0 failed
+progress: 45.0 s, 18594.8 tps, lat 0.161 ms stddev 0.025, 0 failed
+progress: 50.0 s, 18690.9 tps, lat 0.160 ms stddev 0.030, 0 failed
+progress: 55.0 s, 18694.5 tps, lat 0.160 ms stddev 0.021, 0 failed
+progress: 60.0 s, 18487.0 tps, lat 0.162 ms stddev 0.035, 0 failed
+transaction type: <builtin: select only>
+scaling factor: 5
+query mode: simple
+number of clients: 3
+number of threads: 3
+maximum number of tries: 1
+duration: 60 s
+number of transactions actually processed: 1112721
+number of failed transactions: 0 (0.000%)
+latency average = 0.162 ms
+latency stddev = 0.030 ms
+initial connection time = 6.800 ms
+tps = 18546.411782 (without initial connection time)
+
+[3/3] Read-write benchmark (3 clients, 60s)…
+pgbench (18.3)
+starting vacuum...end.
+progress: 5.0 s, 1873.4 tps, lat 1.598 ms stddev 3.267, 0 failed
+progress: 10.0 s, 2218.4 tps, lat 1.353 ms stddev 3.551, 0 failed
+progress: 15.0 s, 1914.7 tps, lat 1.557 ms stddev 4.355, 0 failed
+progress: 20.0 s, 1896.7 tps, lat 1.592 ms stddev 4.091, 0 failed
+progress: 25.0 s, 1949.5 tps, lat 1.537 ms stddev 3.289, 0 failed
+progress: 30.0 s, 2368.4 tps, lat 1.268 ms stddev 2.952, 0 failed
+progress: 35.0 s, 2161.3 tps, lat 1.386 ms stddev 3.181, 0 failed
+progress: 40.0 s, 2375.8 tps, lat 1.265 ms stddev 3.173, 0 failed
+progress: 45.0 s, 1926.0 tps, lat 1.558 ms stddev 3.397, 0 failed
+progress: 50.0 s, 2816.2 tps, lat 1.065 ms stddev 2.801, 0 failed
+progress: 55.0 s, 1917.0 tps, lat 1.565 ms stddev 4.074, 0 failed
+progress: 60.0 s, 1461.5 tps, lat 2.050 ms stddev 5.726, 0 failed
+transaction type: <builtin: TPC-B (sort of)>
+scaling factor: 5
+query mode: simple
+number of clients: 3
+number of threads: 3
+maximum number of tries: 1
+duration: 60 s
+number of transactions actually processed: 124398
+number of failed transactions: 0 (0.000%)
+latency average = 1.447 ms
+latency stddev = 3.638 ms
+initial connection time = 7.454 ms
+tps = 2072.519593 (without initial connection time)
+
+Done.
+```
+
+The memory usage is stable,
+
+```
+(At Start)
+Watching 'postgres-minimal' memory every 2s — Ctrl-C to stop.
+
+22:24:53               19.9 MB  /  140 MB limit  ([0m)
+
+  PostgreSQL internals:
+ db_size | active_connections | shared_buffers | work_mem 
+---------+--------------------+----------------+----------
+ 7678 kB |                  9 | 4096B          | 2048B
+(1 row)
+
+
+(Mid Test Under Max Load)
+22:25:56               58.7 MB  /  140 MB limit  ([0m)
+
+  PostgreSQL internals:
+ db_size | active_connections | shared_buffers | work_mem 
+---------+--------------------+----------------+----------
+ 82 MB   |                 12 | 4096B          | 2048B
+(1 row)
+
+```
 
 The key thing to watch during the benchmark is memory usage. Run `./scripts/memory-check.sh --watch` in another terminal while the benchmark runs to see live memory consumption. Even under load with 5 concurrent clients, memory should stay well under the 140MB limit.
 
 # Running Alongside Other Services
 
+## On a 500MB VPS
+
 On a 500MB VPS, a rough allocation might look like:
 
-| Service | Memory Budget |
-|---|---|
-| OS + kernel | ~80 MB |
-| PostgreSQL (this config) | ~110 MB typical / 140 MB limit |
-| Nginx | ~20 MB |
-| Application (e.g. Node/Go/Java) | ~150–200 MB |
-| Buffer / headroom | ~60 MB |
+| Service                         | Memory Budget                  |
+|---------------------------------|--------------------------------|
+| OS + kernel                     | ~80 MB                         |
+| PostgreSQL (this config)        | ~110 MB typical / 140 MB limit |
+| Nginx                           | ~20 MB                         |
+| Application (e.g. Node/Go/Java) | ~150–200 MB                    |
+| Buffer / headroom               | ~60 MB                         |
 
 Keep an eye on the host's swap usage. Even a little swap activity under a database workload causes latency spikes. If you see swapping, reduce `max_connections` further or add PgBouncer.
+
+## On a Kiosk or Embedded Device
+
+For kiosks and embedded devices, the memory picture looks a little different. These systems typically have one application connecting to the database, so the connection count is much lower — you could drop `max_connections` to 5 or even 3 and reclaim significant memory.
+
+On a Raspberry Pi 4 (1GB model) or similar ARM board, a budget might look like:
+
+| Service                              | Memory Budget                  |
+|--------------------------------------|--------------------------------|
+| OS + kernel                          | ~150 MB                        |
+| PostgreSQL (this config)             | ~110 MB typical / 140 MB limit |
+| Kiosk application (e.g. Electron/Qt) | ~400–500 MB                    |
+| Buffer / headroom                    | ~100 MB                        |
+
+The key difference from a VPS is that kiosks and edge devices usually have **one user and one application**, so you're not worried about concurrent connections. You're worried about the database surviving reboots, power loss, and network outages — which is exactly what PostgreSQL's WAL gives you out of the box. That crash recovery is the main reason to pick Postgres over SQLite in these environments.
+
+For truly constrained devices (256MB–512MB total RAM), you can squeeze even further: drop `shared_buffers` to 16MB, `max_connections` to 5, and `maintenance_work_mem` to 8MB. You'll sacrifice some query performance, but the database will still function correctly.
 
 # What You Give Up
 
@@ -382,11 +511,11 @@ Let's be honest about the tradeoffs:
 3. **Slower maintenance** — `VACUUM` and `CREATE INDEX` are slower with only 16MB of `maintenance_work_mem`.
 4. **No parallel queries** — With 2 worker processes, you're essentially running single-threaded queries.
 
-These are all acceptable tradeoffs for a small application or side project. If you're running a high-traffic production system, you need more RAM. But for a personal project, a staging environment, or a low-traffic production app, this configuration handles real workloads just fine.
+These are all acceptable tradeoffs for a small application, side project, or embedded deployment. If you're running a high-traffic production system, you need more RAM. But for a personal project, a staging environment, a kiosk that needs offline data persistence, or a low-traffic production app, this configuration handles real workloads just fine.
 
 # Takeaways
 
-1. **PostgreSQL is surprisingly flexible** — You can run it on very little memory if you understand what each setting does.
+1. **PostgreSQL is surprisingly flexible** — You can run it on very little memory if you understand what each setting does. From VPS servers to kiosks to Raspberry Pis, Postgres can fit where you need it.
 2. **Connections are the biggest memory hog** — Each connection is a forked process. Keep `max_connections` low and use PgBouncer if you need more.
 3. **`shared_buffers` at 25% of RAM is the starting point** — But leave room for the OS page cache, which Postgres also benefits from.
 4. **`effective_cache_size` doesn't allocate memory** — It's just a planner hint. Don't be afraid to set it higher than your `shared_buffers`.
