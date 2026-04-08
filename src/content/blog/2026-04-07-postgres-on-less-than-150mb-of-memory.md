@@ -214,7 +214,7 @@ On SSDs (which is what most VPS providers give you) or containerized volumes, ra
 
 ### `effective_io_concurrency = 100`
 
-This controls how many concurrent disk I/O operations PostgreSQL can issue. The default is 1 (assuming a single spinning disk). SSDs handle concurrent I/O much better, so 100 is appropriate for most SSD-backed storage.
+This controls how many concurrent disk I/O operations PostgreSQL can issue. The default is 16, which is conservative for modern SSDs. SSDs handle concurrent I/O much better than spinning disks, so 100 is appropriate for most SSD-backed storage.
 
 This setting affects bitmap heap scans — a higher value lets PostgreSQL prefetch more pages concurrently, improving scan performance. It doesn't significantly affect memory usage.
 
@@ -249,7 +249,7 @@ Same idea, but for maintenance operations like `CREATE INDEX CONCURRENTLY`. One 
 
 ### `autovacuum = on`
 
-**Never, ever turn autovacuum off.** Autovacuum is what prevents table bloat and transaction ID wraparound (which can cause data loss). Even on a 140MB instance, it stays on.
+**Never, ever turn autovacuum off.** Autovacuum is what prevents table bloat and transaction ID wraparound. If wraparound gets close, PostgreSQL will refuse new write transactions entirely until you run a manual VACUUM — effectively taking your database offline for writes. Even on a 140MB instance, autovacuum stays on.
 
 ### `autovacuum_max_workers = 1`
 
