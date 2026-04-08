@@ -1,6 +1,6 @@
 ---
 author: StevenPG
-pubDatetime: 2026-04-07T12:00:00.000Z
+pubDatetime: 2026-04-06T12:00:00.000Z
 title: Running PostgreSQL on Less Than 150MB of Memory
 slug: postgres-on-less-than-150mb-of-memory
 featured: false
