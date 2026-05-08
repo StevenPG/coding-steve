@@ -63,6 +63,15 @@ The key insight: a well-structured modular monolith is straightforward to extrac
 
 ## Project Setup
 
+### Version Compatibility
+
+| Spring Modulith | Spring Boot | Java |
+|---|---|---|
+| **1.4.x** | **3.5.x** | 17+ |
+| **2.0.x** | **4.0.x** | 17+ |
+
+The demo in this post targets **Spring Boot 4 / Spring Modulith 2.0.x**. If you're on Spring Boot 3.5, swap the version to `1.4.11` in the BOM — the API is nearly identical; the differences are noted inline where they exist.
+
 ### Dependencies
 
 The demo uses Gradle, but Maven equivalents are shown where relevant.
@@ -89,10 +98,11 @@ dependencies {
 
     // Spring Modulith — core and starters
     implementation("org.springframework.modulith:spring-modulith-starter-core")
-    implementation("org.springframework.modulith:spring-modulith-starter-jpa")   // Event Publication Registry backed by JPA
-    implementation("org.springframework.modulith:spring-modulith-actuator")      // /actuator/modulith endpoint
-    implementation("org.springframework.modulith:spring-modulith-observability") // Micrometer tracing for events
-    implementation("org.springframework.modulith:spring-modulith-moments")       // Time-based domain events
+    implementation("org.springframework.modulith:spring-modulith-starter-jpa")    // Event Publication Registry backed by JPA
+    implementation("org.springframework.modulith:spring-modulith-actuator")       // /actuator/modulith endpoint
+    implementation("org.springframework.modulith:spring-modulith-observability")  // Micrometer tracing for events
+    implementation("org.springframework.modulith:spring-modulith-moments")        // Time-based domain events
+    // Alternative: spring-modulith-starter-insight = observability + actuator + core bundled
 
     // Observability
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -146,6 +156,7 @@ dependencies {
 | `spring-modulith-actuator` | `/actuator/modulith` endpoint exposing the module graph |
 | `spring-modulith-observability` | Module-to-module event hops become Micrometer spans/traces |
 | `spring-modulith-moments` | Time-based domain events (`DayHasPassed`, `WeekHasPassed`, etc.) |
+| `spring-modulith-starter-insight` | Convenience bundle: core + actuator + observability |
 | `spring-modulith-starter-test` | `@ApplicationModuleTest`, `AssertablePublishedEvents`, `Scenario` |
 
 ## Module Structure and Package Conventions
@@ -166,6 +177,27 @@ com.stevenpg.ecommerce/
 ```
 
 That's it. No registration, no configuration file. Modulith scans the root package at startup and treats each sub-package as a module boundary.
+
+### The `@Modulith` Application Annotation
+
+`@Modulith` is a drop-in replacement for `@SpringBootApplication` that adds metadata about the module system:
+
+```java
+@Modulith(
+    systemName = "E-Commerce Platform",
+    sharedModules = {"shared"},                   // always loaded, always accessible
+    useFullyQualifiedModuleNames = false
+)
+public class EcommerceApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(EcommerceApplication.class, args);
+    }
+}
+```
+
+`sharedModules` is useful when you have a utility module (e.g., `shared`, `common`) that every other module may depend on without explicitly declaring it in `allowedDependencies`. The `systemName` appears in generated documentation.
+
+This is optional — if you keep `@SpringBootApplication`, Modulith still works. Use `@Modulith` when you want to configure shared modules or the system name.
 
 ### Public vs Internal Surface
 
@@ -300,6 +332,27 @@ package com.stevenpg.ecommerce.payments;
 ```
 
 `allowedDependencies` is checked during `ApplicationModules.verify()`. If a module tries to depend on something not in that list, the verification test fails with a clear error message. Use an empty array to declare a leaf module with zero external dependencies.
+
+### Named Interfaces
+
+By default, only the root package of a module is accessible to other modules. Named Interfaces let you expose a specific sub-package by name, without opening the entire internal package:
+
+```java
+// com/stevenpg/ecommerce/orders/spi/package-info.java
+@org.springframework.modulith.NamedInterface("spi")
+package com.stevenpg.ecommerce.orders.spi;
+```
+
+Another module can then depend on just that named interface:
+
+```java
+@ApplicationModule(
+    allowedDependencies = {"orders::spi"}  // only the spi sub-package, not the full orders module
+)
+package com.stevenpg.ecommerce.payments;
+```
+
+This is useful when a module has a large public API but you want to restrict other modules to a narrow SPI (e.g., event types only) rather than giving them access to your service classes.
 
 ## Cross-Module Communication
 
@@ -499,14 +552,43 @@ The Event Publication Registry is not a replacement for Kafka or RabbitMQ in all
 - You need to replay event history beyond application restarts
 - Your event throughput exceeds what a relational database handles well
 
-Spring Modulith supports externalizing events to a message broker via `@Externalized`:
+Spring Modulith supports externalizing events to a message broker via `@Externalized`. The format is `"topicName::routingKey"` where the routing key is optional and supports SpEL:
 
 ```java
-@Externalized("orders.placed")  // Kafka topic or RabbitMQ exchange name
+@Externalized("orders.placed")                        // topic name only
 public record OrderPlacedEvent(UUID orderId, /* ... */) {}
+
+@Externalized("orders.placed::#{#this.orderId}")      // topic::key — SpEL for partition key
+public record OrderShippedEvent(UUID orderId) {}
+
+@Externalized   // no target → defaults to "moduleName.EventClassName"
+public record OrderCancelledEvent(UUID orderId) {}
 ```
 
-With this annotation and the appropriate binder on the classpath, Modulith automatically publishes the event both internally (to Application Event listeners) and externally (to the broker). The Event Publication Registry tracks the external publication too.
+For advanced routing (payload transformation, custom headers, filtering), use a configuration bean:
+
+```java
+@Bean
+EventExternalizationConfiguration eventExternalizationConfiguration() {
+    return EventExternalizationConfiguration
+        .defaults("com.stevenpg.ecommerce")
+        .mapping(OrderPlacedEvent.class, e -> new ExternalOrderPayload(e.orderId()))
+        .headers(e -> Map.of("source", "ecommerce-modulith"))
+        .build();
+}
+```
+
+Add the appropriate binder for your broker:
+
+```kotlin
+// Kafka
+implementation("org.springframework.modulith:spring-modulith-events-kafka")
+
+// RabbitMQ
+implementation("org.springframework.modulith:spring-modulith-events-amqp")
+```
+
+With this in place, Modulith automatically publishes the event both internally (to `@ApplicationModuleListener` handlers) and externally (to the broker). The Event Publication Registry tracks both publications independently.
 
 ## Time-Based Events with Moments
 
@@ -929,18 +1011,33 @@ This is useful if you want a scheduled job that proactively retries stuck events
 
 ## Documenting Your Modules
 
-Spring Modulith can generate documentation (including PlantUML component diagrams) directly from your code:
+Spring Modulith can generate documentation (including PlantUML component diagrams) directly from your code. Add this to your `ModularityTests` class:
 
 ```java
 @Test
 void writeDocumentationSnippets() {
     new Documenter(ApplicationModules.of(EcommerceApplication.class))
-        .writeModulesAsPlantUml()
-        .writeIndividualModulesAsPlantUml();
+        .writeModulesAsPlantUml()           // overview diagram showing all modules
+        .writeIndividualModulesAsPlantUml() // one diagram per module
+        .writeModuleCanvases()              // module canvas: beans, events, listeners
+        .writeAggregatingDocument();        // all-docs.adoc combining everything
 }
 ```
 
-Running this test creates `.puml` files in `target/modulith-docs/` (or `build/modulith-docs/` for Gradle). These can be rendered with any PlantUML viewer or committed to your docs directory.
+Output lands in `build/spring-modulith-docs/` (Gradle) or `target/spring-modulith-docs/` (Maven). The `.puml` files render in any PlantUML viewer or can be embedded in Asciidoctor docs.
+
+Customize the diagram style:
+
+```java
+new Documenter(modules)
+    .writeModulesAsPlantUml(
+        DiagramOptions.defaults()
+            .withStyle(DiagramStyle.C4)           // C4 model instead of UML (default)
+            .withDependencyDepth(DependencyDepth.IMMEDIATE)
+            .withColorSelector(module -> Optional.of("#E8F4F8"))
+    )
+    .writeIndividualModulesAsPlantUml();
+```
 
 The component diagram shows:
 - Each module as a box
@@ -948,6 +1045,8 @@ The component diagram shows:
 - Internal components hidden
 - Dependency arrows between modules
 - Event publications as dashed arrows
+
+`writeAggregatingDocument()` produces an `all-docs.adoc` with `include::` directives — suitable for embedding in your project's Asciidoctor documentation pipeline.
 
 For teams maintaining architecture decision records, this is a living diagram that can't drift from the actual code.
 
@@ -1008,7 +1107,7 @@ Because you've maintained clean boundaries throughout, there's no "untangling" p
 
 | Annotation | Purpose |
 |---|---|
-| `@ApplicationModule` | Explicit module declaration with allowed dependency constraints |
+| `@ApplicationModule` | Explicit module declaration with allowed dependency constraints; `type = OPEN` for shared utility modules |
 | `@ApplicationModuleListener` | Registers listener with `AFTER_COMMIT` semantics and new transaction |
 | `@Externalized("topic-name")` | Also publishes event to external broker |
 | `@ApplicationModuleTest` | Bootstraps Spring context limited to one module (+ optional deps) |
