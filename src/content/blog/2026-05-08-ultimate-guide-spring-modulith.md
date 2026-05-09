@@ -1194,6 +1194,6 @@ spring:
 
 Spring Modulith provides the structure that makes a monolith maintainable at scale, without requiring you to solve distributed systems problems before your product is ready for them. The package conventions are simple enough to adopt in an afternoon. The boundary verifier catches drift automatically. The Event Publication Registry gives you at-least-once delivery with zero additional infrastructure. And the testing tools — `@ApplicationModuleTest`, `AssertablePublishedEvents`, `Scenario`, `TimeMachine` — make testing event-driven code actually pleasant.
 
-The demo repository used throughout this post is available at [github.com/StevenPG/DemosAndArticleContent](https://github.com/StevenPG/DemosAndArticleContent/tree/modulith-demo/blog/spring-boot-modulith) on the `modulith-demo` branch. All four modules are there with full tests covering every scenario described in this guide.
+The demo repository used throughout this post is available at [github.com/StevenPG/DemosAndArticleContent](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/spring-boot-modulith) on the `modulith-demo` branch. All four modules are there with full tests covering every scenario described in this guide.
 
 If you found this useful, the [Spring Cloud Streams guide](/posts/ultimate-guide-spring-cloud-streams) and [Spring Batch 6 guide](/posts/ultimate-guide-spring-batch-6) follow the same format for those topics.
