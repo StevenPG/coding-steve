@@ -867,11 +867,15 @@ class ModularityTests {
 
 `modules.stream()` iterates over discovered modules without starting Spring. `getModuleByType()` verifies that an event record lives in the correct module's public package. These assertions turn architectural decisions into executable documentation.
 
-Run `generateModuleDocumentation()` locally to produce PlantUML diagrams in `build/spring-modulith-docs/`. Sample output:
+Run `generateModuleDocumentation()` locally to produce PlantUML diagrams in `build/spring-modulith-docs/`. 
 
-```
-<!-- TODO: paste actual output from running ModularityTests#generateModuleDocumentation -->
-```
+These files are generated after executing the test:
+
+![Image of Directory](/assets/modulith/generated_files.png)
+
+Contained within the spring-modulith-docs directory is the summary diagram of the module structure:
+
+![Image of Directory](/assets/modulith/generated_puml.png)
 
 ### End-to-End Scenario Tests
 
@@ -962,7 +966,37 @@ GET /actuator/modulith
 ```
 
 ```json
-<!-- TODO: paste actual /actuator/modulith response from running app -->
+{
+  "catalog": {
+    "displayName": "Catalog",
+    "basePackage": "com.stevenpg.ecommerce.catalog",
+    "nested": [],
+    "type": "closed",
+    "shared": false,
+    "namedInterfaces": {
+      "<<UNNAMED>>": [
+        "com.stevenpg.ecommerce.catalog.Product",
+        "com.stevenpg.ecommerce.catalog.CatalogService"
+      ]
+    },
+    "initializers": [
+      "com.stevenpg.ecommerce.catalog.internal.CatalogInitializer"
+    ],
+    "dependencies": []
+  },
+  "orders": {
+    "displayName": "Orders",
+    "basePackage": "com.stevenpg.ecommerce.orders",
+    "nested": [],
+    "type": "closed",
+    "shared": false,
+    "namedInterfaces": {
+      "<<UNNAMED>>": [
+        "com.stevenpg.ecommerce.orders.Order",
+        "com.stevenpg.ecommerce.orders.OrderStatus",
+        "com.stevenpg.ecommerce.orders.OrderPlacedEvent",
+        "com.stevenpg.ecommerce.orders.OrderManagement",
+...
 ```
 
 This is useful for debugging which modules depend on which, and for validating that your intended architecture matches what Modulith has discovered.
