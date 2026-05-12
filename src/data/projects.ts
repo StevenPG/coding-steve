@@ -15,4 +15,12 @@ export const projects: Project[] = [
     tags: ["Web App"],
     image: "/assets/projects/autosteven.png",
   },
+  {
+    name: "Visual Finances",
+    url: "https://visualfinances.com/",
+    description:
+      "A personal finance visualization tool for tracking and understanding your financial data through interactive charts and dashboards.",
+    tags: ["Web App"],
+    image: "/assets/projects/visualfinances.png",
+  },
 ];
