@@ -29,7 +29,7 @@ I was writing some Go recently and went looking for a testing helper, and I kept
 
 That got me wondering what this looks like in Java. I write a lot more Spring Boot than Go, and "fuzzing" in the JVM world had always felt like a security-research thing, something other people did to other people's parsers. It turns out the Java story is pretty good. It's just not in the standard library, and almost nobody talks about it.
 
-So this post is two things. First, an introduction to fuzzing for developers who have never written a fuzz test: what it is, why it finds bugs your unit tests never will, and how Go's built-in support works as a reference point. Second, a hands-on guide to doing the same thing in Java with **Jazzer**, walking through a small Spring Boot project that ships with three deliberately planted bugs for you to fix.
+So this post is two things. First, an introduction to fuzzing for developers who have never written a fuzz test: what it is, why it finds bugs your unit tests never will, and how Go's built-in support works as a reference point. Second, a hands-on guide to doing the same thing in Java with **Jazzer**, walking through a small Spring Boot project that ships with three deliberately planted bugs — yours to find with the fuzzer and then fix.
 
 If you've never fuzzed anything, read straight through. If you already know the concept and just want the Java mechanics, skip to [Fuzzing in Java with Jazzer](#fuzzing-in-java-with-jazzer).
 
@@ -115,7 +115,12 @@ tasks.withType<Test> {
     // Scope Jazzer's coverage instrumentation to our own application code.
     systemProperty("jazzer.instrument", "com.stevenpg.fuzzingdemo.**")
 
-    testLogging { events("passed", "skipped", "failed") }
+    testLogging {
+        events("passed", "skipped", "failed")
+        showExceptions = true
+        showCauses = true
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
 }
 ```
 
@@ -129,15 +134,7 @@ The companion repo is a small Spring Boot 4 REST API. It exposes twelve endpoint
 
 Jakarta Bean Validation runs on every endpoint, so a lot of garbage input is rejected at the door with a `400`. The interesting bugs are the ones that get past validation and crash in the controller body anyway.
 
-The project ships with **three deliberately planted bugs**. Each one has a pre-committed crash input, so the moment you clone the repo and run the tests, exactly three of them fail:
-
-```
-OrderControllerFuzzTest   > fuzzCreateOrder(byte[])   > crash-int-overflow.json   FAILED
-ProductControllerFuzzTest > fuzzCreateProduct(byte[]) > crash-metadata-npe.json   FAILED
-UserControllerFuzzTest    > fuzzSearchByName(byte[])  > crash-short-name          FAILED
-```
-
-Your job is to fix the three bugs and watch the suite go green. That loop, where the fuzzer finds a crash, the crash becomes a failing test, you fix it, and the test passes forever, is the entire workflow this post is about.
+The project ships with **three deliberately planted bugs**, one in each controller. The test suite starts fully green — no crash inputs are pre-committed. Your job is to run the fuzzer, let it find the bugs, commit each crash file to lock the failure in, and then fix the code. That loop — fuzz, find, lock, fix — is the entire workflow this post is about.
 
 ## Anatomy of a Fuzz Test
 
@@ -178,9 +175,9 @@ The method body does exactly one job: drive a request from the fuzzed input and 
 
 Jazzer can hand your test data in two shapes, and the demo uses both so you can compare them.
 
-**`byte[] data`, where the raw bytes are the input.** Use this when the thing you're fuzzing is itself a byte stream, like an HTTP request body or a single query value. The seed corpus files are literal. A corpus file for a JSON body is just a `.json` file you can open and read. `fuzzSearchByName` above uses this style, and the raw bytes become the `name` parameter.
+**`byte[] data`, where the raw bytes are the input.** Works well when the target is itself a byte stream — a parser, a single query parameter. Seed corpus files are literal: you can open and read them. The downside is important: validation layers absorb most random bytes as `400`, leaving the fuzzer with no coverage signal to guide it deeper. If your endpoint has required fields or a typed body, raw bytes bounce off the validation layer and the fuzzer never reaches the code you care about. `fuzzSearchByName` above uses this style; the raw bytes become the `name` parameter.
 
-**`FuzzedDataProvider data`, a typed-value cursor.** Use this when you need to assemble a structured, multi-field request. `FuzzedDataProvider` hands out typed values on demand (`consumeInt()`, `consumeString(maxLength)`, `consumeBoolean()`, `consumeRemainingAsBytes()`), and Jazzer mutates those typed values intelligently rather than mutating raw bytes you'd then have to parse yourself.
+**`FuzzedDataProvider data`, a typed-value cursor.** Use this to assemble structured, multi-field requests so that Bean Validation always passes and the fuzzer explores controller logic instead of stalling at the rejection layer. `FuzzedDataProvider` hands out typed values on demand (`consumeInt()`, `consumeString(maxLength)`, `consumeBoolean()`, `consumeRemainingAsBytes()`), and Jazzer mutates those typed values intelligently. Note that seed corpus files are opaque binary (the raw byte stream `FuzzedDataProvider` consumed), but the crashing request body is printed in the `AssertionError` message when a crash is replayed in regression mode.
 
 Here's the `FuzzedDataProvider` style, from `ProductControllerFuzzTest#fuzzListProducts`:
 
@@ -223,7 +220,7 @@ This is the part that makes Jazzer practical for everyday development, and it mi
 
 In regression mode, Jazzer does not generate anything. It replays a fixed set of inputs: the empty input, plus every file already sitting in that test's seed corpus directory. Each corpus file becomes its own JUnit test invocation.
 
-This is fast, deterministic, and CI-friendly. It runs in milliseconds alongside your normal unit tests. It's not finding new bugs, it's guarding against the ones you already found coming back. This is the mode that fails on the three planted bugs, because each planted bug has a crash input pre-committed to its corpus.
+This is fast, deterministic, and CI-friendly. It runs in milliseconds alongside your normal unit tests. It's not finding new bugs, it's guarding against the ones you already found coming back. Once you've run fuzzing mode and committed a crash file, regression mode replays it on every `./gradlew test` run — the build stays red until someone fixes the code.
 
 ### Fuzzing Mode, the search
 
@@ -284,7 +281,64 @@ build is GREEN, and the corpus file guards it permanently
 
 A discovered bug stops being a thing someone saw once in a log. It becomes a small, human-readable file in your repo that is part of your test suite. That separates fuzzing as a one-off security audit from fuzzing as a permanent part of your development process. It's the same guarantee Go gives you with `testdata/fuzz/`, and it's worth adopting the convention even before you write a single fuzz test.
 
-The demo leans on this directly. The three planted bugs each ship with their crash input already in the corpus. You're starting the exercise at the "build is RED" step. The corpus files are committed, and your job is the last two boxes.
+## Finding Fresh Bugs
+
+This is the loop you run when you want the fuzzer to discover new issues rather than replaying known ones.
+
+### 1. Run a discovery session
+
+```bash
+JAZZER_FUZZ=1 ./gradlew test \
+  --tests "*.ProductControllerFuzzTest.fuzzCreateProduct"
+```
+
+When Jazzer triggers a `5xx` it writes a file to the project root:
+
+```
+artifact_prefix='.../fuzzing-in-java/'; Test unit written to .../crash-<sha1hash>
+```
+
+Because `fuzzCreateProduct` builds the request manually and wraps the assertion, the console also prints the exact body that caused the crash:
+
+```
+java.lang.AssertionError: Crashing input: {"name":"x","price":1.00,"metadata":{"category":null}}
+```
+
+### 2. Place the crash file in the seed corpus
+
+Move the generated file into the Jazzer seed corpus directory for the test method that found it:
+
+```
+src/test/resources/<package>/<TestClassName>Inputs/<methodName>/
+```
+
+For example:
+
+```bash
+mv crash-<sha1hash> \
+   src/test/resources/com/stevenpg/fuzzingdemo/fuzz/ProductControllerFuzzTestInputs/fuzzCreateProduct/crash-null-category
+```
+
+Name it something that describes the bug. The filename becomes the test case name in Jazzer's output.
+
+### 3. Verify regression mode catches it
+
+```bash
+./gradlew test --tests "*.ProductControllerFuzzTest.fuzzCreateProduct"
+```
+
+You'll see the named crash fail in milliseconds — no live fuzzing, no long wait:
+
+```
+ProductControllerFuzzTest > fuzzCreateProduct(FuzzedDataProvider) > crash-null-category FAILED
+    java.lang.AssertionError: Crashing input: {...}
+```
+
+Commit the file. From this point on, CI fails on it until someone fixes the bug, and the fix is guarded against ever coming back.
+
+### 4. Fix the bug, confirm the suite is green
+
+Apply the fix, run `./gradlew test`, and watch the crash case turn from `FAILED` to `PASSED`. The seed file stays in the corpus permanently as a regression guard.
 
 ## Walking Through the Three Planted Bugs
 
@@ -313,7 +367,7 @@ private String buildSearchPrefix(String name) {
 
 Look at the guard: `name != null && !name.isEmpty()`. It's almost right. The developer thought about `null`, thought about `""`, and stopped. But `substring(0, 3)` needs a string of length 3 or more, and `"ab"` sails through every guard, through the `@Size(max = 100)` constraint, and straight into a `StringIndexOutOfBoundsException`.
 
-This is the canonical fuzzing find. No human writes a test for `"ab"` specifically. It's not a representative value, it's not `null`, and it's not empty. But a fuzzer mutating the `name` bytes hits a 2-character string in milliseconds. The committed corpus file `crash-short-name` contains exactly the two bytes `ab`.
+This is the canonical fuzzing find. No human writes a test for `"ab"` specifically. It's not a representative value, it's not `null`, and it's not empty. But a fuzzer mutating the `name` bytes hits a 2-character string in milliseconds and catches the crash.
 
 The fix:
 
@@ -340,7 +394,7 @@ Here's the subtle part. Jakarta Bean Validation has no built-in constraint that 
 
 passes every declared constraint, reaches the controller, and `null.toUpperCase()` throws.
 
-A coverage-guided fuzzer walks into this in steps, and you can almost watch it think. First it generates a body where `metadata` is present (new coverage), then it puts the key `category` inside the map (more coverage), then it sets that key's value to `null` (reaches the unguarded call). Each step is rewarded by the coverage signal, so the fuzzer keeps it and builds on it. The committed corpus file `crash-metadata-npe.json` is that final JSON, reproduced directly.
+A coverage-guided fuzzer walks into this in steps, and you can almost watch it think. First it generates a body where `metadata` is present (new coverage), then it puts the key `category` inside the map (more coverage), then it sets that key's value to `null` (reaches the unguarded call). Each step is rewarded by the coverage signal, so the fuzzer keeps it and builds on it. When it finally triggers the NPE, it prints the exact crashing JSON body in the `AssertionError` so you know immediately what to commit to the corpus.
 
 The fix:
 
@@ -363,7 +417,7 @@ int total = quantity * unitPrice;   // BUG: 32-bit multiplication overflows
 
 Bean Validation lets both `quantity` and `unitPrice` individually reach large values. But their product can exceed `Integer.MAX_VALUE` (2,147,483,647). With `quantity = unitPrice = 50000`, the true product is 2,500,000,000, which doesn't fit in a 32-bit `int`, so it silently wraps around to a negative number.
 
-This is the bug class fuzzers were practically invented to find. No validation rule is violated. No exception is thrown at the multiplication itself, since Java integer overflow is silent. The only symptom is a wrong, negative number, and the fuzzer's habit of trying large `int` values walks straight into it. The corpus file `crash-int-overflow.json` carries the overflowing pair.
+This is the bug class fuzzers were practically invented to find. No validation rule is violated. No exception is thrown at the multiplication itself, since Java integer overflow is silent. The only symptom is a wrong, negative number, and the fuzzer's habit of trying large `int` values walks straight into it.
 
 The fix is to promote to 64-bit before multiplying:
 
@@ -413,7 +467,7 @@ The takeaway generalizes beyond REST. Before you fuzz anything, decide what "bro
 
 ## Running the Demo
 
-Clone the repo and run the suite:
+Clone the repo and verify the suite starts clean:
 
 ```bash
 git clone https://github.com/StevenPG/DemosAndArticleContent.git
@@ -422,15 +476,15 @@ cd DemosAndArticleContent/blog/fuzzing-in-java
 ./gradlew test
 ```
 
-You'll see 15 tests run and 3 fail, with each failure a pre-committed crash input reproducing one planted bug. Open each controller, find the comment marked `BUG:`, apply the fix from the walkthrough above, and re-run. Each fix turns one failure green. When all three are fixed, the suite is fully green and you've completed the full fuzzing loop by hand.
-
-Then try the other direction. Pick a test, run it in fuzzing mode, and let Jazzer hunt:
+All tests pass. No crash files are pre-committed. Now pick a test and let Jazzer hunt:
 
 ```bash
+JAZZER_FUZZ=1 ./gradlew test --tests "*.UserControllerFuzzTest.fuzzSearchByName"
 JAZZER_FUZZ=1 ./gradlew test --tests "*.ProductControllerFuzzTest.fuzzCreateProduct"
+JAZZER_FUZZ=1 ./gradlew test --tests "*.OrderControllerFuzzTest.fuzzCreateOrder"
 ```
 
-If you re-introduce a bug, or find a brand new one, Jazzer will drop a fresh crash file into the seed corpus. Commit it, and you've grown your regression suite the way a real team does.
+When Jazzer finds a crash it prints the offending input and drops a file in the project root. Follow the steps in [Finding Fresh Bugs](#finding-fresh-bugs) to move that file into the seed corpus and commit it. The build goes red. Open the controller, find the comment marked `BUG:`, apply the fix from the walkthrough above, and re-run `./gradlew test`. The crash case turns green, the corpus file stays as a permanent guard, and you've completed the full fuzzing loop by hand.
 
 ## When Should You Actually Use This?
 
@@ -455,6 +509,6 @@ The first is to pick the right invariant. "No `5xx`" works because the applicati
 
 The second is to commit the crash files. A discovered bug should never be a log line you might lose. It should be a file in your repo that fails the build until it's fixed and guards against its own return forever.
 
-Clone the demo, fix the three bugs, then point Jazzer at your own parsers and controllers. The bugs are already there. Fuzzing just finds them before your users do.
+Clone the demo, fuzz the three controllers to find the planted bugs, lock each crash into the corpus, then fix the code. Once the suite is green, point Jazzer at your own parsers and controllers. The bugs are already there. Fuzzing just finds them before your users do.
 
 Thanks for reading, and happy fuzzing.
