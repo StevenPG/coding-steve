@@ -30,22 +30,22 @@ The path from there was `llama.cpp`'s `llama-server`. It exposes an OpenAI-compa
 
 The model choice matters more than you'd think — not every model fits in an M3 Pro's memory, and not every model that fits runs fast enough to be usable.
 
-Qwen3.6-35B-A3B is a [mixture-of-experts](https://qwenlm.github.io/blog/qwen3.6/) model from the Qwen team. It has 35 billion total parameters but only activates about 3 billion per token. That sparse activation has two consequences that matter for local deployment:
+Qwen3.6-35B-A3B is a [mixture-of-experts](https://qwen.ai/blog?id=qwen3.6-35b-a3b) model from the Qwen team. It has 35 billion total parameters but only activates about 3 billion per token. That sparse activation has two consequences that matter for local deployment:
 
-1. **Memory footprint.** A dense 35B model in Q4 quantization needs roughly 18-20 GB of VRAM. On a 16 GB M3/M3 Pro, that means swapping. The A3B variant, because only 3B parameters are active per token, needs about the same memory as a 5-7B dense model — roughly 3-4 GB for the weights. The rest of the RAM goes to KV cache and context.
+1. **Memory footprint.** The full 35B-parameter MoE router must be loaded into memory regardless of how many parameters are active per token. At Q4_K_M quantization, the GGUF weights are about 22 GB. The rest of the RAM goes to KV cache and context.
 2. **Inference speed.** Active parameters scale with compute, not total parameters. Token generation is closer to a 3B model's speed while retaining the quality of a much larger model.
 
 ### Other models worth considering
 
 | Model | Active Params | Q4 Weight Size | Best For |
 |---|---|---|---|
-| Qwen3.6-35B-A3B | ~3B | ~3 GB | General purpose, best quality/size balance |
-| Qwen3-Coder-30B-A3B | ~3B | ~3 GB | Code-focused tasks |
-| Qwen3.6-235B-A22B | ~2B | ~12 GB | Maximum quality (needs 32 GB+ RAM) |
-| Gemma 3 27B | 27B (dense) | ~16 GB | Dense model quality, tight on 16 GB Macs |
-| DeepSeek-R1-Distill-Qwen-32B | 32B (dense) | ~20 GB | Reasoning tasks (may swap on 18 GB) |
+| Qwen3.6-35B-A3B | ~3B | ~22 GB | General purpose, best quality/size balance |
+| Qwen3-Coder-30B-A3B | ~3B | ~18 GB | Code-focused tasks |
+| Qwen3.6-235B-A22B | ~22B | ~120 GB | Maximum quality (needs 128 GB+ RAM) |
+| Gemma 3 27B | 27B (dense) | ~16 GB | Dense model quality, tight on 36 GB Macs |
+| DeepSeek-R1-Distill-Qwen-32B | 32B (dense) | ~20 GB | Reasoning tasks (may swap on 36 GB) |
 
-The sparse-activated models (the "A3B" series) are the sweet spot for 16-18 GB Macs, but on a 36 GB machine like my M3 Pro you can comfortably run larger models too. Anything dense above ~13B parameters at Q4 starts pressing against the unified memory limit on 16-18 GB machines. On 36 GB, you have room for Dense 13B models at Q4, or the sparse Qwen3.6-235B-A22B.
+The A3B models (sparse-activated, ~3B active params) are the sweet spot for 36 GB Macs — the Q4 weights fit comfortably with room for a generous context window. On 16-18 GB machines, even the A3B variants are too large for Q4; you'd need much lower quantization (Q2 or Q3) or a smaller model (7-13B dense). On 128 GB (M4 Ultra), you can run the much larger Qwen3.6-235B-A22B.
 
 ## Understanding Quantization
 
@@ -61,10 +61,10 @@ Here's a quick reference for the quantization schemes you'll encounter:
 |---|---|---|---|---|
 | FP16 | 16 | Reference | ~70 GB | Full precision, rarely needed locally |
 | Q8_0 | 8 | Near-lossless | ~37 GB | Good for KV cache, overkill for weights |
-| Q5_0 | 5 | Very good | ~23 GB | Sweet spot for larger models on big Macs |
-| Q4_K_M | 4 (mixed) | Good | ~19 GB | Mixed Q4/Q6 quantization, balanced |
-| Q3_K_M | 3 (mixed) | Acceptable | ~15 GB | Noticeable quality drop |
-| Q2_K | 2 (mixed) | Poor | ~12 GB | Only if you're desperate for space |
+| Q5_0 | 5 | Very good | ~26 GB | Sweet spot for larger models on big Macs |
+| Q4_K_M | 4 (mixed) | Good | ~22 GB | Mixed Q4/Q6 quantization, balanced |
+| Q3_K_M | 3 (mixed) | Acceptable | ~18 GB | Noticeable quality drop |
+| Q2_K | 2 (mixed) | Poor | ~14 GB | Only if you're desperate for space |
 
 The `_K_M` variants use mixed precision — some weights get quantized more aggressively than others, based on their importance to the model's output. `K_M` is generally the best quality/size tradeoff in the K-quants family. If you have the RAM, prefer Q5_0 or Q8_0. If you need to fit in memory, Q4_K_M is the default recommendation.
 
@@ -106,7 +106,7 @@ llama-server \
   --no-mmap
 ```
 
-It downloads the model on first run (about 3 GB over the network) and caches it locally. Subsequent starts are immediate.
+It downloads the model on first run (about 22 GB over the network) and caches it locally. Subsequent starts are immediate.
 
 ### Flag-by-flag explanation
 
@@ -240,22 +240,22 @@ The model you can run depends entirely on how much unified memory your Mac has. 
 
 | Model | Weight Size | Viable? | Notes |
 |---|---|---|---|
-| Qwen3.6-35B-A3B | ~3 GB | Yes | Sweet spot. Plenty of RAM for context. |
-| Qwen3-Coder-30B-A3B | ~3 GB | Yes | Code-focused alternative. |
-| Qwen3.6-235B-A22B | ~12 GB | Yes | Larger but still fits. Slower due to more active params. |
-| Gemma 3 27B | ~16 GB | Marginal | No room for meaningful context. Drop quantization or pick a smaller model. |
-| Any dense model >13B | >8 GB | Marginal at Q4 | Possible, but context window will be very limited. |
+| Qwen3.6-35B-A3B | ~22 GB | No | Weights alone exceed total RAM. |
+| Qwen3-Coder-30B-A3B | ~18 GB | No | Weights exceed usable RAM. |
+| Qwen3.6-235B-A22B | ~120 GB | No | Needs 128 GB of RAM minimum. |
+| Gemma 3 27B | ~16 GB | No | Weights alone fill the machine. |
+| Qwen2.5-7B/14B | ~4-8 GB | Yes | Comfortable fit at Q4, room for context. |
+| Any dense model <=13B | <=8 GB | Yes | Best option for 16 GB Macs at Q4. |
 
 ### M3 Pro (18 GB)
 
-This tier is tight. The 18 GB limit leaves about 12-13 GB usable for the model + OS after accounting for macOS overhead. Sparse-activated models are essential.
-
 | Model | Weight Size | Viable? | Notes |
 |---|---|---|---|
-| Qwen3.6-35B-A3B | ~3 GB | Yes | Comfortable fit. ~10 GB free for context. |
-| Qwen3-Coder-30B-A3B | ~3 GB | Yes | Code-focused alternative. |
-| Qwen3.6-235B-A22B | ~12 GB | Marginal | Barely fits. ~1 GB for context. Drop `-c` to 8192 or skip. |
-| Dense 13B at Q4 | ~8 GB | Marginal | ~4 GB for context. Possible but tight. |
+| Qwen3.6-35B-A3B | ~22 GB | No | Weights exceed total RAM. |
+| Qwen3-Coder-30B-A3B | ~18 GB | No | Weights alone fill the machine. |
+| Qwen3.6-235B-A22B | ~120 GB | No | Needs 128 GB of RAM minimum. |
+| Dense 13B at Q4 | ~8 GB | Yes | ~8 GB free for context. Best balance. |
+| Dense 7-8B at Q4 | ~4-5 GB | Yes | Plenty of room for context. |
 
 ### M2 Max / M3 Pro / M3 Max (36 GB)
 
@@ -263,19 +263,20 @@ This is the setup described in this guide. The 36 GB limit leaves about 28-30 GB
 
 | Model | Weight Size | Viable? | Notes |
 |---|---|---|---|
-| Qwen3.6-235B-A22B | ~12 GB | Yes | Great fit. ~16 GB for context — can push to 64K+. |
-| Gemma 3 27B (Q4) | ~16 GB | Yes | Dense model quality, plenty of room for context. |
+| Qwen3.6-235B-A22B | ~120 GB | No | Weights alone exceed 36 GB RAM. |
+| Qwen3.6-35B-A3B | ~22 GB | Yes | Comfortable fit. ~6-8 GB for context. |
+| Gemma 3 27B (Q4) | ~16 GB | Yes | Dense model quality, ~10 GB for context. |
+| Qwen3-Coder-30B-A3B | ~18 GB | Yes | Code-focused, ~8 GB for context. |
 | Any dense 14-20B at Q4 | ~8-12 GB | Yes | Good quality, room for context. |
-| Qwen3.6-35B-A3B | ~3 GB | Yes | Runs fine, but you're leaving quality on the table — pick a larger model. |
 
 ### M4 Pro / M4 Max / M4 Ultra (32-128 GB)
 
-These chips can run anything that fits. The practical limit is inference speed — larger models take longer to generate tokens, even with GPU offload. For 32 GB (M4 Pro), treat it like the 36 GB tier. For 48 GB (M4 Max), dense 30B models at Q4 become comfortable. At 128 GB (M4 Ultra), you're in "run a dense 70B+ model locally" territory.
+These chips can run anything that fits. The practical limit is inference speed — larger models take longer to generate tokens, even with GPU offload. For 32-36 GB (M4 Pro / M3 Pro), treat it like the 36 GB tier above. For 48 GB (M4 Max), Qwen3.6-35B-A3B becomes comfortable with a large context window. At 128 GB (M4 Ultra), you can run the Qwen3.6-235B-A22B or a dense 70B+ model.
 
 ### General Rules of Thumb
 
 1. **Available RAM ≈ total RAM - 6 GB** (macOS overhead + other processes). On a 36 GB machine, that's ~28-30 GB. On 18 GB, ~12-13 GB.
-2. **KV cache at Q8_0 ≈ context_tokens * hidden_dim * 2 bytes * 2 (K+V) / model_dim** — roughly 0.5-1 GB per 16K tokens depending on model architecture. A 64K context on Qwen3.6-35B-A3B with Q8_0 cache uses roughly 2-3 GB.
+2. **KV cache at Q8_0** roughly scales with context length and model architecture. A 64K context on Qwen3.6-35B-A3B with Q8_0 cache uses roughly 2-3 GB. Larger models with bigger hidden dimensions consume more per token.
 3. **Always leave headroom.** If the model + estimated cache exceeds your RAM, you'll swap and the GPU offload advantage is meaningless.
 
 ## Comparison
@@ -296,3 +297,7 @@ These chips can run anything that fits. The practical limit is inference speed �
 Running Claude Code locally on Apple Silicon is practical. The combination of sparse-activated models and unified memory makes the hardware a surprisingly good fit. It won't replace the API for everything — the model isn't as smart, and the ecosystem is less polished — but for routine coding tasks, it eliminates the frustration of rate-limit throttled sessions.
 
 The key flags are `-ngl 999` (GPU offload), `--mlock --no-mmap` (keep the model in RAM), and `--cache-type-k/v q8_0` (fit more context in memory). Everything else is tuning.
+
+---
+
+*This post was written using Qwen3.6-35B-A3B running locally on a MacBook Pro with an M3 Pro chip (36 GB RAM).*
