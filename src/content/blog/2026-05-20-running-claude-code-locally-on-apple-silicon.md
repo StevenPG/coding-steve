@@ -214,23 +214,31 @@ Restart any existing Claude Code sessions for the changes to take effect. The fi
 
 ## Performance
 
-> **[TODO: Insert your performance numbers here. Things to measure:]**
->
-> - First-token latency (time from sending a prompt to receiving the first token)
-> - Tokens per second (steady-state throughput)
-> - How the model handles long context (does it slow down past 16K/32K tokens?)
-> - Memory usage at idle (check with `top` or `htop`)
-> - Any noticeable quality gaps vs Claude Haiku/Pro
+Measured on an M3 Pro (36 GB) with the model fully offloaded to the GPU via Metal.
+
+**First-token latency: ~30-35 ms** — this is the time from sending a prompt to the server receiving the first token from the model. The initial prompt processing (331 tokens in my first test run) took 774 ms total, but the subsequent response generation was 14 tokens in 448 ms, which works out to about **31 tokens per second** for the response portion. That's not blazing fast, but it's usable. The first-token latency for interactive response generation (after prompt processing is done) feels roughly 10-20x slower than Claude's API.
+
+**Context handling: gradual slowdown.** The server logs show prompt processing at various checkpoints — at 1K tokens it's running ~610 tokens/sec, at 8K it drops to ~590 tokens/sec, and by 13K tokens it's down to ~527 tokens/sec. The sliding window attention (`--swa-full`) was actually disabled for this model (the server logs `swa_full is not supported by this model, it will be disabled`), so the full quadratic attention cost applies. At 64K context, expect significant slowdown. The KV cache with Q8_0 quantization consumed roughly 129 MB for a 344-token context — scaling linearly, a 32K context would be around 1.2 GB, which is very manageable on 36 GB.
+
+**Memory usage: ~30-32 GB at idle.** The model weights (22 GB Q4) + GPU offload + KV cache + prompt cache leave about 4-6 GB of headroom. macOS shows the process consuming about 31 GB of unified memory. The prompt cache was allocated at 8 GB (`--cache-idle-slots` would let it grow but that flag requires `--kv-unified`). This is tight — if other apps consume significant RAM, the `--mlock` flag is doing heavy lifting to prevent swapping.
+
+**The model takes about 9 seconds to load** from a cold start, which is fast given the 22 GB file. The `--keep 1024` flag (17 minutes of inactivity) keeps it resident.
+
+**Compared to Claude's API:** Claude Pro responds in well under a second for most prompts. Locally, first response is ~1-2 seconds (prompt processing + initial generation) and steady-state is 31 tokens/sec — about 10-20x slower. For iterative work where you're reading and responding quickly, this is noticeable. For longer tasks where the model is generating extended code or explanations, the speed difference is less jarring.
 
 ## Caveats
 
-> **[TODO: What didn't work well? What surprised you? Examples:]**
->
-> - Model quality compared to Claude (is it "good enough" for code?)
-> - Tool calling reliability (do tools get called correctly every time?)
-> - Any quirks or bugs you hit
-> - Situations where the API model is clearly better
-> - Things you had to work around
+**Sliding window attention is disabled.** The server logs `swa_full is not supported by this model, it will be disabled`. This means for long contexts the model falls back to full quadratic attention, which is why you see that 15% throughput drop between 1K and 13K tokens. It's not a dealbreaker for typical Claude Code sessions (which rarely push past 16K of actual content), but it does cap the effective context well below the model's 262K training length.
+
+**The `--reasoning off` flag was necessary.** Qwen3.6 supports a "chain of thought" reasoning mode that outputs hidden tokens before its final response. The Claude API doesn't support streaming reasoning tokens in a way that works with Claude Code's interaction model, so the model would either hang or produce garbled output with reasoning enabled. This is a known limitation and removes a capability that Qwen's reasoning models offer.
+
+**Prompt cache invalidation is aggressive.** The server logs show context checkpoints being invalidated during processing (`forced full prompt re-processing due to lack of cache data`). The log line `swa or hybrid/recurrent memory` suggests this is a known issue with certain model architectures that use non-standard memory patterns. Each new interaction after a pause requires full re-processing of the context, which adds latency to follow-up messages.
+
+**Memory is tight.** 31-32 GB used for the model leaves very little headroom. If you're running Xcode, Docker, or a browser with many tabs, you'll eat into that buffer. The `--mlock` and `--no-mmap` flags prevent swapping, but if total memory exceeds ~35 GB, `llama.cpp` will refuse to start or fall back to CPU inference, which is orders of magnitude slower.
+
+**Tool calling works but isn't bulletproof.** The model calls tools correctly most of the time, but there are occasional failures — wrong parameter names, missing arguments, or hallucinated tool names. Claude's API model virtually never makes these mistakes. For code generation and text editing, the quality is good enough for routine tasks. For complex multi-step refactors or unfamiliar codebases, you'll likely want the API model as a fallback.
+
+**It's slower.** By a lot. Claude's API responds in sub-second time for most prompts. Locally, the first token takes ~30 ms to arrive (which feels instant), but the actual prompt processing for a 300-token input takes 774 ms, and steady-state generation is ~31 tokens/sec. The gap is most noticeable during interactive conversations where you're reading responses and firing follow-ups quickly — it feels like chatting with a very patient colleague who writes at the speed of a snail. For batch tasks (generate a whole file, run tests, explain a long output) the slowness is less jarring because the model is doing useful work rather than waiting for a response.
 
 ## Choosing a Model for Your Mac
 
@@ -287,14 +295,14 @@ These chips can run anything that fits. The practical limit is inference speed �
 | Rate limits | Yes (tier-dependent) | None |
 | Tool calling | Full, reliable | Works, depends on model |
 | Internet access | Via tools you provide | Via tools you provide |
-| First-token latency | ~200-500ms | [TODO] |
-| Context window | 200K tokens | [TODO] (effective) |
+| First-token latency | ~200-500ms | ~30ms (server), ~774ms (full prompt processing for 331 tokens) |
+| Context window | 200K tokens | ~32K (effective, SWA disabled for this model) |
 | Model quality | SOTA | Good, not SOTA |
 | Privacy | Data leaves your machine | Entirely local |
 
 ## Summary
 
-Running Claude Code locally on Apple Silicon is practical. The combination of sparse-activated models and unified memory makes the hardware a surprisingly good fit. It won't replace the API for everything — the model isn't as smart, and the ecosystem is less polished — but for routine coding tasks, it eliminates the frustration of rate-limit throttled sessions.
+Running Claude Code locally on Apple Silicon is practical, but it comes with trade-offs. The combination of sparse-activated models and unified memory makes the hardware a surprisingly good fit — the model is smart enough for routine coding tasks, and the setup eliminates the frustration of rate-limit throttled sessions. But it's slower than the API (roughly 10-20x for response generation) and the effective context window is capped around 32K tokens because this model doesn't support sliding window attention. For heavy iterative work where API limits are a problem, it's a great alternative. For speed and maximum quality, the API still wins.
 
 The key flags are `-ngl 999` (GPU offload), `--mlock --no-mmap` (keep the model in RAM), and `--cache-type-k/v q8_0` (fit more context in memory). Everything else is tuning.
 
