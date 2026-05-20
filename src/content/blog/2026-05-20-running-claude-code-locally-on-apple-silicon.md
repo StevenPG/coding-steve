@@ -128,7 +128,21 @@ CPU threads. The M3 Pro has 12 cores (6 performance + 6 efficiency). Use 6 threa
 
 **`-c 65536`**
 
-Context window size in tokens. 64K tokens is a lot of text — roughly 48,000 words. The Qwen3.6-35B-A3B context window supports this, but each 32K tokens of context consumes roughly 1-2 GB of RAM for the KV cache at default precision. If you're tight on memory, drop to 32768.
+Context window size in tokens. 64K tokens is roughly 48,000 words. This is the flag you'll most likely need to tune.
+
+Long Claude Code sessions — iterative debugging, multi-file refactors, or sessions with many tool calls accumulating — can exhaust this limit. When context fills and `--no-context-shift` is set, the server rejects new requests rather than silently truncating. You'll hit an error and the session becomes unusable until you restart with a larger context or start fresh.
+
+The constraint is RAM. KV cache consumption scales roughly linearly with context length. Based on the post's measured ~1.2 GB for a 32K context at Q8.0, here's what to expect on a 36 GB machine:
+
+| `-c` value | Approx. KV cache | Notes |
+|---|---|---|
+| 16384 (16K) | ~0.6 GB | Comfortable floor; fine for short sessions |
+| 32768 (32K) | ~1.2 GB | Reasonable default for most coding tasks |
+| 65536 (64K) | ~2.4 GB | What this guide uses; fits well on 36 GB |
+| 98304 (96K) | ~3.6 GB | Tight; requires minimal other apps running |
+| 131072 (128K) | ~4.8 GB | Marginal; may refuse to start with browser/Docker open |
+
+On a 36 GB machine with the model occupying ~30-32 GB, you have roughly 4-6 GB of headroom. A 64K context sits comfortably. A 128K context is possible but leaves almost no margin. If the server refuses to start, it's almost always this flag — drop it by half and try again.
 
 **`-b 1024`**
 
@@ -235,6 +249,8 @@ Measured on an M3 Pro (36 GB) with the model fully offloaded to the GPU via Meta
 **Prompt cache invalidation is aggressive.** The server logs show context checkpoints being invalidated during processing (`forced full prompt re-processing due to lack of cache data`). The log line `swa or hybrid/recurrent memory` suggests this is a known issue with certain model architectures that use non-standard memory patterns. Each new interaction after a pause requires full re-processing of the context, which adds latency to follow-up messages.
 
 **Memory is tight.** 31-32 GB used for the model leaves very little headroom. If you're running Xcode, Docker, or a browser with many tabs, you'll eat into that buffer. The `--mlock` and `--no-mmap` flags prevent swapping, but if total memory exceeds ~35 GB, `llama.cpp` will refuse to start or fall back to CPU inference, which is orders of magnitude slower.
+
+**Context exhaustion is a real-world problem.** The `-c 65536` value sounds generous until you hit it. A session that opens several large files, runs a few build commands, and iterates on errors can push 20-30K tokens faster than you'd expect. Once the limit is reached with `--no-context-shift`, the server stops accepting new prompts. The fix is to either restart the server with a larger `-c` value (and accept the RAM hit), start a new Claude Code session, or lower the context if startup is failing due to memory. I went through a few tries before settling on 65536 — 32768 ran out mid-session on longer refactors, and 128K wouldn't start reliably with other apps open.
 
 **Tool calling works but isn't bulletproof.** The model calls tools correctly most of the time, but there are occasional failures — wrong parameter names, missing arguments, or hallucinated tool names. Claude's API model virtually never makes these mistakes. For code generation and text editing, the quality is good enough for routine tasks. For complex multi-step refactors or unfamiliar codebases, you'll likely want the API model as a fallback.
 
