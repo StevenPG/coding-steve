@@ -1,0 +1,298 @@
+---
+author: StevenPG
+pubDatetime: 2026-05-20T12:00:00.000Z
+title: Running Claude Code Locally on Apple Silicon
+slug: running-claude-code-locally-on-apple-silicon
+featured: false
+ogImage: /assets/default-og-image.png
+tags:
+  - ai
+  - llm
+  - claude
+description: How to run Claude Code locally on a Mac using llama.cpp, Qwen3.6-35B, and Apple Silicon to avoid API limits.
+---
+
+## Brief
+
+This guide shows you how to run Claude Code locally on an Apple Silicon Mac using `llama.cpp` and the Qwen3.6-35B model. No API key, no rate limits, no per-request billing. You'll need a Mac with an M-series chip and some comfort with the command line.
+
+The end result is a fully functional Claude Code session — tool use, file editing, shell execution, the whole agentic workflow — running entirely on your machine.
+
+## Why Go Local
+
+I kept hitting Claude API rate limits on the $20 Pro tier. Not from heavy use, but from the kind of session that naturally accumulates — iterative debugging, refactoring, back-and-forth exploration. Once the throttle hits, the session becomes unusable until it resets.
+
+My first stop was Ollama. It's the easiest way to run an LLM locally on macOS. But Ollama's API doesn't support tool calling. Claude Code requires tool calling to do anything useful — file editing, shell execution, search-and-replace. Without it, Ollama is just a chat window.
+
+The path from there was `llama.cpp`'s `llama-server`. It exposes an OpenAI-compatible API that the Claude SDK can talk to using the `anthropic` backend. No tool-calling translation layer. No abstraction tax. Just a local HTTP server that behaves like the Anthropic API.
+
+## Why Qwen3.6-35B-A3B
+
+The model choice matters more than you'd think — not every model fits in an M3 Pro's memory, and not every model that fits runs fast enough to be usable.
+
+Qwen3.6-35B-A3B is a [mixture-of-experts](https://qwenlm.github.io/blog/qwen3.6/) model from the Qwen team. It has 35 billion total parameters but only activates about 3 billion per token. That sparse activation has two consequences that matter for local deployment:
+
+1. **Memory footprint.** A dense 35B model in Q4 quantization needs roughly 18-20 GB of VRAM. On a 16 GB M3/M3 Pro, that means swapping. The A3B variant, because only 3B parameters are active per token, needs about the same memory as a 5-7B dense model — roughly 3-4 GB for the weights. The rest of the RAM goes to KV cache and context.
+2. **Inference speed.** Active parameters scale with compute, not total parameters. Token generation is closer to a 3B model's speed while retaining the quality of a much larger model.
+
+### Other models worth considering
+
+| Model | Active Params | Q4 Weight Size | Best For |
+|---|---|---|---|
+| Qwen3.6-35B-A3B | ~3B | ~3 GB | General purpose, best quality/size balance |
+| Qwen3-Coder-30B-A3B | ~3B | ~3 GB | Code-focused tasks |
+| Qwen3.6-235B-A22B | ~2B | ~12 GB | Maximum quality (needs 32 GB+ RAM) |
+| Gemma 3 27B | 27B (dense) | ~16 GB | Dense model quality, tight on 16 GB Macs |
+| DeepSeek-R1-Distill-Qwen-32B | 32B (dense) | ~20 GB | Reasoning tasks (may swap on 18 GB) |
+
+The sparse-activated models (the "A3B" series) are the sweet spot for 16-18 GB Macs, but on a 36 GB machine like my M3 Pro you can comfortably run larger models too. Anything dense above ~13B parameters at Q4 starts pressing against the unified memory limit on 16-18 GB machines. On 36 GB, you have room for Dense 13B models at Q4, or the sparse Qwen3.6-235B-A22B.
+
+## Understanding Quantization
+
+The models you'll see on Hugging Face come in many quantization variants. Quantization is the process of reducing the precision of a model's weights to save memory and speed up inference. A full-precision model stores each weight as a 32-bit floating-point number (FP32). Quantization maps those values to a smaller set — 8 bits (INT8), 4 bits (INT4), and so on.
+
+The tradeoff is straightforward: lower precision means smaller files and faster inference, but potentially degraded model quality. The model was trained or fine-tuned with the quantization in mind, so a well-quantized model at Q4 can be nearly indistinguishable from its FP16 original. A poorly quantized one will be noticeably dumber.
+
+**GGUF** is the file format used by `llama.cpp`. It stores the quantized weights along with metadata (model architecture, quantization scheme, etc.). When you see a model tag like `UD-Q4_K_M`, that's a GGUF quantization identifier.
+
+Here's a quick reference for the quantization schemes you'll encounter:
+
+| Scheme | Bits | Quality | Weight Size (35B model) | Notes |
+|---|---|---|---|---|
+| FP16 | 16 | Reference | ~70 GB | Full precision, rarely needed locally |
+| Q8_0 | 8 | Near-lossless | ~37 GB | Good for KV cache, overkill for weights |
+| Q5_0 | 5 | Very good | ~23 GB | Sweet spot for larger models on big Macs |
+| Q4_K_M | 4 (mixed) | Good | ~19 GB | Mixed Q4/Q6 quantization, balanced |
+| Q3_K_M | 3 (mixed) | Acceptable | ~15 GB | Noticeable quality drop |
+| Q2_K | 2 (mixed) | Poor | ~12 GB | Only if you're desperate for space |
+
+The `_K_M` variants use mixed precision — some weights get quantized more aggressively than others, based on their importance to the model's output. `K_M` is generally the best quality/size tradeoff in the K-quants family. If you have the RAM, prefer Q5_0 or Q8_0. If you need to fit in memory, Q4_K_M is the default recommendation.
+
+The KV cache is a separate concern from the model weights. It's the stored key/value pairs for each token in the context, and it also has a precision setting. That's what the `--cache-type-k q8_0` and `--cache-type-v q8_0` flags control — quantizing the cache independently of the weights so you can fit more context in the same amount of RAM without degrading the model itself.
+
+## Prerequisites
+
+Install `llama.cpp` via Homebrew:
+
+```bash
+brew install llama.cpp
+```
+
+This gives you `llama-server`, which is the only binary you need.
+
+## The Server Command
+
+This is the command that runs on my M3 Pro (36 GB):
+
+```bash
+llama-server \
+  -hf unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q4_K_M \
+  --port 8131 \
+  -ngl 999 \
+  -t 6 \
+  -c 65536 \
+  -b 1024 \
+  -ub 1024 \
+  --parallel 1 \
+  -fa on \
+  --jinja \
+  --keep 1024 \
+  --cache-type-k q8_0 \
+  --cache-type-v q8_0 \
+  --swa-full \
+  --no-context-shift \
+  --reasoning off \
+  --mlock \
+  --no-mmap
+```
+
+It downloads the model on first run (about 3 GB over the network) and caches it locally. Subsequent starts are immediate.
+
+### Flag-by-flag explanation
+
+**`-hf unsloth/Qwen3.6-35B-A3B-GGUF:UD-Q4_K_M`**
+
+Downloads and loads the model directly from Hugging Face. The `unsloth/` organization provides community-optimized GGUF quantizations. `UD-Q4_K_M` is a specific quantization variant — Q4 means 4-bit, `K_M` is a medium-quality K-quants scheme that balances quality and size. Lower quantizations (Q3, Q2) save memory but degrade model quality noticeably.
+
+**`--port 8131`**
+
+The HTTP port the server listens on. The Claude SDK will connect here instead of Anthropic's API endpoint. Pick any unused port.
+
+**`-ngl 999`**
+
+Number of GPU layers to offload. 999 means "offload everything to the GPU." On Apple Silicon, this uses Metal. The M3 Pro's GPU is orders of magnitude faster than the CPU for transformer inference, so this is the single most important flag for speed.
+
+**`-t 6`**
+
+CPU threads. The M3 Pro has 12 cores (6 performance + 6 efficiency). Use 6 threads for the CPU portions. This leaves the other 6 cores free for your OS and other applications. If you're running on a Max or Ultra with more cores, you can go higher. If you want the server to be completely non-blocking, drop to 4.
+
+**`-c 65536`**
+
+Context window size in tokens. 64K tokens is a lot of text — roughly 48,000 words. The Qwen3.6-35B-A3B context window supports this, but each 32K tokens of context consumes roughly 1-2 GB of RAM for the KV cache at default precision. If you're tight on memory, drop to 32768.
+
+**`-b 1024`**
+
+Batch size — the number of tokens processed in parallel during inference. Larger batches improve throughput on Apple Silicon's GPU but consume more memory. 1024 is a reasonable default.
+
+**`-ub 1024`**
+
+Ubatch (micro-batch) size — the number of tokens processed per internal compute step. Smaller ubatch values use less memory but can reduce throughput. Keeping it equal to batch size is fine for most use cases.
+
+**`--parallel 1`**
+
+Number of context sequences to run in parallel. Set to 1 because with a single user session, there's no benefit to running multiple contexts. Higher values consume proportionally more memory.
+
+**`-fa on`**
+
+Enables flash attention. This is an attention optimization that reduces memory bandwidth pressure during self-attention computation. On Apple Silicon, this can provide a meaningful speedup because it reduces the number of memory accesses per attention head.
+
+**`--jinja`**
+
+Enables Jinja templating for chat templates. Required for proper tool calling format with Claude models. Without this, the server falls back to a simpler template that may not support function calling correctly.
+
+**`--keep 1024`**
+
+Keep the model in memory for 1024 seconds (about 17 minutes) of inactivity before unloading. Without this, the model would be evicted after the last request, and the next request would trigger a slow reload. Set to `0` to never unload, or a higher value if your sessions are longer apart.
+
+**`--cache-type-k q8_0`** and **`--cache-type-v q8_0`**
+
+Override the precision of the K (key) and V (value) KV cache tensors to Q8.0 (8-bit). The default is usually F16, which uses 4x more memory. Q8.0 cache is essentially indistinguishable from F16 in quality but cuts cache memory in half. This is critical for fitting larger context windows in limited RAM.
+
+**`--swa-full`**
+
+Enables sliding window attention across the entire context window. Standard attention scales quadratically with context length — doubling the context quadruples the compute. Sliding window attention reduces this to linear scaling, which means faster inference on long prompts and better handling of follow-up messages that build on prior context.
+
+**`--no-context-shift`**
+
+Disable context shifting. By default, when the context fills up, llama.cpp shifts the window forward, discarding the oldest tokens. With this flag off, the server rejects new tokens that exceed the context window rather than silently dropping conversation history. Safer — you'll get an error instead of losing context.
+
+**`--reasoning off`**
+
+Disable the reasoning token mode. Qwen3.6 supports a "chain of thought" reasoning mode where the model outputs hidden reasoning tokens before its final response. We turn it off here because the Claude API doesn't support streaming reasoning tokens in a way that works well with Claude Code's interaction model.
+
+**`--mlock`**
+
+Lock the model in memory using `mlock()`. On macOS, this prevents the OS from swapping the model weights to disk. Without this, if other applications consume RAM, the kernel could page your model weights out, causing massive latency spikes when they're paged back in.
+
+**`--no-mmap`**
+
+Disable memory-mapped file I/O for loading the model. Combined with `--mlock`, this ensures the model is fully loaded into physical RAM rather than being memory-mapped from disk. On systems with enough RAM (which is the point of `--mlock`), this avoids subtle latency issues from page faults.
+
+### Running as a Script + Alias
+
+Pasting a long command into the terminal every time is tedious. Create a script (e.g., `./qclaude`) with the server command, make it executable, and add an alias in your shell config:
+
+```bash
+# In ~/.zshrc or ~/.bashrc
+alias qclaude='~/path/to/your/dir/qclaude'
+```
+
+Or run it inline:
+
+```bash
+ANTHROPIC_BASE_URL=http://127.0.0.1:8131 ANTHROPIC_AUTH_TOKEN=local claude --dangerously-skip-permissions
+```
+
+This approach starts the Claude Code session directly with the environment variables set for that invocation only — no persistent config changes needed. The `--dangerously-skip-permissions` flag skips the permission prompts for tool use (file edits, shell commands). Remove it if you want Claude Code to ask for confirmation before each action.
+
+## Connecting Claude Code
+
+Configure Claude Code to use the local server by editing `~/.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:8131",
+    "ANTHROPIC_AUTH_TOKEN": "local"
+  }
+}
+```
+
+That's it. Claude Code uses the Anthropic SDK, which reads these environment variables. The base URL points to your local server, and the auth token can be anything — the local server doesn't validate it.
+
+Restart any existing Claude Code sessions for the changes to take effect. The first prompt will be slower (the model is already in memory thanks to `--keep`), but subsequent interactions will be fast.
+
+## Performance
+
+> **[TODO: Insert your performance numbers here. Things to measure:]**
+>
+> - First-token latency (time from sending a prompt to receiving the first token)
+> - Tokens per second (steady-state throughput)
+> - How the model handles long context (does it slow down past 16K/32K tokens?)
+> - Memory usage at idle (check with `top` or `htop`)
+> - Any noticeable quality gaps vs Claude Haiku/Pro
+
+## Caveats
+
+> **[TODO: What didn't work well? What surprised you? Examples:]**
+>
+> - Model quality compared to Claude (is it "good enough" for code?)
+> - Tool calling reliability (do tools get called correctly every time?)
+> - Any quirks or bugs you hit
+> - Situations where the API model is clearly better
+> - Things you had to work around
+
+## Choosing a Model for Your Mac
+
+The model you can run depends entirely on how much unified memory your Mac has. The KV cache also consumes RAM, so you can't load a model whose weight size equals your total RAM. Here's a practical guide for each Apple Silicon tier, using Q4_K_M quantization as the default.
+
+### M1 / M2 / M2 Pro / M3 (16 GB)
+
+| Model | Weight Size | Viable? | Notes |
+|---|---|---|---|
+| Qwen3.6-35B-A3B | ~3 GB | Yes | Sweet spot. Plenty of RAM for context. |
+| Qwen3-Coder-30B-A3B | ~3 GB | Yes | Code-focused alternative. |
+| Qwen3.6-235B-A22B | ~12 GB | Yes | Larger but still fits. Slower due to more active params. |
+| Gemma 3 27B | ~16 GB | Marginal | No room for meaningful context. Drop quantization or pick a smaller model. |
+| Any dense model >13B | >8 GB | Marginal at Q4 | Possible, but context window will be very limited. |
+
+### M3 Pro (18 GB)
+
+This tier is tight. The 18 GB limit leaves about 12-13 GB usable for the model + OS after accounting for macOS overhead. Sparse-activated models are essential.
+
+| Model | Weight Size | Viable? | Notes |
+|---|---|---|---|
+| Qwen3.6-35B-A3B | ~3 GB | Yes | Comfortable fit. ~10 GB free for context. |
+| Qwen3-Coder-30B-A3B | ~3 GB | Yes | Code-focused alternative. |
+| Qwen3.6-235B-A22B | ~12 GB | Marginal | Barely fits. ~1 GB for context. Drop `-c` to 8192 or skip. |
+| Dense 13B at Q4 | ~8 GB | Marginal | ~4 GB for context. Possible but tight. |
+
+### M2 Max / M3 Pro / M3 Max (36 GB)
+
+This is the setup described in this guide. The 36 GB limit leaves about 28-30 GB usable. You can comfortably run both sparse and dense models with generous context windows.
+
+| Model | Weight Size | Viable? | Notes |
+|---|---|---|---|
+| Qwen3.6-235B-A22B | ~12 GB | Yes | Great fit. ~16 GB for context — can push to 64K+. |
+| Gemma 3 27B (Q4) | ~16 GB | Yes | Dense model quality, plenty of room for context. |
+| Any dense 14-20B at Q4 | ~8-12 GB | Yes | Good quality, room for context. |
+| Qwen3.6-35B-A3B | ~3 GB | Yes | Runs fine, but you're leaving quality on the table — pick a larger model. |
+
+### M4 Pro / M4 Max / M4 Ultra (32-128 GB)
+
+These chips can run anything that fits. The practical limit is inference speed — larger models take longer to generate tokens, even with GPU offload. For 32 GB (M4 Pro), treat it like the 36 GB tier. For 48 GB (M4 Max), dense 30B models at Q4 become comfortable. At 128 GB (M4 Ultra), you're in "run a dense 70B+ model locally" territory.
+
+### General Rules of Thumb
+
+1. **Available RAM ≈ total RAM - 6 GB** (macOS overhead + other processes). On a 36 GB machine, that's ~28-30 GB. On 18 GB, ~12-13 GB.
+2. **KV cache at Q8_0 ≈ context_tokens * hidden_dim * 2 bytes * 2 (K+V) / model_dim** — roughly 0.5-1 GB per 16K tokens depending on model architecture. A 64K context on Qwen3.6-35B-A3B with Q8_0 cache uses roughly 2-3 GB.
+3. **Always leave headroom.** If the model + estimated cache exceeds your RAM, you'll swap and the GPU offload advantage is meaningless.
+
+## Comparison
+
+| Aspect | Claude API (Pro) | Qwen3.6-35B-A3B Local |
+|---|---|---|
+| Cost | $20/mo + overage | Hardware you already own |
+| Rate limits | Yes (tier-dependent) | None |
+| Tool calling | Full, reliable | Works, depends on model |
+| Internet access | Via tools you provide | Via tools you provide |
+| First-token latency | ~200-500ms | [TODO] |
+| Context window | 200K tokens | [TODO] (effective) |
+| Model quality | SOTA | Good, not SOTA |
+| Privacy | Data leaves your machine | Entirely local |
+
+## Summary
+
+Running Claude Code locally on Apple Silicon is practical. The combination of sparse-activated models and unified memory makes the hardware a surprisingly good fit. It won't replace the API for everything — the model isn't as smart, and the ecosystem is less polished — but for routine coding tasks, it eliminates the frustration of rate-limit throttled sessions.
+
+The key flags are `-ngl 999` (GPU offload), `--mlock --no-mmap` (keep the model in RAM), and `--cache-type-k/v q8_0` (fit more context in memory). Everything else is tuning.
