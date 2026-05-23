@@ -1,16 +1,30 @@
+---
+author: StevenPG
+pubDatetime: 2026-05-22T12:00:00.000Z
+title: How I built Visual Finances
+slug: how-i-built-visual-finances
+featured: false
+ogImage: /assets/default-og-image.png
+tags:
+  - finances
+description: How I built a free suite of calculators for the modern web.
+---
+
 # How I Built Visual Finances: A Free Calculator Suite with Astro + React Islands
 
-I got frustrated looking for a simple compound interest calculator. Every site I found was either behind a soft paywall, required an email, loaded three ad networks before rendering, or gave me a result I couldn't share with anyone. I just wanted a clean calculator I could send to a friend with my numbers already filled in.
+## Brief
 
-So I built [Visual Finances](https://visualfinances.com) — a free, browser-only financial calculator suite with 32 calculators across saving, borrowing, retirement, income, and spending categories. No accounts. No email gates. No ads. Here's how it works under the hood.
+I kept running into the same problem with financial calculators online: they were either locked behind a paywall, required an email to access the "advanced" version, or just wouldn't let you share your inputs with anyone. I wanted a calculator I could send to someone with my exact numbers already filled in.
+
+[Visual Finances](https://visualfinances.com) is what I built to solve that — a free, browser-only financial calculator suite with 32 calculators across saving, borrowing, retirement, income, and spending categories. No accounts, no email gates, no ads. This post covers the technical decisions behind it.
 
 ---
 
-## The Problem I Was Actually Solving
+## The Problem
 
-The existing financial calculator landscape has two modes: oversimplified (one input, one output) or gated (give us your email for the "advanced" tab). Neither is useful for someone who wants to actually think through a financial decision.
+Financial calculator sites tend toward two failure modes: oversimplified (one input, one output) or gated (give us your email for the "advanced" tab). Neither is useful for someone who wants to actually think through a financial decision.
 
-I wanted a tool where you could pull up the rent-vs-buy calculator, tweak numbers until they matched your situation, and then copy the URL and send it to your partner or your financial advisor with the state intact. That last part — the shareable URL — turned out to be the most technically interesting piece of the whole project.
+The feature I cared most about was a shareable URL — pull up the rent-vs-buy calculator, tweak numbers until they match your situation, then copy the URL and send it to your partner or financial advisor with state intact. That constraint turned out to be the most technically interesting part of the project.
 
 ---
 
@@ -50,7 +64,7 @@ Each calculator is a self-contained React component. They all share a common lay
 />
 ```
 
-The piece I'm most happy with is `useHashState`. Instead of a backend or localStorage, calculator input state lives in the URL hash fragment. The hash never goes to a server — it's purely client-side — so your loan amount and income are never in a server log anywhere.
+The most interesting piece is `useHashState`. Instead of a backend or localStorage, calculator input state lives in the URL hash fragment. The hash never goes to a server — it's purely client-side — so your loan amount and income are never in a server log anywhere.
 
 ```ts
 // Simplified version of the actual hook
@@ -107,32 +121,16 @@ The `relatedCalculators` array is the glue between content and tools. Each artic
 
 ---
 
-## SEO from the Start
-
-I added JSON-LD structured data on every page from day one rather than retrofitting it. Calculator pages get `HowTo` and `FAQPage` schema; the site root gets `WebApplication`; learn articles get `Article`. The sitemap (`@astrojs/sitemap`) runs at build time and I hand-tune `priority` and `changefreq` per page type.
-
-One thing I'd recommend to anyone building a content + tools hybrid: treat the article hub as its own first-class traffic channel. The calculators are the product, but people search for "how does compound interest work" far more than they search for "compound interest calculator." The learn articles do that mid-funnel work.
-
----
-
-## What I'd Do Differently
-
-A few honest notes:
-
-**Tailwind v3, not v4.** The project uses Tailwind via PostCSS — the Astro Tailwind integration was deprecated for Astro 6 compatibility, so I wired it up manually. The upgrade to Tailwind v4 is still on the list. It's not blocking anything, but it's a mild technical debt item.
-
-**The Cesium globe.** There's a 3D globe visualization powered by CesiumJS that I'm genuinely proud of, but the Cesium bundle is enormous. I had to write a custom asset-copy script (`copy-cesium-assets.mjs`) to handle its static workers and WASM files during the Astro build. If I were starting over, I'd evaluate whether a lighter visualization library could cover 90% of the use case with 10% of the bundle weight.
-
-**More keyboard accessibility earlier.** I had to go back and add proper `aria-label` attributes, focus ring styles, and keyboard navigation to the slider inputs after the fact. That's always faster to do right the first time.
-
----
-
 ## What's Next
 
-The organic traffic growth from the learn hub has been the biggest surprise. My goal is to keep expanding both the article count and the calculator coverage — particularly around more nuanced retirement and tax scenarios (Roth conversion ladders, IRMAA brackets, that sort of thing).
+The immediate roadmap is expanding coverage across all three areas of the site.
+
+On the calculator side, there are gaps in retirement and tax scenarios I want to fill — Roth conversion ladders, IRMAA bracket modeling, Social Security breakeven analysis, and marginal tax rate visualization. Each of these involves more complex math than the current set and needs better visualizations to be genuinely useful rather than just a number.
+
+Speaking of visualizations: most calculators currently display results as a table or a basic chart. I want to push further here — things like an interactive amortization timeline you can scrub through, a retirement projection that shows multiple scenarios overlaid, or a net worth curve that accounts for inflation. The goal is results that communicate the *shape* of a financial outcome, not just a single number.
+
+The learn hub is the third area. Each article is meant to pair with a calculator — explain the concept, then let the tool do the math. There are plenty of concepts worth covering that don't have articles yet, and each new article creates a natural entry point for users who land from search.
 
 If you want to try the site: [visualfinances.com](https://visualfinances.com)
 
-If you want to look at the code or open an issue: [github-url]
-
-Feedback welcome — especially on which calculators are missing and whether the existing ones match how you'd actually do the math.
+Feedback on missing calculators or where the math doesn't match your mental model is genuinely useful.
