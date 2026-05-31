@@ -325,3 +325,35 @@ The key flags are `-ngl 999` (GPU offload), `--mlock --no-mmap` (keep the model 
 ---
 
 *This post was written using Qwen3.6-35B-A3B running locally on a MacBook Pro with an M3 Pro chip (36 GB RAM).*
+
+## Addendum: Just Use OpenCode
+
+After going through all of this, there's a simpler path worth mentioning: [OpenCode](https://opencode.ai). It's an open-source terminal-based coding assistant that natively supports plugging in any OpenAI-compatible backend — including a local `llama-server` instance.
+
+Instead of wiring Claude Code up to a local model through an API proxy, you can drop an `opencode.json` config in your project and point it directly at your running server:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "openai-compatible": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "llama-server (local)",
+      "options": {
+        "baseURL": "http://127.0.0.1:8131/v1"
+      },
+      "models": {
+        "qwen3.6-coder": {
+          "name": "Qwen3.6 Coder (local)",
+          "limit": {
+            "context": 32768,
+            "output": 8192
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+That's it. OpenCode handles the rest — tool use, file edits, context management — without needing the Claude Code CLI or any API key. If your goal is a fully local, fully offline coding assistant, this is the lower-friction option.
