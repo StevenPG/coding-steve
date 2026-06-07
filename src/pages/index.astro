@@ -76,9 +76,9 @@ const yoe = new Date().getFullYear() - 2016
           <section id="featured">
             <h2>Featured</h2>
             <ul>
-              {featuredPosts.map(({ data, slug }) => (
+              {featuredPosts.map(({ data }) => (
                 <Card
-                  href={`/posts/${slug}/`}
+                  href={`/posts/${data.slug}/`}
                   frontmatter={data}
                   secHeading={false}
                 />
@@ -96,10 +96,10 @@ const yoe = new Date().getFullYear() - 2016
           <h2>Recent Posts</h2>
           <ul>
             {recentPosts.map(
-              ({ data, slug }, index) =>
+              ({ data }, index) =>
                 index < SITE.postPerIndex && (
                   <Card
-                    href={`/posts/${slug}/`}
+                    href={`/posts/${data.slug}/`}
                     frontmatter={data}
                     secHeading={false}
                   />
