@@ -43,7 +43,7 @@ jobs:
 
       - name: Install & Build
         run: |
-          npm install
+          npm ci
           npm run build
         working-directory: .
 
