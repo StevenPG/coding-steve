@@ -23,4 +23,12 @@ export const projects: Project[] = [
     tags: ["Web App"],
     image: "/assets/projects/visualfinances.png",
   },
+  {
+    name: "Elden Ring 3D Map",
+    url: "https://eldenring3dmap.stevenpg.com/",
+    description:
+      "An interactive 3D map of the Lands Between built with CesiumJS, rendering the Elden Ring overworld as a navigable 3D tileset with 170+ annotated Sites of Grace.",
+    tags: ["Web App", "3D", "Gaming"],
+    image: "/assets/projects/eldenring3dmap.png",
+  },
 ];
