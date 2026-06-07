@@ -37,8 +37,8 @@ for (const entry of sortedPosts) {
       <section class="month-group">
         <h2>{group.label}</h2>
         <ul>
-          {group.items.map(({ data, slug }) => (
-            <Card href={`/posts/${slug}/`} frontmatter={data} secHeading={false} />
+          {group.items.map(({ data }) => (
+            <Card href={`/posts/${data.slug}/`} frontmatter={data} secHeading={false} />
           ))}
         </ul>
       </section>
