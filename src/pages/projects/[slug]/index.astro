@@ -2,9 +2,11 @@
 import { getCollection, render } from "astro:content";
 import { SITE } from "@config";
 import Breadcrumbs from "@components/Breadcrumbs.astro";
+import Card from "@components/Card";
 import Footer from "@components/Footer.astro";
 import Header from "@components/Header.astro";
 import Layout from "@layouts/Layout.astro";
+import getPostsByTag from "@utils/getPostsByTag";
 
 export async function getStaticPaths() {
   const projects = await getCollection("projects", ({ data }) => !data.draft);
@@ -16,11 +18,26 @@ export async function getStaticPaths() {
 }
 
 const { project } = Astro.props;
-const { title, description, url, image, tags } = project.data;
+const { title, description, url, image, tags, relatedTag } = project.data;
 const { Content } = await render(project);
+
+const ogUrl = new URL(`/projects/${project.id}/index.png`, Astro.url.origin)
+  .href;
+
+const relatedPosts = relatedTag
+  ? getPostsByTag(
+      await getCollection("blog", ({ data }) => !data.draft),
+      relatedTag
+    )
+  : [];
 ---
 
-<Layout title={`${title} | ${SITE.title}`} description={description}>
+<Layout
+  title={`${title} | ${SITE.title}`}
+  description={description}
+  ogImage={ogUrl}
+  schemaType="SoftwareApplication"
+>
   <Header activeNav="projects" />
   <Breadcrumbs />
   <main id="main-content">
@@ -71,6 +88,23 @@ const { Content } = await render(project);
             />
           </svg>
         </a>
+      )
+    }
+
+    {
+      relatedPosts.length > 0 && (
+        <section class="mt-12">
+          <h2 class="text-xl font-semibold tracking-wide">Related Posts</h2>
+          <ul>
+            {relatedPosts.map(({ data }) => (
+              <Card
+                href={`/posts/${data.slug}/`}
+                frontmatter={data}
+                secHeading={false}
+              />
+            ))}
+          </ul>
+        </section>
       )
     }
   </main>

@@ -4,8 +4,8 @@ import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import Tag from "@components/Tag.astro";
 import Datetime from "@components/Datetime";
-import { render, type CollectionEntry } from "astro:content";
-import { slugifyStr } from "@utils/slugify";
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import { slugifyAll, slugifyStr } from "@utils/slugify";
 import ShareLinks from "@components/ShareLinks.astro";
 import { SITE } from "@config";
 
@@ -44,6 +44,7 @@ const layoutProps = {
   canonicalURL,
   ogImage: ogUrl,
   scrollSmooth: true,
+  schemaType: "BlogPosting" as const,
 };
 
 /* ========== Prev/Next Posts ========== */
@@ -54,6 +55,17 @@ const allPosts = posts.map(({ data: { title, slug } }) => ({
 }));
 
 const currentPostIndex = allPosts.findIndex(a => a.slug === post.data.slug);
+
+/* ========== Related Project ========== */
+
+const postTagSlugs = slugifyAll(tags);
+const projects = await getCollection(
+  "projects",
+  ({ data }) => !data.draft && !!data.relatedTag
+);
+const relatedProject = projects.find(({ data }) =>
+  postTagSlugs.includes(data.relatedTag as string)
+);
 
 const prevPost = currentPostIndex !== 0 ? allPosts[currentPostIndex - 1] : null;
 const nextPost =
@@ -90,6 +102,20 @@ const nextPost =
     <ul class="my-8">
       {tags.map(tag => <Tag tag={slugifyStr(tag)} />)}
     </ul>
+
+    {
+      relatedProject && (
+        <a
+          href={`/projects/${relatedProject.id}/`}
+          class="related-project-callout focus-outline mb-8 flex items-center gap-2 rounded-lg border border-skin-line bg-skin-card px-4 py-3 hover:border-skin-accent/50"
+        >
+          <span class="opacity-70">Related project:</span>
+          <span class="font-semibold text-skin-accent">
+            {relatedProject.data.title}
+          </span>
+        </a>
+      )
+    }
 
     <div
       class="flex flex-col-reverse items-center justify-between gap-6 sm:flex-row-reverse sm:items-end sm:gap-4"

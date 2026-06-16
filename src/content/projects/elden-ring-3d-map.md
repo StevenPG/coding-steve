@@ -9,6 +9,7 @@ tags:
   - Gaming
 featured: true
 order: 3
+relatedTag: cesium
 ---
 
 An interactive 3D map of the Lands Between built with CesiumJS, rendering the Elden Ring overworld as a navigable 3D tileset with 170+ annotated Sites of Grace.
