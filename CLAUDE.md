@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is **Coding Steve** (stevenpg.com), a personal tech blog built with the AstroPaper theme on **Astro 4**. It uses React for interactive components, TailwindCSS for styling, and deploys to **Cloudflare Pages** via GitHub Actions on push to `main`.
+This is **Coding Steve** (stevenpg.com), a personal tech blog and project hub built on **Astro 6** (originally based on the AstroPaper theme, since customized with its own palette, content collections, and homepage structure). It uses React for interactive components, TailwindCSS for styling, and deploys to **Cloudflare Pages** via GitHub Actions on push to `main`.
 
 ## Commands
 
@@ -19,7 +19,8 @@ This is **Coding Steve** (stevenpg.com), a personal tech blog built with the Ast
 
 ## Architecture
 
-- **Blog posts**: Markdown files in `src/content/blog/` with Zod-validated frontmatter (defined in `src/content/config.ts`)
+- **Blog posts**: Markdown files in `src/content/blog/` with Zod-validated frontmatter (defined in `src/content.config.ts`)
+- **Projects**: Markdown files in `src/content/projects/` (same `content.config.ts`), rendered at `/projects/` and `/projects/<slug>/`; an optional `relatedTag` field cross-links a project to blog posts sharing that tag
 - **Site config**: `src/config.ts` — site metadata, social links, pagination settings
 - **Astro config**: `astro.config.ts` — integrations (Tailwind, React, Sitemap, Partytown for analytics), remark plugins (TOC, collapse), Shiki code highlighting
 - **Layouts/Pages**: `src/layouts/` and `src/pages/` — Astro file-based routing
