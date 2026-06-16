@@ -1,6 +1,6 @@
 ---
 author: StevenPG
-pubDatetime: 2025-08-00T12:00:00.000Z
+pubDatetime: 2025-08-01T12:00:00.000Z
 title: Building a Website Purely with Vibes
 slug: building-webapp-with-vibes
 featured: false
