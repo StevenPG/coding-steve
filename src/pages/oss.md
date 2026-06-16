@@ -7,31 +7,34 @@ I am a passionate advocate for open-source software and believe in giving back t
 
 ## My Projects
 
-### [instancio-gis](https://github.com/stevenpg/instancio-gis)
-**Core Maintainer**
+<details class="oss-box">
+<summary><span class="oss-box-title">instancio-gis</span><span class="oss-box-role">Core Maintainer</span></summary>
 
-An extension for the [Instancio](https://www.instancio.org/) library that enables automated generation of geospatial objects (JTS) for Java testing.
+An extension for the [Instancio](https://www.instancio.org/) library that enables automated generation of geospatial objects (JTS) for Java testing. [View on GitHub](https://github.com/stevenpg/instancio-gis)
 
 *   **Impact:** Simplifies the testing of GIS-enabled applications by removing the boilerplate required to create valid, complex geometries.
 *   **Technologies:** Java, JTS (Java Topology Suite), Instancio SPI.
 *   **Key Achievement:** Implemented a seamless integration using Java SPI, allowing users to generate random, valid Polygons, Points, and LineStrings with zero configuration.
 *   **Blog Post:** [Writing an Instancio Extension Library](/posts/writing-instancio-extension/)
 
-### [spring-boot-starter-page-jackson3](https://github.com/StevenPG/spring-boot-starter-page-jackson3)
-**Core Maintainer**
+</details>
 
-A Spring Boot 4 auto-configuration starter that fills a gap in the Spring ecosystem: Jackson 3 cannot deserialize `org.springframework.data.domain.Page<T>` out of the box when consuming paginated REST responses.
+<details class="oss-box">
+<summary><span class="oss-box-title">spring-boot-starter-page-jackson3</span><span class="oss-box-role">Core Maintainer</span></summary>
+
+A Spring Boot 4 auto-configuration starter that fills a gap in the Spring ecosystem: Jackson 3 cannot deserialize `org.springframework.data.domain.Page<T>` out of the box when consuming paginated REST responses. [View on GitHub](https://github.com/StevenPG/spring-boot-starter-page-jackson3)
 
 *   **Impact:** Eliminates the need for copy-pasting a `RestPage` workaround into every project that consumes paginated APIs in Spring Boot 4.
 *   **Technologies:** Java, Spring Boot 4, Spring Data Commons 4, Jackson 3, Gradle.
 *   **Key Achievement:** Identified the root cause (Spring Data's `PageModule` is serialization-only), diagnosed a misleading null-primitive error that masked the actual fix, and published a minimal zero-config solution to Maven Central.
 *   **Blog Post:** [Fixing Page<T> Deserialization in Spring Boot 4 with Jackson 3](/posts/spring-boot-4-page-deserialization-jackson3)
 
----
+</details>
 
 ## Contributions
 
-### Spring Cloud Stream
+<details class="oss-box">
+<summary><span class="oss-box-title">Spring Cloud Stream</span></summary>
 
 I am a frequent user and occasional contributor to the Spring Cloud Stream ecosystem, focusing on improving the developer experience and expanding API capabilities.
 
@@ -44,19 +47,24 @@ I am a frequent user and occasional contributor to the Spring Cloud Stream ecosy
 *   **Observability:** Added targeted trace logging to assist in debugging complex stream processing issues.
     *   [Issue #2802: Trace Log Addition](https://github.com/spring-cloud/spring-cloud-stream/issues/2802)
 
-### Headlamp (Kubernetes SIGs)
+</details>
+
+<details class="oss-box">
+<summary><span class="oss-box-title">Headlamp (Kubernetes SIGs)</span></summary>
 
 [Headlamp](https://headlamp.dev/) is a Kubernetes web UI maintained under kubernetes-sigs. It provides an extensible, user-friendly dashboard for managing Kubernetes clusters.
 
 *   **Feature: ClusterTable Settings Persistence:** Implemented localStorage persistence for ClusterTable column visibility, sorting, and filter settings. Lifted shared table settings helpers out of ResourceTable into a reusable module, enabling the ClusterTable to retain user customizations across page navigations and browser refreshes.
     *   [Issue #4711: ClusterTable does not store table settings between page reloads](https://github.com/kubernetes-sigs/headlamp/issues/4711)
     *   [PR #4712: Lift up tableSettings helpers and add localStorage to ClusterTable](https://github.com/kubernetes-sigs/headlamp/pull/4712) (Merged — [v0.41.0](https://github.com/kubernetes-sigs/headlamp/releases/tag/v0.41.0))
-
 *   **Bug Fix: Cluster Rename with Special Characters:** Diagnosed and fixed a backend bug where clusters with special characters in their names (e.g., AWS EKS clusters containing forward slashes) would silently disappear from the UI after being renamed. The root cause was a mismatch between how Headlamp rendered the cluster name and how the backend identified it during a rename operation.
     *   [Issue #4813: Cluster rename bug with special characters](https://github.com/kubernetes-sigs/headlamp/issues/4813)
     *   [PR #4819: Backend cluster rename bug clusters with special characters](https://github.com/kubernetes-sigs/headlamp/pull/4819) (Merged — [v0.41.0](https://github.com/kubernetes-sigs/headlamp/releases/tag/v0.41.0))
 
-### Instancio
+</details>
+
+<details class="oss-box">
+<summary><span class="oss-box-title">Instancio</span></summary>
 
 Contributed to the core library to expand its built-in generation capabilities.
 
@@ -64,6 +72,6 @@ Contributed to the core library to expand its built-in generation capabilities.
     *   [Issue #951: Add Spatial Support](https://github.com/instancio/instancio/issues/951)
     *   [Additional Spatial Contribution](https://github.com/instancio/instancio/commit/58a6677b4eeb99d8b0f7c534868fc0f492d8db4a)
 
----
+</details>
 
 > "Talk is cheap. Show me the code." — Linus Torvalds

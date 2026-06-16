@@ -65,6 +65,43 @@ const { frontmatter } = Astro.props;
     content: "•";
     @apply text-skin-base font-normal;
   }
+  /* Expandable OSS boxes */
+  :global(.prose details.oss-box) {
+    @apply mb-4 rounded-xl border border-skin-line bg-skin-card transition-colors;
+  }
+  :global(.prose details.oss-box[open]) {
+    @apply border-skin-accent/50;
+  }
+  :global(.prose details.oss-box > summary) {
+    @apply flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-5 py-4 font-semibold;
+  }
+  :global(.prose details.oss-box > summary::-webkit-details-marker) {
+    display: none;
+  }
+  :global(.prose details.oss-box > summary::after) {
+    content: "+";
+    @apply ml-auto text-xl font-normal text-skin-accent transition-transform;
+  }
+  :global(.prose details.oss-box[open] > summary::after) {
+    content: "−";
+  }
+  :global(.prose .oss-box-title) {
+    @apply text-lg text-skin-accent;
+  }
+  :global(.prose .oss-box-role) {
+    @apply ml-3 rounded-full bg-skin-card-muted px-3 py-0.5 text-xs font-medium opacity-90;
+  }
+  /* Reset prose list spacing inside boxes and pad the body */
+  :global(.prose details.oss-box > *:not(summary)) {
+    @apply px-5;
+  }
+  :global(.prose details.oss-box > *:not(summary):last-child) {
+    @apply pb-5;
+  }
+  :global(.prose details.oss-box > ul) {
+    @apply mt-0;
+  }
+
   :global(.prose blockquote) {
     @apply mt-16 border-l-4 border-skin-accent bg-skin-card/30 py-4 px-6 rounded-r-lg italic;
   }

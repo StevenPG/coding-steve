@@ -6,8 +6,7 @@ export const SITE: Site = {
   profile: "https://stevenpg.com/",
   desc: "My Tech and Life Blog with the writing the articles I wish were written!",
   title: "Coding Steve",
-  // TODO - replace image
-  ogImage: "astropaper-og.jpg",
+  ogImage: "og.png",
   lightAndDarkMode: true,
   postPerIndex: 6,
   postPerPage: 6,

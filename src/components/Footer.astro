@@ -15,6 +15,15 @@ const { noMarginTop = false } = Astro.props;
 <footer class={`${noMarginTop ? "" : "mt-auto"}`}>
   <BuyMeACoffee/>
   <Hr noPadding />
+  <div class="demos-link-wrapper">
+    <a
+      href="https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Demos &amp; article content
+    </a>
+  </div>
   <div class="footer-wrapper">
     <Socials centered />
     <div class="copyright-wrapper">
@@ -28,6 +37,12 @@ const { noMarginTop = false } = Astro.props;
 <style>
   footer {
     @apply w-full;
+  }
+  .demos-link-wrapper {
+    @apply pt-4 text-center text-sm;
+  }
+  .demos-link-wrapper a {
+    @apply opacity-80 underline-offset-4 hover:text-skin-accent hover:underline hover:opacity-100;
   }
   .footer-wrapper {
     @apply flex flex-col items-center justify-between py-6 sm:flex-row-reverse sm:py-4;
