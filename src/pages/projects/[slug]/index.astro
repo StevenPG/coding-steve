@@ -1,0 +1,87 @@
+---
+import { getCollection, render } from "astro:content";
+import { SITE } from "@config";
+import Breadcrumbs from "@components/Breadcrumbs.astro";
+import Footer from "@components/Footer.astro";
+import Header from "@components/Header.astro";
+import Layout from "@layouts/Layout.astro";
+
+export async function getStaticPaths() {
+  const projects = await getCollection("projects", ({ data }) => !data.draft);
+
+  return projects.map(project => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { title, description, url, image, tags } = project.data;
+const { Content } = await render(project);
+---
+
+<Layout title={`${title} | ${SITE.title}`} description={description}>
+  <Header activeNav="projects" />
+  <Breadcrumbs />
+  <main id="main-content">
+    <h1 class="project-title">{title}</h1>
+    <div class="mt-6 overflow-hidden rounded-lg border border-skin-line">
+      <img
+        src={image}
+        alt={`Screenshot of ${title}`}
+        class="w-full object-cover"
+      />
+    </div>
+
+    <article id="article" class="prose mx-auto mt-8 max-w-3xl">
+      <Content />
+    </article>
+
+    <ul class="my-8 flex flex-wrap gap-2">
+      {
+        tags.map(tag => (
+          <li class="rounded-full bg-skin-card-muted px-3 py-0.5 text-xs font-medium opacity-90">
+            {tag}
+          </li>
+        ))
+      }
+    </ul>
+
+    {
+      url && (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="focus-outline inline-flex items-center gap-2 rounded-lg border border-skin-line bg-skin-card px-4 py-2 font-medium hover:border-skin-accent/50"
+        >
+          Visit {title}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+            />
+          </svg>
+        </a>
+      )
+    }
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  main {
+    @apply mx-auto w-full max-w-3xl px-4 pb-12;
+  }
+  .project-title {
+    @apply mt-8 text-2xl font-semibold text-skin-accent;
+  }
+</style>
