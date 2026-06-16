@@ -21,8 +21,8 @@ AI is a tool like any other, and I treat it that way. My main concern with the c
 
 ## This Site
 
-This site is a copy of the astro project by https://github.com/satnaing/astro-paper. 
+This site started as a copy of the astro project by https://github.com/satnaing/astro-paper, but has since grown into its own thing — a custom palette, a projects hub with its own content collection, and an SEO/structured-data pass on top of the original template.
 
 I previously had a site made in Jekyll, but
 very quickly I struggled to get Jekyll to do what I wanted. From
-there I found a template I liked, made sure to stay within the license requirements, and get to work writing!
+there I found a template I liked, made sure to stay within the license requirements, and got to work writing — and kept building from there.
