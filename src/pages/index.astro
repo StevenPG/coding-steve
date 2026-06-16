@@ -87,40 +87,6 @@ const yoe = new Date().getFullYear() - 2016;
     <Hr />
 
     {
-      featuredProjects.length > 0 && (
-        <>
-          <section id="projects">
-            <h2>Projects</h2>
-            <ul class="project-grid">
-              {featuredProjects.map(project => (
-                <li>
-                  <a href={`/projects/${project.id}/`} class="project-tile">
-                    <img
-                      src={project.data.image}
-                      alt={`Screenshot of ${project.data.title}`}
-                      loading="lazy"
-                    />
-                    <h3>{project.data.title}</h3>
-                    <p>{project.data.description}</p>
-                  </a>
-                </li>
-              ))}
-            </ul>
-            <div class="all-posts-btn-wrapper">
-              <LinkButton href="/projects/">
-                All Projects
-                <svg xmlns="http://www.w3.org/2000/svg">
-                  <path d="m11.293 17.293 1.414 1.414L19.414 12l-6.707-6.707-1.414 1.414L15.586 11H6v2h9.586z" />
-                </svg>
-              </LinkButton>
-            </div>
-          </section>
-          <Hr />
-        </>
-      )
-    }
-
-    {
       featuredPosts.length > 0 && (
         <>
           <section id="featured">
@@ -170,6 +136,40 @@ const yoe = new Date().getFullYear() - 2016;
         </svg>
       </LinkButton>
     </div>
+
+    {
+      featuredProjects.length > 0 && (
+        <>
+          <Hr />
+          <section id="projects">
+            <h2>Projects</h2>
+            <ul class="project-grid">
+              {featuredProjects.map(project => (
+                <li>
+                  <a href={`/projects/${project.id}/`} class="project-tile">
+                    <img
+                      src={project.data.image}
+                      alt={`Screenshot of ${project.data.title}`}
+                      loading="lazy"
+                    />
+                    <h3>{project.data.title}</h3>
+                    <p>{project.data.description}</p>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <div class="all-posts-btn-wrapper">
+              <LinkButton href="/projects/">
+                All Projects
+                <svg xmlns="http://www.w3.org/2000/svg">
+                  <path d="m11.293 17.293 1.414 1.414L19.414 12l-6.707-6.707-1.414 1.414L15.586 11H6v2h9.586z" />
+                </svg>
+              </LinkButton>
+            </div>
+          </section>
+        </>
+      )
+    }
   </main>
 
   <Footer />

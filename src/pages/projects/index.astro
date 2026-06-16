@@ -15,12 +15,12 @@ const projects = (
   <Header activeNav="projects" />
   <Breadcrumbs />
   <main id="main-content">
-    <section class="mb-28 max-w-3xl">
+    <section class="mb-28 max-w-5xl">
       <h1 class="text-3xl tracking-wider sm:text-4xl">Projects</h1>
       <p class="mt-4 mb-10 opacity-80">
         Sites and applications I've built and maintain.
       </p>
-      <div class="flex flex-col gap-8">
+      <div class="grid grid-cols-1 gap-8 sm:grid-cols-2">
         {
           projects.map(project => (
             <a
@@ -61,6 +61,6 @@ const projects = (
 
 <style>
   #main-content {
-    @apply mx-auto max-w-3xl px-4;
+    @apply mx-auto max-w-5xl px-4;
   }
 </style>
