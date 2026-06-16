@@ -5,6 +5,7 @@ url: https://visualfinances.com/
 image: /assets/projects/visualfinances.png
 tags:
   - Web App
+featured: true
 order: 2
 ---
 

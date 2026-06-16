@@ -5,6 +5,7 @@ url: https://autosteven.com/
 image: /assets/projects/autosteven.png
 tags:
   - Web App
+featured: true
 order: 1
 ---
 

@@ -16,9 +16,15 @@ const sortedPosts = getSortedPosts(posts);
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
 const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
 
+const allProjects = await getCollection("projects", ({ data }) => !data.draft);
+const featuredProjects = allProjects
+  .filter(({ data }) => data.featured)
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 3);
+
 const socialCount = SOCIALS.filter(social => social.active).length;
 
-const yoe = new Date().getFullYear() - 2016
+const yoe = new Date().getFullYear() - 2016;
 ---
 
 <Layout>
@@ -44,19 +50,29 @@ const yoe = new Date().getFullYear() - 2016
       </a>
 
       <p>
-        I'm a senior software developer with about {yoe} years of experience doing devops and development work.
-        This is my blog where I write posts I wish I had found online myself.
+        I'm a senior software developer with about {yoe} years of experience doing
+        devops and development work. This is my blog where I write posts I wish I
+        had found online myself.
       </p>
       <p>
-        I also write on my substack, which is a little less technical and sometimes a bit more personal.
-        You can find that at <a href="https://substack.com/@stevenpg1">https://substack.com/@stevenpg1</a>
+        I also write on my substack, which is a little less technical and
+        sometimes a bit more personal. You can find that at <a
+          href="https://substack.com/@stevenpg1"
+          >https://substack.com/@stevenpg1</a
+        >
       </p>
       <h4>Quick Reference Posts</h4>
       <ul class="quick-ref-list">
-        <li><a href="/posts/spring-compat-cheatsheet/">Spring Version Compatibility Cheatsheet</a></li>
+        <li>
+          <a href="/posts/spring-compat-cheatsheet/"
+            >Spring Version Compatibility Cheatsheet</a>
+        </li>
       </ul>
       <ul class="quick-ref-list">
-        <li><a href="https://spring.io/projects/generations">Official Spring Dependency Matrix</a></li>
+        <li>
+          <a href="https://spring.io/projects/generations"
+            >Official Spring Dependency Matrix</a>
+        </li>
       </ul>
       {
         // only display if at least one social link is enabled
@@ -69,6 +85,40 @@ const yoe = new Date().getFullYear() - 2016
     </section>
 
     <Hr />
+
+    {
+      featuredProjects.length > 0 && (
+        <>
+          <section id="projects">
+            <h2>Projects</h2>
+            <ul class="project-grid">
+              {featuredProjects.map(project => (
+                <li>
+                  <a href={`/projects/${project.id}/`} class="project-tile">
+                    <img
+                      src={project.data.image}
+                      alt={`Screenshot of ${project.data.title}`}
+                      loading="lazy"
+                    />
+                    <h3>{project.data.title}</h3>
+                    <p>{project.data.description}</p>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <div class="all-posts-btn-wrapper">
+              <LinkButton href="/projects/">
+                All Projects
+                <svg xmlns="http://www.w3.org/2000/svg">
+                  <path d="m11.293 17.293 1.414 1.414L19.414 12l-6.707-6.707-1.414 1.414L15.586 11H6v2h9.586z" />
+                </svg>
+              </LinkButton>
+            </div>
+          </section>
+          <Hr />
+        </>
+      )
+    }
 
     {
       featuredPosts.length > 0 && (
@@ -160,6 +210,29 @@ const yoe = new Date().getFullYear() - 2016
     @apply text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300;
   }
 
+  /* ===== Projects Section ===== */
+  #projects {
+    @apply pb-6 pt-12;
+  }
+  #projects h2 {
+    @apply text-2xl font-semibold tracking-wide;
+  }
+  .project-grid {
+    @apply mt-6 grid grid-cols-1 gap-5 sm:grid-cols-3;
+  }
+  .project-tile {
+    @apply block h-full rounded-xl border border-skin-line bg-skin-card p-4 transition-all hover:border-skin-accent/50;
+  }
+  .project-tile img {
+    @apply mb-3 aspect-video w-full rounded-lg border border-skin-line object-cover;
+  }
+  .project-tile h3 {
+    @apply text-lg font-semibold text-skin-accent;
+  }
+  .project-tile p {
+    @apply mt-1 text-sm opacity-80;
+  }
+
   /* ===== Featured & Recent Posts Sections ===== */
   #featured,
   #recent-posts {
@@ -173,4 +246,3 @@ const yoe = new Date().getFullYear() - 2016
     @apply my-8 text-center;
   }
 </style>
-
