@@ -1,6 +1,7 @@
 ---
 author: StevenPG
 pubDatetime: 2025-05-04T12:00:00.000Z
+modDatetime: 2026-06-19T12:00:00.000Z
 title: Spring Version Compatibility Cheatsheet
 slug: spring-compat-cheatsheet
 featured: false
@@ -40,8 +41,8 @@ are compatible with each other, including Spring Boot, Spring Framework and Spri
 
 | Spring Boot Version | Compatible Java Versions (Min - Max Targeted) |
 |:--------------------|:----------------------------------------------|
-| 4.1.x               | Java 21 - 25                                  |
-| 4.0.x               | Java 21 - 25                                  |
+| 4.1.x               | Java 17 - 26                                  |
+| 4.0.x               | Java 17 - 25                                  |
 | 3.5.x               | Java 17 - 25                                  |
 | 3.4.x               | Java 17 - 25                                  |
 | 3.3.x               | Java 17 - 25                                  |
@@ -57,7 +58,8 @@ are compatible with each other, including Spring Boot, Spring Framework and Spri
 
 Key Notes:
 
-- Spring Boot 3.x requires Java 17 as a baseline.
+- Spring Boot 4.x and 3.x both require Java 17 as a baseline. Spring Boot 4.x runs on Spring Framework 7
+  and tracks the latest JDKs (4.1.x adds Java 26 support; first-class/native-image support is tested on Java 25).
 - Spring Boot 2.x supports Java 8 but is tested with newer JDKs up to specific versions.
 
 Reference doc (https://endoflife.date/spring-boot#java-compatibility)
@@ -73,7 +75,7 @@ Spring Boot version.
 
 | Spring Cloud Release Train                                                                                  | Corresponding Spring Boot Version                                                      |
 |:------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------|
-| [2025.1.x (Oakwood)](https://spring.io/blog/2025/11/25/spring-cloud-2025-1-0-aka-oakwood-has-been-released) | [Spring Boot 4.0.x](https://spring.io/blog/2025/11/20/spring-boot-4-0-0-available-now) |
+| [2025.1.x (Oakwood)](https://spring.io/blog/2025/11/25/spring-cloud-2025-1-0-aka-oakwood-has-been-released) | [Spring Boot 4.0.x / 4.1.x](https://spring.io/blog/2026/06/10/spring-boot-4/) |
 | [2025.0.x (Northfields)](https://spring.io/blog/2025/05/29/spring-cloud-2025-0-0-is-abvailable)             | Spring Boot 3.5.x                                                                      |
 | [2024.0.x (Moorgate)](https://spring.io/blog/2024/12/03/spring-cloud-2024-0-0)                              | Spring Boot 3.4.x                                                                      |
 | [2023.0.x (Leyton)](https://spring.io/blog/2023/12/06/spring-cloud-2023-0-0-aka-leyton-is-now-available)    | Spring Boot 3.2.x / 3.3.x                                                              |
@@ -89,7 +91,8 @@ Spring Boot version.
 
 | Gradle Version | Latest Supported Java Version |
 |:---------------|:------------------------------|
-| 9.x.x          | Java 25                       |
+| 9.4            | Java 26                       |
+| 9.1            | Java 25                       |
 | 8.14           | Java 24                       |
 | 8.10           | Java 23                       |
 | 8.8            | Java 22                       |
@@ -103,8 +106,10 @@ Spring Boot version.
 
 Key Points:
 
+- The table lists the Gradle version that *first* added support for running on each Java release. The latest Gradle
+  release is 9.6 (June 2026), which can run on any JDK from 17 through 26.
 - Newer Gradle versions are generally required to support newer Java versions for running Gradle itself.
-- While you might run Gradle 8 on JDK 17, you can still configure it to compile your project code for Java 8 or Java 11
+- While you might run Gradle 9 on JDK 25, you can still configure it to compile your project code for Java 17 or Java 21
   using toolchains.
 - Always check the specific Gradle version's documentation, as support details can change between minor releases.
 
