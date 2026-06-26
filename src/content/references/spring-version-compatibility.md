@@ -1,43 +1,33 @@
 ---
-author: StevenPG
-pubDatetime: 2025-05-04T12:00:00.000Z
-modDatetime: 2026-06-19T12:00:00.000Z
 title: Spring Version Compatibility Cheatsheet
-slug: spring-compat-cheatsheet
-featured: false
-ogImage: /assets/default-og-image.png
+description: A continuously updated reference for aligning Java, Gradle, Spring Boot, and Spring Cloud versions.
+slug: spring-version-compatibility
+pubDatetime: 2025-05-04T12:00:00.000Z
+modDatetime: 2026-06-26T12:00:00.000Z
 tags:
   - gradle
   - java
   - spring
-description: A continuously updated page for easy reference!
-canonicalURL: https://stevenpg.com/references/spring-version-compatibility/
+order: 0
 ---
-
-> **📌 This cheatsheet now lives on its own continuously updated reference page:
-> [Spring Version Compatibility Cheatsheet](/references/spring-version-compatibility/).**
-> Head there for the latest tables — that page is kept current as new Java, Gradle,
-> Spring Boot, and Spring Cloud versions ship. This post is kept for historical context.
-
-# Getting Versions Aligned: Java, Gradle, Spring Boot, and Spring Cloud
 
 Using Spring Boot and Spring Cloud can significantly speed up Java development, particularly for microservices. However,
 managing the dependencies between your JDK, build tool (like Gradle or Maven), Spring Boot, and Spring Cloud requires
 attention to detail. Version mismatches are a common source of problems, leading to build failures or runtime errors
 that can be difficult to diagnose.
 
-This post outlines the compatibility requirements you need to be aware of, explains common errors caused by mismatches,
-provides methods for resolving them, and includes specific compatibility information for Gradle, Java, Spring Boot, and
-Spring Cloud.
+This page collects the compatibility tables I reach for most often. I keep it updated as new versions ship, so bookmark
+it rather than relying on a snapshot.
 
 ### Table Shortcuts
 
-* [Gradle and Java Compatibility](#gradle-and-java-compatibility)
-* [Java Version Compatibility with Spring Boot](#java-version-compatibility-with-spring-boot)
-* [Spring Cloud Compatibility with Spring Boot](#spring-cloud-compatibility-with-spring-boot)
+- [Java Version Compatibility with Spring Boot](#java-version-compatibility-with-spring-boot)
+- [Spring Cloud Compatibility with Spring Boot](#spring-cloud-compatibility-with-spring-boot)
+- [Gradle and Java Compatibility](#gradle-and-java-compatibility)
 
 ### Spring Support Mapping
-Spring has now published a [compatibility list](https://spring.io/projects/generations) 
+
+Spring has now published a [compatibility list](https://spring.io/projects/generations)
 called Spring Support Mapping. It provides a matrix of which versions of different Spring dependencies
 are compatible with each other, including Spring Boot, Spring Framework and Spring Cloud.
 
@@ -46,7 +36,7 @@ are compatible with each other, including Spring Boot, Spring Framework and Spri
 ### Java Version Compatibility with Spring Boot
 
 | Spring Boot Version | Compatible Java Versions (Min - Max Targeted) |
-|:--------------------|:----------------------------------------------|
+| :------------------ | :-------------------------------------------- |
 | 4.1.x               | Java 17 - 26                                  |
 | 4.0.x               | Java 17 - 25                                  |
 | 3.5.x               | Java 17 - 25                                  |
@@ -79,24 +69,24 @@ Do not arbitrarily combine Spring Cloud trains and Spring Boot versions.
 Always check the documentation page for the specific Spring Cloud release train (e.g., 2023.0.1) to find its required
 Spring Boot version.
 
-| Spring Cloud Release Train                                                                                  | Corresponding Spring Boot Version                                                      |
-|:------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------|
+| Spring Cloud Release Train                                                                                  | Corresponding Spring Boot Version                                             |
+| :---------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- |
 | [2025.1.x (Oakwood)](https://spring.io/blog/2025/11/25/spring-cloud-2025-1-0-aka-oakwood-has-been-released) | [Spring Boot 4.0.x / 4.1.x](https://spring.io/blog/2026/06/10/spring-boot-4/) |
-| [2025.0.x (Northfields)](https://spring.io/blog/2025/05/29/spring-cloud-2025-0-0-is-abvailable)             | Spring Boot 3.5.x                                                                      |
-| [2024.0.x (Moorgate)](https://spring.io/blog/2024/12/03/spring-cloud-2024-0-0)                              | Spring Boot 3.4.x                                                                      |
-| [2023.0.x (Leyton)](https://spring.io/blog/2023/12/06/spring-cloud-2023-0-0-aka-leyton-is-now-available)    | Spring Boot 3.2.x / 3.3.x                                                              |
-| 2022.0.x (Kilburn)                                                                                          | Spring Boot 3.0.x / 3.1.x                                                              |
-| 2021.0.x (Jubilee)                                                                                          | Spring Boot 2.6.x / 2.7.x                                                              |
-| 2020.0.x (Ilford)                                                                                           | Spring Boot 2.4.x / 2.5.x                                                              |
-| Hoxton                                                                                                      | Spring Boot 2.2.x / 2.3.x                                                              |
-| Greenwich                                                                                                   | Spring Boot 2.1.x                                                                      |
-| Finchley                                                                                                    | Spring Boot 2.0.x                                                                      |
-| Edgware                                                                                                     | Spring Boot 1.5.x                                                                      |
+| [2025.0.x (Northfields)](https://spring.io/blog/2025/05/29/spring-cloud-2025-0-0-is-abvailable)             | Spring Boot 3.5.x                                                             |
+| [2024.0.x (Moorgate)](https://spring.io/blog/2024/12/03/spring-cloud-2024-0-0)                              | Spring Boot 3.4.x                                                             |
+| [2023.0.x (Leyton)](https://spring.io/blog/2023/12/06/spring-cloud-2023-0-0-aka-leyton-is-now-available)    | Spring Boot 3.2.x / 3.3.x                                                     |
+| 2022.0.x (Kilburn)                                                                                          | Spring Boot 3.0.x / 3.1.x                                                     |
+| 2021.0.x (Jubilee)                                                                                          | Spring Boot 2.6.x / 2.7.x                                                     |
+| 2020.0.x (Ilford)                                                                                           | Spring Boot 2.4.x / 2.5.x                                                     |
+| Hoxton                                                                                                      | Spring Boot 2.2.x / 2.3.x                                                     |
+| Greenwich                                                                                                   | Spring Boot 2.1.x                                                             |
+| Finchley                                                                                                    | Spring Boot 2.0.x                                                             |
+| Edgware                                                                                                     | Spring Boot 1.5.x                                                             |
 
 ### Gradle and Java Compatibility
 
 | Gradle Version | Latest Supported Java Version |
-|:---------------|:------------------------------|
+| :------------- | :---------------------------- |
 | 9.4            | Java 26                       |
 | 9.1            | Java 25                       |
 | 8.14           | Java 24                       |
@@ -112,7 +102,7 @@ Spring Boot version.
 
 Key Points:
 
-- The table lists the Gradle version that *first* added support for running on each Java release. The latest Gradle
+- The table lists the Gradle version that _first_ added support for running on each Java release. The latest Gradle
   release is 9.6 (June 2026), which can run on any JDK from 17 through 26.
 - Newer Gradle versions are generally required to support newer Java versions for running Gradle itself.
 - While you might run Gradle 9 on JDK 25, you can still configure it to compile your project code for Java 17 or Java 21
@@ -133,41 +123,22 @@ this, adding its own layer of managed dependencies. These systems work reliably 
 - Transitive Dependencies: The dependencies managed by Spring Boot and Spring Cloud have their own dependencies. A
   mismatch anywhere in this chain can cause conflicts.
 
-## Gradle and Java
-
-Before even considering Spring Boot, your build tool itself needs a compatible JDK to run. Gradle, like any Java
-application, has minimum and recommended Java versions. Furthermore, Gradle supports compiling and testing code using
-different Java versions than the one it runs on, configured via Java toolchains.
-
-- Running Gradle: You need a compatible JDK installed and typically configured via JAVA_HOME or the Gradle daemon
-  settings.
-
-- Building Code: You configure sourceCompatibility and targetCompatibility in your build.gradle file, and ideally use
-  Gradle's Java toolchain support to ensure Gradle downloads and uses the specified JDK version for compilation and
-  testing, regardless of the JDK it's running on.
-
 ### Common Errors from Version Mismatches
 
 When versions aren't correctly aligned between Java, your build tool, Spring Boot, and potentially Spring Cloud, you
 might encounter errors like:
 
-- java.lang.ClassNotFoundException: The JVM can't find a specific class file at runtime. This often points to a missing
+- `java.lang.ClassNotFoundException`: The JVM can't find a specific class file at runtime. This often points to a missing
   dependency or an incorrect version being loaded.
-
-- java.lang.NoSuchMethodError: Code calls a method that existed at compile time, but is missing in the version of the
+- `java.lang.NoSuchMethodError`: Code calls a method that existed at compile time, but is missing in the version of the
   library loaded at runtime. A classic sign of a version conflict.
-
-- java.lang.AbstractMethodError: An attempt was made to call an abstract method, which can happen if library APIs
+- `java.lang.AbstractMethodError`: An attempt was made to call an abstract method, which can happen if library APIs
   changed between versions in incompatible ways.
-
 - Compilation Failures: Often related to using Java language features not supported by the configured
-  targetCompatibility bytecode level, or when Spring Boot/Cloud versions require APIs from a newer JDK than you're
-  using.
-
+  targetCompatibility bytecode level, or when Spring Boot/Cloud versions require APIs from a newer JDK than you're using.
 - Build Tool Errors: Gradle or Maven might fail if they are run with an incompatible JDK version (e.g., running Gradle 6
   with JDK 17 might cause issues).
-
-- Spring Framework Issues: Problems like UnsatisfiedDependencyException or BeanCreationException during application
+- Spring Framework Issues: Problems like `UnsatisfiedDependencyException` or `BeanCreationException` during application
   startup can sometimes stem from underlying library incompatibilities caused by version mismatches.
 
 ### Resolving Compatibility Issues
@@ -176,19 +147,15 @@ Troubleshooting version conflicts involves a systematic approach:
 
 - Consult Official Documentation: This is the primary source of truth. Check the specific version requirements for
   Gradle, Spring Boot, and Spring Cloud.
-
 - Use Spring Initializr: For new projects, start.spring.io pre-selects compatible versions, providing a solid starting
   point.
-
 - Utilize Maven/Gradle BOMs: Import the spring-boot-dependencies Bill of Materials (BOM) and, if used, the
   spring-cloud-dependencies BOM for your specific release train. This helps ensure consistent versions for transitive
-  dependencies. It's generally recommended to let these BOMs manage versions unless you have a specific reason to
-  override one.
+  dependencies.
 
 Maven Example (pom.xml)
 
 ```xml
-
 <dependencyManagement>
     <dependencies>
         <dependency>
@@ -221,24 +188,13 @@ dependencyManagement {
 }
 ```
 
-- Inspect the Dependency Tree: Use mvn dependency:tree or gradle dependencies (or gradle buildEnvironment) to see the
-  resolved dependency versions. Identify conflicts where different versions of the same library are being requested. Use
-  exclusions or explicitly declare needed versions if necessary.
-
+- Inspect the Dependency Tree: Use `mvn dependency:tree` or `gradle dependencies` (or `gradle buildEnvironment`) to see
+  the resolved dependency versions. Identify conflicts where different versions of the same library are being requested.
 - Verify Build Tool Configuration: Ensure your Gradle or Maven setup is compatible with the JDK you're using to run the
   build. For Gradle, explicitly configure Java toolchains for compiling and testing.
-
 - Test Consistently: Implement unit and integration tests to catch runtime errors early.
 
-
-## Final Thoughts
-
-Managing version compatibility in the Java and Spring ecosystem is a necessary part of development. While tools like
-Spring Boot and Gradle significantly help, understanding the requirements and relationships between the JDK, build tool,
-Spring Boot, and Spring Cloud is key to avoiding common problems.
-
-Prioritize checking official documentation, utilize BOMs for dependency management, inspect your build environment when
-issues arise, and maintain robust testing practices. This diligence helps ensure a smoother development process.
+---
 
 Disclaimer: Version compatibility information changes. Always refer to the official documentation for Gradle, Spring
 Boot, and Spring Cloud for the most accurate and up-to-date details pertinent to your project.

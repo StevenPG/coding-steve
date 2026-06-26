@@ -22,6 +22,13 @@ const featuredProjects = allProjects
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 3);
 
+const references = (
+  await getCollection("references", ({ data }) => !data.draft)
+).sort((a, b) => {
+  if (a.data.order !== b.data.order) return a.data.order - b.data.order;
+  return a.data.title.localeCompare(b.data.title);
+});
+
 const socialCount = SOCIALS.filter(social => social.active).length;
 
 const yoe = new Date().getFullYear() - 2016;
@@ -61,19 +68,26 @@ const yoe = new Date().getFullYear() - 2016;
           >https://substack.com/@stevenpg1</a
         >
       </p>
-      <h4>Quick Reference Posts</h4>
+      <h4>Quick References</h4>
       <ul class="quick-ref-list">
-        <li>
-          <a href="/posts/spring-compat-cheatsheet/"
-            >Spring Version Compatibility Cheatsheet</a>
-        </li>
-      </ul>
-      <ul class="quick-ref-list">
+        {
+          references.map(reference => (
+            <li>
+              <a href={`/references/${reference.id}/`}>
+                {reference.data.title}
+              </a>
+            </li>
+          ))
+        }
         <li>
           <a href="https://spring.io/projects/generations"
-            >Official Spring Dependency Matrix</a>
+            >Official Spring Dependency Matrix</a
+          >
         </li>
       </ul>
+      <p class="mt-1 text-sm opacity-80">
+        See all <a href="/references/" class="quick-ref-inline">references</a>.
+      </p>
       {
         // only display if at least one social link is enabled
         socialCount > 0 && (
@@ -206,7 +220,8 @@ const yoe = new Date().getFullYear() - 2016;
   .quick-ref-list li {
     @apply my-1;
   }
-  .quick-ref-list a {
+  .quick-ref-list a,
+  .quick-ref-inline {
     @apply text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300;
   }
 

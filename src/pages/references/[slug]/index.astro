@@ -1,0 +1,134 @@
+---
+import { getCollection, render } from "astro:content";
+import { SITE } from "@config";
+import Breadcrumbs from "@components/Breadcrumbs.astro";
+import Datetime from "@components/Datetime";
+import Footer from "@components/Footer.astro";
+import Header from "@components/Header.astro";
+import Tag from "@components/Tag.astro";
+import Layout from "@layouts/Layout.astro";
+import { slugifyStr } from "@utils/slugify";
+
+export async function getStaticPaths() {
+  const references = await getCollection(
+    "references",
+    ({ data }) => !data.draft
+  );
+
+  return references.map(reference => ({
+    params: { slug: reference.id },
+    props: { reference },
+  }));
+}
+
+const { reference } = Astro.props;
+const { title, description, tags, ogImage, pubDatetime, modDatetime } =
+  reference.data;
+const { Content } = await render(reference);
+
+const ogUrl = new URL(
+  ogImage ?? "/assets/default-og-image.png",
+  Astro.url.origin
+).href;
+---
+
+<Layout
+  title={`${title} | ${SITE.title}`}
+  description={description}
+  ogImage={ogUrl}
+  pubDatetime={pubDatetime}
+  modDatetime={modDatetime}
+  schemaType="TechArticle"
+  scrollSmooth={true}
+>
+  <Header activeNav="references" />
+  <Breadcrumbs />
+  <main id="main-content">
+    <h1 class="reference-title">{title}</h1>
+    <Datetime
+      pubDatetime={pubDatetime}
+      modDatetime={modDatetime}
+      size="lg"
+      className="my-2"
+    />
+    <p class="reference-evergreen">
+      <span aria-hidden="true">&#9851;</span> This is a living reference page &mdash;
+      I keep it updated as versions and details change.
+    </p>
+
+    <article id="article" class="prose mx-auto mt-8 max-w-3xl">
+      <Content />
+    </article>
+
+    <ul class="my-8">
+      {tags.map(tag => <Tag tag={slugifyStr(tag)} />)}
+    </ul>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  main {
+    @apply mx-auto w-full max-w-3xl px-4 pb-12;
+  }
+  .reference-title {
+    @apply mt-8 text-2xl font-semibold text-skin-accent;
+  }
+  .reference-evergreen {
+    @apply mt-4 rounded-lg border border-skin-line bg-skin-card px-4 py-3 text-sm opacity-90;
+  }
+</style>
+
+<script is:inline data-astro-rerun>
+  /** Attaches links to headings, allowing easy section sharing. */
+  function addHeadingLinks() {
+    const headings = Array.from(
+      document.querySelectorAll("#article h2, #article h3, #article h4")
+    );
+    for (const heading of headings) {
+      if (!heading.id) continue;
+      heading.classList.add("group");
+      const link = document.createElement("a");
+      link.className =
+        "heading-link ml-2 opacity-0 group-hover:opacity-100 focus:opacity-100";
+      link.href = "#" + heading.id;
+      const span = document.createElement("span");
+      span.ariaHidden = "true";
+      span.innerText = "#";
+      link.appendChild(span);
+      heading.appendChild(link);
+    }
+  }
+  addHeadingLinks();
+
+  /** Attaches copy buttons to code blocks. */
+  function attachCopyButtons() {
+    const copyButtonLabel = "Copy";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      const copyButton = document.createElement("button");
+      copyButton.className =
+        "copy-code absolute right-3 -top-3 rounded bg-skin-card px-2 py-1 text-xs leading-4 text-skin-base font-medium";
+      copyButton.innerHTML = copyButtonLabel;
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        const code = codeBlock.querySelector("code");
+        await navigator.clipboard.writeText(code?.innerText ?? "");
+        copyButton.innerText = "Copied";
+        setTimeout(() => {
+          copyButton.innerText = copyButtonLabel;
+        }, 700);
+      });
+    }
+  }
+  attachCopyButtons();
+</script>
