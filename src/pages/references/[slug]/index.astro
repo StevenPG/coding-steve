@@ -77,6 +77,46 @@ const ogUrl = new URL(
   .reference-evergreen {
     @apply mt-4 rounded-lg border border-skin-line bg-skin-card px-4 py-3 text-sm opacity-90;
   }
+
+  /* Collapsible reference boxes (e.g. per-version entries) */
+  :global(.prose details.ref-box) {
+    @apply mb-4 rounded-xl border border-skin-line bg-skin-card transition-colors;
+  }
+  :global(.prose details.ref-box[open]) {
+    @apply border-skin-accent/50;
+  }
+  :global(.prose details.ref-box > summary) {
+    @apply flex cursor-pointer list-none items-center gap-3 rounded-xl px-5 py-4 font-semibold;
+  }
+  :global(.prose details.ref-box > summary::-webkit-details-marker) {
+    display: none;
+  }
+  :global(.prose details.ref-box > summary::after) {
+    content: "+";
+    @apply ml-auto text-xl font-normal text-skin-accent transition-transform;
+  }
+  :global(.prose details.ref-box[open] > summary::after) {
+    content: "−";
+  }
+  :global(.prose .ref-box-title) {
+    @apply text-lg text-skin-accent;
+  }
+  :global(.prose .ref-box-date) {
+    @apply text-sm font-normal opacity-70;
+  }
+  :global(.prose .ref-box-lts) {
+    @apply rounded-full bg-green-600/15 px-2.5 py-0.5 text-xs font-semibold text-green-700 dark:text-green-400;
+  }
+  /* Pad the body and tidy list spacing inside boxes */
+  :global(.prose details.ref-box > *:not(summary)) {
+    @apply px-5;
+  }
+  :global(.prose details.ref-box > *:not(summary):last-child) {
+    @apply pb-5;
+  }
+  :global(.prose details.ref-box > ul) {
+    @apply mt-0;
+  }
 </style>
 
 <script is:inline data-astro-rerun>

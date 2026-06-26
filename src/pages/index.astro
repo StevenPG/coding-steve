@@ -22,13 +22,6 @@ const featuredProjects = allProjects
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 3);
 
-const references = (
-  await getCollection("references", ({ data }) => !data.draft)
-).sort((a, b) => {
-  if (a.data.order !== b.data.order) return a.data.order - b.data.order;
-  return a.data.title.localeCompare(b.data.title);
-});
-
 const socialCount = SOCIALS.filter(social => social.active).length;
 
 const yoe = new Date().getFullYear() - 2016;
@@ -70,15 +63,6 @@ const yoe = new Date().getFullYear() - 2016;
       </p>
       <h4>Quick References</h4>
       <ul class="quick-ref-list">
-        {
-          references.map(reference => (
-            <li>
-              <a href={`/references/${reference.id}/`}>
-                {reference.data.title}
-              </a>
-            </li>
-          ))
-        }
         <li>
           <a href="https://spring.io/projects/generations"
             >Official Spring Dependency Matrix</a
@@ -86,7 +70,8 @@ const yoe = new Date().getFullYear() - 2016;
         </li>
       </ul>
       <p class="mt-1 text-sm opacity-80">
-        See all <a href="/references/" class="quick-ref-inline">references</a>.
+        Browse all <a href="/references/" class="quick-ref-inline">references</a
+        >.
       </p>
       {
         // only display if at least one social link is enabled
