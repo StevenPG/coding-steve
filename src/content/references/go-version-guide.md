@@ -21,6 +21,7 @@ painless.
 
 | Version                                | Released | Highlights                                                                                                       |
 | :------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------------------- |
+| [1.26](https://go.dev/doc/go1.26)      | Feb 2026 | **Green Tea GC default** (10–40% GC overhead reduction), self-referential generics, `go fix` rewrite with modernizers, `crypto/hpke`, `errors.AsType()`, `log/slog.NewMultiHandler()`, post-quantum TLS hybrids default, ~30% faster cgo calls |
 | [1.25](https://go.dev/doc/go1.25)      | Aug 2025 | Container-aware `GOMAXPROCS`, experimental Green Tea GC, `testing/synctest` graduated, experimental `encoding/json/v2` |
 | [1.24](https://go.dev/doc/go1.24)      | Feb 2025 | Generic type aliases, faster Swiss Table maps, tool dependencies in `go.mod` (`go tool`), `os.Root`, weak pointers, FIPS 140-3 |
 | [1.23](https://go.dev/doc/go1.23)      | Aug 2024 | **Range-over-function iterators** (`iter`), `unique` package, timer/ticker GC improvements                       |
@@ -35,8 +36,7 @@ painless.
 | [1.5](https://go.dev/doc/go1.5)        | Aug 2015 | Compiler & runtime rewritten in Go, concurrent low-latency GC, `GOMAXPROCS` defaults to all CPUs                 |
 | [1.0](https://go.dev/doc/go1)          | Mar 2012 | First stable release &mdash; the Go 1 compatibility guarantee begins                                             |
 
-> **Go 1.26** is expected around **February 2026**. See the [release history](https://go.dev/doc/devel/release) for the
-> latest published versions and the [milestone tracker](https://github.com/golang/go/milestones) for what's landing.
+> **[Go 1.27](https://go.dev/doc/go1.27)** is expected around **August 2026**. Work-in-progress release notes are already published — highlights include generic methods, `encoding/json/v2` GA, a new `uuid` package, `crypto/mldsa` (post-quantum ML-DSA), and ~30% faster small allocations. See the [release history](https://go.dev/doc/devel/release) for the latest published versions and the [milestone tracker](https://github.com/golang/go/milestones) for what's landing.
 
 ## How Go Support Works
 
