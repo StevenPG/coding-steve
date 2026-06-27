@@ -1,0 +1,79 @@
+---
+import { getCollection } from "astro:content";
+import { SITE } from "@config";
+import Breadcrumbs from "@components/Breadcrumbs.astro";
+import Footer from "@components/Footer.astro";
+import Header from "@components/Header.astro";
+import Layout from "@layouts/Layout.astro";
+
+const references = (
+  await getCollection("references", ({ data }) => !data.draft)
+).sort((a, b) => {
+  if (a.data.order !== b.data.order) return a.data.order - b.data.order;
+  return a.data.title.localeCompare(b.data.title);
+});
+
+const formatDate = (date: Date) =>
+  date.toLocaleDateString("en-EN", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+---
+
+<Layout
+  title={`References | ${SITE.title}`}
+  description="Continuously updated reference pages, cheatsheets, and lookup tables I keep current and return to often."
+>
+  <Header activeNav="references" />
+  <Breadcrumbs />
+  <main id="main-content">
+    <section class="mb-28 max-w-3xl">
+      <h1 class="text-3xl tracking-wider sm:text-4xl">References</h1>
+      <p class="mt-4 mb-10 opacity-80">
+        Living reference pages I keep continuously updated &mdash; cheatsheets,
+        compatibility matrices, and lookup tables worth bookmarking rather than
+        reading once.
+      </p>
+      <ul class="flex flex-col gap-5">
+        {
+          references.map(reference => (
+            <li>
+              <a
+                href={`/references/${reference.id}/`}
+                class="group block rounded-xl border border-skin-line bg-skin-card p-5 transition-all hover:border-skin-accent/50"
+              >
+                <h2 class="text-xl font-semibold text-skin-accent">
+                  {reference.data.title}
+                </h2>
+                <p class="mt-2 text-sm opacity-80">
+                  {reference.data.description}
+                </p>
+                <div class="mt-3 flex flex-wrap items-center gap-2">
+                  {reference.data.tags.map(tag => (
+                    <span class="rounded-full bg-skin-card-muted px-3 py-0.5 text-xs font-medium opacity-90">
+                      {tag}
+                    </span>
+                  ))}
+                  <span class="ml-auto text-xs italic opacity-70">
+                    Updated{" "}
+                    {formatDate(
+                      reference.data.modDatetime ?? reference.data.pubDatetime
+                    )}
+                  </span>
+                </div>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  #main-content {
+    @apply mx-auto max-w-3xl px-4;
+  }
+</style>

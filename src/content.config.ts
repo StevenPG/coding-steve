@@ -42,4 +42,21 @@ const projects = defineCollection({
   }),
 });
 
-export const collections = { blog, projects };
+const references = defineCollection({
+  type: "content_layer",
+  loader: glob({ pattern: "**/*.md", base: "./src/content/references" }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    slug: z.string().optional(),
+    pubDatetime: z.date(),
+    modDatetime: z.date().optional().nullable(),
+    tags: z.array(z.string()).default([]),
+    ogImage: z.string().optional(),
+    featured: z.boolean().optional(),
+    draft: z.boolean().optional(),
+    order: z.number().default(0),
+  }),
+});
+
+export const collections = { blog, projects, references };

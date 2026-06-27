@@ -11,7 +11,13 @@ tags:
   - java
   - spring
 description: A continuously updated page for easy reference!
+canonicalURL: https://stevenpg.com/references/spring-version-compatibility/
 ---
+
+> **📌 This cheatsheet now lives on its own continuously updated reference page:
+> [Spring Version Compatibility Cheatsheet](/references/spring-version-compatibility/).**
+> Head there for the latest tables — that page is kept current as new Java, Gradle,
+> Spring Boot, and Spring Cloud versions ship. This post is kept for historical context.
 
 # Getting Versions Aligned: Java, Gradle, Spring Boot, and Spring Cloud
 

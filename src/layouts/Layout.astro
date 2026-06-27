@@ -16,7 +16,11 @@ export interface Props {
   pubDatetime?: Date;
   modDatetime?: Date | null;
   scrollSmooth?: boolean;
-  schemaType?: "WebSite" | "BlogPosting" | "SoftwareApplication";
+  schemaType?:
+    | "WebSite"
+    | "BlogPosting"
+    | "SoftwareApplication"
+    | "TechArticle";
 }
 
 const {
@@ -47,7 +51,7 @@ const structuredData = {
   url: canonicalURL,
   ...(pubDatetime && { datePublished: pubDatetime.toISOString() }),
   ...(modDatetime && { dateModified: modDatetime.toISOString() }),
-  ...(schemaType === "BlogPosting" && {
+  ...((schemaType === "BlogPosting" || schemaType === "TechArticle") && {
     author: [
       {
         "@type": "Person",
@@ -91,8 +95,7 @@ const structuredData = {
       is:inline
       async
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9553425410079173"
-      crossorigin="anonymous"
-    ></script>
+      crossorigin="anonymous"></script>
     <script is:inline>
       function loadAds() {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
