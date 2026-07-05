@@ -1,0 +1,47 @@
+---
+import { ADSENSE } from "@config";
+
+export interface Props {
+  slot: string;
+  className?: string;
+}
+
+const { slot, className = "" } = Astro.props;
+
+// Only render when a slot ID has been configured in src/config.ts.
+const shouldRender = ADSENSE.enable && slot.length > 0;
+---
+
+{
+  shouldRender && (
+    <div class={`ad-unit ${className}`}>
+      <ins
+        class="adsbygoogle"
+        style="display:block"
+        data-ad-client={ADSENSE.clientId}
+        data-ad-slot={slot}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
+    </div>
+  )
+}
+
+<!-- data-astro-rerun makes this re-execute after every view-transition swap,
+     so ads also load on client-side navigations. Each run requests fills only
+     for ins elements that haven't been requested yet, so it is safe when
+     multiple AdUnit instances are on the page. -->
+<script is:inline data-astro-rerun>
+  document
+    .querySelectorAll("ins.adsbygoogle:not([data-ad-requested])")
+    .forEach(el => {
+      el.setAttribute("data-ad-requested", "true");
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    });
+</script>
+
+<style>
+  .ad-unit {
+    @apply mx-auto w-full max-w-3xl;
+  }
+</style>
