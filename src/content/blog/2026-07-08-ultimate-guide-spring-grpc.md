@@ -1,6 +1,6 @@
 ---
 author: StevenPG
-pubDatetime: 2026-07-08T12:00:00.000Z
+pubDatetime: 2026-07-08T00:00:00.000Z
 title: "The Ultimate Guide to gRPC with Spring Boot 4.1"
 slug: ultimate-guide-spring-grpc
 featured: true
