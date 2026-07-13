@@ -226,7 +226,7 @@ sudo tc qdisc del dev lo root
 
 What to expect from the shape of the results (and what published QUIC research consistently shows): near-parity on the clean run — possibly HTTP/2 slightly ahead, since userspace QUIC pays CPU overhead that a loss-free loopback never lets it recoup — and a widening HTTP/3 advantage at the tail (p95/p99) as loss and concurrency increase, because a lost TCP segment stalls all 50 HTTP/2 streams while QUIC streams recover independently. If my measured numbers contradict that shape, the analysis section will say so — that's the fun part.
 
-The full benchmark code is available at [github.com/StevenPG/DemosAndArticleContent](https://github.com/StevenPG/DemosAndArticleContent).
+The full benchmark code is available at [github.com/StevenPG/DemosAndArticleContent](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/java-26-httpclient-http3-benchmark).
 
 ## Should You Use It?
 

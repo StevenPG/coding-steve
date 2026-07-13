@@ -6,22 +6,22 @@ Flip each post to `draft: false` only after its checklist is complete.
 ## Benchmark posts — numbers must be measured before publishing
 
 ### `2026-07-20-java-26-httpclient-http3.md`
-- [ ] Push the `H2vsH3Bench` benchmark code + Caddyfile to [DemosAndArticleContent](https://github.com/StevenPG/DemosAndArticleContent) and update the repo link in the post to the exact subdirectory
+- [x] Push the `H2vsH3Bench` benchmark code + Caddyfile to [DemosAndArticleContent](https://github.com/StevenPG/DemosAndArticleContent) and update the repo link in the post to the exact subdirectory — [PR #13](https://github.com/StevenPG/DemosAndArticleContent/pull/13) (merge it, then smoke-run on JDK 26)
 - [ ] Run the benchmark on the M3 MacBook Pro (JDK 26) and fill in all three `*TBD*` results tables:
   - Clean localhost, 1KB sequential
   - 20ms delay + 2% loss, 1KB sequential
   - 20ms delay + 2% loss, 1MB × 50 concurrent
-- [ ] Document the macOS `dnctl`/`pfctl` loss-injection commands in the demo repo README (post references it)
+- [x] Document the macOS `dnctl`/`pfctl` loss-injection commands in the demo repo README (post references it) — in PR #13
 - [ ] Update/remove the "what to expect" paragraph if measured results contradict the predicted shape
 - [ ] Remove the `[DRAFT NOTE — numbers pending]` callout
 
 ### `2026-07-29-java-26-aot-cache-zgc-leyden-benchmarks.md`
-- [ ] Build the Spring Boot 4.1 benchmark app (webmvc + JPA/H2 + actuator + training profile `CommandLineRunner`) and push to DemosAndArticleContent
+- [x] Build the Spring Boot 4.1 benchmark app (webmvc + JPA/H2 + actuator + training profile `CommandLineRunner`) and push to DemosAndArticleContent — [PR #13](https://github.com/StevenPG/DemosAndArticleContent/pull/13) (merge it, then `./gradlew bootJar` smoke-run on JDK 26)
 - [ ] Run 10× per configuration on the M3 (JDK 26 Temurin) and fill in the `*TBD*` tables:
   - JDK 26: G1 / ZGC / Serial, cache on vs off
   - ZGC across JDK 25 vs 26 (object layer inactive vs active)
   - Cache file size + RSS at readiness
-- [ ] Verify the readiness-probe wrapper script measures what the post claims (curl poll at 5ms)
+- [x] Verify the readiness-probe wrapper script measures what the post claims (curl poll at 5ms) — `scripts/measure-startup.sh` in PR #13, includes `-Xlog:aot` cache-engagement check
 - [ ] Reconcile the "expected ~40% band" analysis text with actual results
 - [ ] Remove the `[DRAFT NOTE — numbers pending]` callout
 

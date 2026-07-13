@@ -127,7 +127,7 @@ The January post's [TL;DR table](/posts/project-leyden-vs-graalvm-native-image) 
 - JEP 516 (Java 26) makes the AOT object cache GC-agnostic by storing references as logical indices instead of physical addresses — ZGC, previously excluded, now gets the full Leyden startup benefit.
 - Training-run GC and production GC are decoupled; one cache artifact serves every fleet.
 - The Leyden-vs-GraalVM decision from my January guide tilts further toward Leyden for any service that was already JVM-shaped — native image's remaining moat is genuine cold-start-in-milliseconds requirements.
-- Benchmark tables above are filled from real runs on my hardware (see draft note); the code and commands are reproducible as written, and the full setup lives at [github.com/StevenPG/DemosAndArticleContent](https://github.com/StevenPG/DemosAndArticleContent).
+- Benchmark tables above are filled from real runs on my hardware (see draft note); the code and commands are reproducible as written, and the full setup lives at [github.com/StevenPG/DemosAndArticleContent](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/java-26-aot-cache-zgc-benchmark).
 
 ## Resources
 
