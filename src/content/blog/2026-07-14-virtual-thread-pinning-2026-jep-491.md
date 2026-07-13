@@ -4,7 +4,7 @@ pubDatetime: 2026-07-14T12:00:00.000Z
 title: "Virtual Thread Pinning in 2026: What JEP 491 Fixed and What Still Pins"
 slug: virtual-thread-pinning-2026-jep-491
 featured: false
-draft: true
+draft: false
 ogImage: /assets/default-og-image.png
 tags:
   - software
