@@ -4,7 +4,7 @@ pubDatetime: 2026-07-23T12:00:00.000Z
 title: "SSRF Hardening in Spring Boot 4.1 with InetAddressFilter"
 slug: spring-boot-4-1-ssrf-inetaddressfilter
 featured: false
-draft: true
+draft: false
 ogImage: /assets/default-og-image.png
 tags:
   - software
