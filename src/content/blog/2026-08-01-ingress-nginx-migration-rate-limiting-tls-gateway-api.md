@@ -4,7 +4,7 @@ pubDatetime: 2026-08-01T12:00:00.000Z
 title: "Ingress-NGINX Migration Part 2: Rate Limiting, TLS, and the Annotations That Don't Map"
 slug: ingress-nginx-migration-rate-limiting-tls-gateway-api
 featured: false
-draft: true
+draft: false
 ogImage: /assets/default-og-image.png
 tags:
   - kubernetes
