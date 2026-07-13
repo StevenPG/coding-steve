@@ -4,7 +4,7 @@ pubDatetime: 2026-07-17T12:00:00.000Z
 title: "Spring Boot 4.0 → 4.1: What's New and What Breaks"
 slug: spring-boot-4-1-whats-new-what-breaks
 featured: false
-draft: true
+draft: false
 ogImage: /assets/default-og-image.png
 tags:
   - software
