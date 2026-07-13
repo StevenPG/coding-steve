@@ -4,7 +4,7 @@ pubDatetime: 2026-07-11T12:00:00.000Z
 title: "Undertow Is Gone in Spring Boot 4: Fixing the ClassNotFoundException"
 slug: spring-boot-4-undertow-classnotfoundexception
 featured: false
-draft: true
+draft: false
 ogImage: /assets/default-og-image.png
 tags:
   - software
