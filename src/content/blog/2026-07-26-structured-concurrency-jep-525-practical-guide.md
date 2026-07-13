@@ -4,7 +4,7 @@ pubDatetime: 2026-07-26T12:00:00.000Z
 title: "Structured Concurrency (JEP 525): A Practical Guide"
 slug: structured-concurrency-jep-525-practical-guide
 featured: false
-draft: true
+draft: false
 ogImage: /assets/default-og-image.png
 tags:
   - software
