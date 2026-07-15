@@ -154,9 +154,51 @@ Because of how HKDF works, the derived session keys are secure **as long as eith
 - A future quantum computer breaks the X25519 half — but ML-KEM holds.
 - If cryptanalysts find a devastating flaw in the young lattice math — X25519, with 25+ years of scrutiny, holds.
 
+Here's the whole thing at the wire level — note that it's the *same* single round trip TLS 1.3 always had, just with fatter key shares:
+
+```
+    Client                                                  Server
+      |                                                        |
+      |  ClientHello                                           |
+      |    supported_groups: X25519MLKEM768, X25519, ...       |
+      |    key_share (X25519MLKEM768):                         |
+      |      ML-KEM-768 encapsulation key ...... 1,184 bytes   |
+      |      X25519 public key .................... 32 bytes   |
+      |  ----------------------------------------------------> |
+      |                                                        |
+      |                     Server encapsulates against the    |
+      |                     client's ML-KEM key (producing a   |
+      |                     shared secret + ciphertext) and    |
+      |                     does normal X25519 with its own    |
+      |                     ephemeral key.                     |
+      |                                                        |
+      |  ServerHello                                           |
+      |    key_share (X25519MLKEM768):                         |
+      |      ML-KEM-768 ciphertext .............. 1,088 bytes  |
+      |      X25519 public key .................... 32 bytes   |
+      |  <---------------------------------------------------- |
+      |                                                        |
+      |  Both sides: keys = KeySchedule(mlkem_ss || x25519_ss) |
+      |                                                        |
+      |  {Certificate, CertificateVerify, Finished, appdata}   |
+      |  ...everything else already encrypted under keys that  |
+      |  an attacker must break BOTH algorithms to recover.    |
+```
+
 This is belt *and* suspenders, and it's why conservative security teams were willing to deploy a brand-new primitive at internet scale: the hybrid can't be *less* secure than the classical crypto it replaced. The practical costs are the ~2.3 KB of extra handshake bytes and a few microseconds of lattice math — ML-KEM operations are actually *fast*, competitive with or faster than X25519 itself. Cloudflare and Chrome both measured the real-world latency impact and found it small enough to enable for everyone by default.
 
-The naming, for the record, follows the algorithms in the order the bytes appear on the wire: `X25519MLKEM768` = X25519 share first, ML-KEM-768 second. You'll also see `SecP256r1MLKEM768` and `SecP384r1MLKEM1024` for NIST-curve variants, but the X25519 hybrid is the internet's de facto standard.
+For scale, here's what going post-quantum costs in bytes, for both halves of the handshake:
+
+| Wire artifact | Classical | Post-quantum | Growth |
+|---|---|---|---|
+| Client key share | X25519: **32 B** | ML-KEM-768 encap key: **1,184 B** | ~37× |
+| Server key share | X25519: **32 B** | ML-KEM-768 ciphertext: **1,088 B** | ~34× |
+| Signature (per signature!) | ECDSA P-256: **~64 B** | ML-DSA-65: **3,309 B** | ~50× |
+| Public key in a certificate | ECDSA P-256: **65 B** | ML-DSA-65: **1,952 B** | ~30× |
+
+The top two rows are the deployed part: ~2.3 KB total, absorbed into the existing round trip, done. The bottom two rows — multiplied by the several signatures and keys in a real certificate chain — are why the authentication half is still in the lab (next section but one).
+
+One trivia point that trips people up: despite the name, the wire format of `X25519MLKEM768` puts the ML-KEM-768 component *first*, then X25519, simply concatenated in the key_share (the earlier draft-Kyber version had the opposite order, and the standardized group flipped it). You'll also see `SecP256r1MLKEM768` and `SecP384r1MLKEM1024` for NIST-curve variants, but the X25519 hybrid is the internet's de facto standard. And since QUIC carries TLS 1.3 inside it, all of this applies to your HTTP/3 traffic identically.
 
 ## The Quiet Rollout: How Half the Web Went Post-Quantum
 
@@ -170,6 +212,22 @@ The timeline of the quiet rollout:
 - **Late 2024**: Chrome 131 switches to the standardized `X25519MLKEM768`; Firefox 132+ enables it. Cloudflare supports it across the entire network.
 - **2025**: [OpenSSL 3.5](https://openssl-corporation.org/post-quantum.html) ships ML-KEM with the hybrid *enabled by default*; Go 1.24 enables `X25519MLKEM768` by default in `crypto/tls`; Cloudflare [upgrades ~6 million origin-facing domains automatically](https://blog.cloudflare.com/automatically-secure/).
 - **2026**: Apple ships system-wide support in iOS 26 / macOS Tahoe 26, bringing Safari fully into the fold. Per [Cloudflare's own measurements](https://blog.cloudflare.com/pq-2025/), post-quantum key agreement crosses **50% of all web requests** — [54% by Q2 2026](https://postquantum.com/industry-news/cloudflare-pqc-majority-traffic/), roughly double the year before.
+
+Here's the support matrix as it stands, for the stacks you're most likely to touch:
+
+| Stack | `X25519MLKEM768` since | On by default? |
+|---|---|---|
+| Chrome / Chromium | 131 (Nov 2024; draft-Kyber since 124, Apr 2024) | ✅ |
+| Firefox | 132 (Nov 2024) | ✅ |
+| Safari / Apple OSes | iOS 26 / macOS Tahoe 26 (2026) | ✅ |
+| Cloudflare edge (client-facing) | Network-wide | ✅ preferred |
+| OpenSSL (nginx, HAProxy, Python, Node…) | 3.5 (Apr 2025, LTS) | ✅ |
+| Go `crypto/tls` | 1.24 (Feb 2025) | ✅ |
+| BoringSSL (Chrome, gRPC, Envoy) | 2024 | ✅ |
+| Java JSSE | JDK 27 (Sep 2026, JEP 527) | ✅ once released |
+| BouncyCastle (Java) | bctls 1.80-era releases | opt-in |
+
+Note the pattern in that table: languages and platforms that ride on OpenSSL (Python's `ssl`, Node's `tls`, Ruby, PHP, curl) inherit post-quantum support the moment their runtime links 3.5+ — no application changes. Statically-linked stacks (Go, Java, .NET) each need their own implementation, which is why Java's story gets its own section below.
 
 So when you read "all of Cloudflare uses post-quantum," what it precisely means is: **Cloudflare's edge supports and prefers `X25519MLKEM768` on every site it fronts, and every major browser now offers it by default** — so the browser↔edge leg of most connections negotiates it automatically. The remaining ~46% is mostly older clients, embedded devices, and API traffic from TLS stacks that haven't caught up.
 
@@ -208,7 +266,14 @@ Ciphersuite: TLS_AES_256_GCM_SHA384
 Negotiated TLS1.3 group: X25519MLKEM768
 ```
 
-The `-groups X25519MLKEM768` flag restricts the client to offering *only* the hybrid, so a successful handshake is proof the server supports it. Drop the flag and OpenSSL 3.5 will offer the hybrid by default anyway — try it against your own servers and see what they negotiate. (`openssl version` first; distro-packaged 3.0.x won't know the group. Check your `openssl version` output before concluding a server lacks support.)
+The `-groups X25519MLKEM768` flag restricts the client to offering *only* the hybrid, so a successful handshake is proof the server supports it. Drop the flag and OpenSSL 3.5 will offer the hybrid by default anyway — try it against your own servers and see what they negotiate.
+
+One trap: run `openssl version` first. Most current LTS distros still package OpenSSL 3.0.x–3.3.x, which will reject `X25519MLKEM768` as an unknown group — that's your *client* lacking support, not the server. Ubuntu 25.10+, Fedora 42+, and Alpine 3.22+ ship 3.5; on anything older, a container is the quickest path:
+
+```sh
+docker run --rm alpine:3.22 sh -c \
+  "apk add -q openssl && openssl s_client -connect cloudflare.com:443 -groups X25519MLKEM768 -brief </dev/null"
+```
 
 ### 3. curl
 
@@ -302,7 +367,18 @@ public class MlKemDemo {
 }
 ```
 
+Running it, both sides print the identical 32-byte secret:
+
+```
+bob:   fd394b7e8bfbf08f93f1a872deac8936f86ce736029d6faf8f9808036b2f99ef
+alice: fd394b7e8bfbf08f93f1a872deac8936f86ce736029d6faf8f9808036b2f99ef
+```
+
+And if you print `ciphertext.length`, you'll get exactly **1,088** — the same number from the handshake diagram earlier. This code *is* the fat part of the ServerHello.
+
 Note what's *not* here compared to Diffie-Hellman: Bob never generates a keypair. He receives a public key, produces a secret plus ciphertext in one shot, and is done. That asymmetry is the KEM shape.
+
+Stuck on JDK 21 LTS? The exact same `javax.crypto.KEM` code runs today with BouncyCastle (`bcprov-jdk18on` 1.79+) — add `Security.addProvider(new BouncyCastleProvider())` at the top and the `ML-KEM-768` / `ML-KEM` algorithm names resolve against BC instead. (That's how the output above was produced, verified on JDK 21; the `javax.crypto.KEM` API itself has been in the JDK since 21.)
 
 ### The missing piece: JEP 527 (JDK 27, September 2026)
 
@@ -340,7 +416,17 @@ Let's make this concrete with the deployment this blog's readers most likely run
 
 **The back door: one decision.** The Cloudflare→origin hop is the under-10% leg. Your realistic options, in order of effort:
 
-1. **Terminate origin TLS in a proxy, not the JVM.** If nginx, HAProxy, Caddy, or Envoy fronts your Spring Boot app, upgrading *that* to a build linked against OpenSSL 3.5+ gets you hybrid key exchange on the origin hop today — Cloudflare will negotiate it automatically. Your JVM keeps speaking plain HTTP (or classical TLS) inside the private network. This is the 90% answer.
+1. **Terminate origin TLS in a proxy, not the JVM.** If nginx, HAProxy, Caddy, or Envoy fronts your Spring Boot app, upgrading *that* to a build linked against OpenSSL 3.5+ gets you hybrid key exchange on the origin hop today — Cloudflare will negotiate it automatically. Your JVM keeps speaking plain HTTP (or classical TLS) inside the private network. This is the 90% answer, and the entire nginx configuration is:
+
+   ```nginx
+   # Requires nginx linked against OpenSSL 3.5+ — check `nginx -V`.
+   # With OpenSSL 3.5 the hybrid is in the default group list anyway;
+   # setting it explicitly pins the preference and documents intent.
+   ssl_protocols TLSv1.3 TLSv1.2;
+   ssl_ecdh_curve X25519MLKEM768:X25519:prime256v1;
+   ```
+
+   Then verify from anywhere with the `openssl s_client -groups X25519MLKEM768` one-liner from earlier, pointed at your origin. Once the origin negotiates the hybrid, Cloudflare's origin-facing connections [pick it up automatically](https://developers.cloudflare.com/ssl/post-quantum-cryptography/pqc-to-origin/), giving you post-quantum protection on both legs.
 2. **Wait for JDK 27** if your JVM terminates TLS directly (embedded Tomcat/Netty with an exposed HTTPS port). Come September 2026 it's a JDK upgrade plus, at most, a `jdk.tls.namedGroups` tweak — the JEP enables the hybrids by default in a sensible preference order.
 3. **BouncyCastle JSSE now**, if you have a compliance mandate that can't wait. It works, but it's a dependency and configuration you'll be un-doing after JDK 27.
 
