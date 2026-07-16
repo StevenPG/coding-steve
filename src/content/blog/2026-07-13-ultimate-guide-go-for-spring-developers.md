@@ -33,7 +33,7 @@ And I mean _real_ code. The companion project for this post builds one non-trivi
 Everything both services implement:
 
 | Concern           | Feature                                                                  |
-| ----------------- | ------------------------------------------------------------------------ |
+|-------------------|--------------------------------------------------------------------------|
 | REST API          | `POST/GET /api/orders` with JSON, path/query params                      |
 | Validation        | Request bodies validated, structured 400 responses                       |
 | Error handling    | RFC 9457 `application/problem+json` everywhere                           |
@@ -541,6 +541,8 @@ For genuinely multi-statement transactions, it's explicit: `tx, _ := pool.Begin(
 
 **Spring:** put Flyway on the classpath, drop `V1__create_orders.sql` into `db/migration/`, and migrations run at startup, tracked in `flyway_schema_history`. It's one of Spring Boot's best pieces of auto-configuration.
 
+One Boot 4 trap worth flagging: `org.flywaydb:flyway-core` alone is no longer enough. Boot 4 split Flyway's auto-configuration out into its own starter, so without `org.springframework.boot:spring-boot-starter-flyway` on the classpath, migrations silently don't run at startup — no error, just an empty schema. It's the kind of "why does this table not exist" bug that costs an afternoon.
+
 **Go:** [golang-migrate](https://github.com/golang-migrate/migrate) is the direct equivalent, with paired up/down files (`0001_create_orders.up.sql` / `.down.sql`) tracked in a `schema_migrations` table. The interesting Go-specific twist is `//go:embed`, which compiles the SQL files _into the binary_:
 
 ```go
@@ -702,6 +704,8 @@ private RestClient oauth2RestClient(RestClient.Builder builder,
 }
 ```
 
+One more Boot 4 starter split before the real landmine: `spring-boot-starter-oauth2-client` no longer pulls in `RestClient.Builder` auto-configuration — that moved out of the web starter into its own `spring-boot-starter-restclient`. Without it, the `RestClient.Builder` this section wires below simply isn't there to inject.
+
 There's one production landmine the demo documents, and if you take nothing else from the Spring side, take this: **the default `OAuth2AuthorizedClientManager` is bound to the servlet request.** This service acquires tokens from Kafka listener threads, where there is no request in scope — with the default manager, that fails. The fix is the service-based manager:
 
 ```java
@@ -773,7 +777,11 @@ There's no request-scope caveat because there's no request scope — a Go `http.
 
 ## 9. Messaging with Kafka
 
-**Spring:** producing is `KafkaTemplate`, consuming is `@KafkaListener`, and the framework owns the poll loop, JSON (de)serialization, offset commits, and rebalancing:
+**Spring:** producing is `KafkaTemplate`, consuming is `@KafkaListener`, and the framework owns the poll loop, JSON (de)serialization, offset commits, and rebalancing.
+
+Same Boot 4 trap as Flyway, different starter: `org.springframework.kafka:spring-kafka` gives you the library, not the auto-configuration for `KafkaTemplate` and the listener container. That moved to `org.springframework.boot:spring-boot-starter-kafka`. Miss it and beans you'd expect Boot to wire — the template, the listener container factory — just aren't there.
+
+A second, subtler gotcha shows up once your event has a timestamp. The auto-configured `JsonSerializer`/`JsonDeserializer` build their own plain `ObjectMapper`, which doesn't inherit Spring's Jackson auto-configuration — so a `java.time.Instant` field on `OrderEvent` fails to serialize until you register `JavaTimeModule` on that Kafka-specific mapper yourself. And because the Go consumer unmarshals that same field into a `time.Time`, which only parses RFC 3339 strings, you also have to disable `WRITE_DATES_AS_TIMESTAMPS` so it's written as an ISO-8601 string instead of a raw epoch number. Two ecosystems, one topic, and the JSON shape has to satisfy both — it's the cross-language tax for sharing a topic at all.
 
 ```java
 public void publishOrderCreated(UUID orderId) {
@@ -1047,24 +1055,42 @@ export TOKEN=$(curl -s http://localhost:8090/realms/demo/protocol/openid-connect
   -d client_id=orders-api-client \
   -d client_secret=orders-api-client-secret | jq -r .access_token)
 
-curl -s -X POST http://localhost:8080/api/orders \
+ORDER_ID=$(curl -s -X POST http://localhost:8080/api/orders \
   -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' \
-  -d '{"customerEmail":"jane@example.com","item":"widget","quantity":2,"totalCents":1999}' | jq
+  -d '{"customerEmail":"jane@example.com","item":"widget","quantity":2,"totalCents":1999}' | jq -r .id)
 ```
 
 Fetch it back a second later and the `status` is `COMPLETED` with a `paymentId` — proving the Kafka round-trip and both OAuth2 downstream calls ran:
 
-```text
-[PLACEHOLDER: paste the JSON response from GET /api/orders/<id> showing
-status COMPLETED and a paymentId, from an actual run]
+```bash
+curl -s http://localhost:8080/api/orders/$ORDER_ID -H "Authorization: Bearer $TOKEN" | jq
+```
+
+```json
+{
+  "id": "cb068640-8a29-4996-ad21-a10b30652b75",
+  "customerEmail": "jane@example.com",
+  "item": "widget",
+  "quantity": 2,
+  "totalCents": 1999,
+  "status": "COMPLETED",
+  "paymentId": "pay-30a958c6",
+  "failureReason": null,
+  "createdAt": "2026-07-16T20:02:36.844659Z",
+  "updatedAt": "2026-07-16T20:02:36.962628Z"
+}
 ```
 
 Run both apps at once and watch the logs interleave — an order created against the Go app on 8081 shows up in both consumers' logs (each consumer group gets its own copy; each service skips events for orders it doesn't own):
 
 ```text
-[PLACEHOLDER: paste interleaved Spring + Go log lines showing the same
-ORDER_CREATED event received by both services, from an actual run]
+2026-07-16T16:07:53.489 - [spring-order-service] : Created order 611a991a-7728-4d57-8d37-a32ec242d688 for jane@example.com
+2026-07-16T16:07:53.509 - [spring-order-service] : Received ORDER_CREATED for order 611a991a-7728-4d57-8d37-a32ec242d688 from spring-order-service
+2026-07-16T16:07:53.568 - [spring-order-service] : Order 611a991a-7728-4d57-8d37-a32ec242d688 completed (payment pay-6036108b)
+time=2026-07-16T16:07:53.499 type=ORDER_CREATED orderId=611a991a-7728-4d57-8d37-a32ec242d688 source=spring-order-service
+2026-07-16T16:07:56.262 - [spring-order-service] : Pending/processing orders: 0
+
 ```
 
 Try the failure paths too: no token → `401`, `"quantity": 0` → an identical `problem+json` `400` from either service.
