@@ -4,7 +4,7 @@ pubDatetime: 2026-07-17T12:00:00.000Z
 title: Modeling AGL Airspace Accurately with PostGIS Tessellation
 slug: modeling-agl-airspace-postgis-tessellation
 featured: false
-draft: true
+draft: false
 ogImage: /assets/default-og-image.png
 tags:
   - software
