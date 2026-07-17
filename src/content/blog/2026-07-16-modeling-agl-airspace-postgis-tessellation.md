@@ -191,7 +191,7 @@ The prism sweep is roughly **2,600× faster** than CSG, and the speedup came fro
 
 One more property worth calling out: **convergence.** Total conflicting volume across resolutions goes 89.74M → 89.52M → 89.45M m³ from 100m down to 25m cells — a 0.3% spread, with _identical yes/no verdicts at every resolution_. Finer tessellation sharpens the boundary precision; it doesn't change decisions. Which means you can run interactive checks at coarse resolution and refine offline, and trust both.
 
-![Two overlapping tessellated airspaces in the Cesium viewer with conflicting cells highlighted in a distinct color](![A flat centroid-sampled airspace slab rendered over Stone Mountain in Cesium, visibly floating above the terrain on one side and clipping into the mountain on the other](../../../public/assets/tessellation/overlap.png))
+![Two overlapping tessellated airspaces in the Cesium viewer with conflicting cells highlighted in a distinct color](../../../public/assets/tessellation/overlap.png))
 
 ## So Why Keep the Solids at All?
 
