@@ -44,9 +44,7 @@ The entire 3D problem gets reduced to one terrain sample and two numbers. Over f
 
 These failures scale directly with terrain relief, and they're unstable — a small adjustment to the footprint moves the centroid, which moves the single terrain sample, which can flip a conflict verdict without changing what the airspace means in the real world.
 
-![A flat centroid-sampled airspace slab rendered over Stone Mountain in Cesium, visibly floating above the terrain on one side and clipping into the mountain on the other](/assets/postgis-tessellation/centroid-slab-problem.png)
-
-> **Image placeholder:** Cesium screenshot of a single flat slab volume over Stone Mountain, showing the slab floating above ground at the footprint edge and/or intersecting the mountainside — the visual version of the three failure modes.
+![A flat centroid-sampled airspace slab rendered over Stone Mountain in Cesium, visibly floating above the terrain on one side and clipping into the mountain on the other](../../../public/assets/tessellation/single_flat_slab.png)
 
 # The Fix: Tessellated Terrain-Following Volumes
 
@@ -54,9 +52,7 @@ The core idea fits in one sentence: **split the footprint into small cells, reso
 
 Each cell becomes a vertical prism — a flat polygon at its own `bottom_z`, extruded up to its own `top_z`, both computed from the ground elevation _inside that cell_. The union of prisms approximates the actual curved airspace volume, and the approximation error is bounded by how much the terrain varies within a single cell. Smaller cells, smaller error, and you get to pick the tradeoff.
 
-![Tessellated airspace over Stone Mountain — hundreds of vertical prisms stepping up and down the mountainside, forming a terrain-following volume](/assets/postgis-tessellation/tessellated-volume.png)
-
-> **Image placeholder:** Cesium screenshot of the tessellated version of the same airspace — the grid of prisms visibly following the terrain up and over the mountain, ideally from a low oblique angle so the stair-stepping reads clearly.
+![Tessellated airspace over Stone Mountain — hundreds of vertical prisms stepping up and down the mountainside, forming a terrain-following volume](/assets/postgis-tessellation/../../../public/assets/tessellation/tessellation.png)
 
 ## What You Need
 
@@ -195,9 +191,7 @@ The prism sweep is roughly **2,600× faster** than CSG, and the speedup came fro
 
 One more property worth calling out: **convergence.** Total conflicting volume across resolutions goes 89.74M → 89.52M → 89.45M m³ from 100m down to 25m cells — a 0.3% spread, with _identical yes/no verdicts at every resolution_. Finer tessellation sharpens the boundary precision; it doesn't change decisions. Which means you can run interactive checks at coarse resolution and refine offline, and trust both.
 
-![Two overlapping tessellated airspaces in the Cesium viewer with conflicting cells highlighted in a distinct color](/assets/postgis-tessellation/conflict-highlight.png)
-
-> **Image placeholder:** Cesium screenshot of two airspace volumes overlapping on the mountainside, with the cells identified as true conflicts by the prism query highlighted (e.g., in red) against the non-conflicting cells.
+![Two overlapping tessellated airspaces in the Cesium viewer with conflicting cells highlighted in a distinct color](![A flat centroid-sampled airspace slab rendered over Stone Mountain in Cesium, visibly floating above the terrain on one side and clipping into the mountain on the other](../../../public/assets/tessellation/overlap.png))
 
 ## So Why Keep the Solids at All?
 
