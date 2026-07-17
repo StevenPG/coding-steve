@@ -52,7 +52,7 @@ The core idea fits in one sentence: **split the footprint into small cells, reso
 
 Each cell becomes a vertical prism — a flat polygon at its own `bottom_z`, extruded up to its own `top_z`, both computed from the ground elevation _inside that cell_. The union of prisms approximates the actual curved airspace volume, and the approximation error is bounded by how much the terrain varies within a single cell. Smaller cells, smaller error, and you get to pick the tradeoff.
 
-![Tessellated airspace over Stone Mountain — hundreds of vertical prisms stepping up and down the mountainside, forming a terrain-following volume](/assets/postgis-tessellation/../../../public/assets/tessellation/tessellation.png)
+![Tessellated airspace over Stone Mountain — hundreds of vertical prisms stepping up and down the mountainside, forming a terrain-following volume](../../../public/assets/tessellation/tessellation.png)
 
 ## What You Need
 
