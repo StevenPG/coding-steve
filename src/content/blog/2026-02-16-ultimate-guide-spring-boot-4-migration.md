@@ -34,7 +34,7 @@ I'm not going to sugarcoat it -- this is one of the larger Spring Boot migration
 
 Before touching your Spring Boot version, make sure your foundation is solid.
 
-**Java 21 minimum.** Spring Boot 4.0.x requires Java 21 through 25. If you're still on 17, that's the first thing to upgrade. Check my [Spring Version Compatibility Cheatsheet](/posts/spring-compat-cheatsheet) for the full matrix.
+**Java 21 minimum.** Spring Boot 4.0.x requires Java 21 through 25. If you're still on 17, that's the first thing to upgrade. Check my [Spring Version Compatibility Cheatsheet](/posts/spring-compat-cheatsheet/) for the full matrix.
 
 **Gradle 8.14+ minimum (Gradle 9 recommended).** Spring Boot 4 supports Gradle 8.14 and above. Gradle 9 is recommended and comes with its own set of changes (covered below).
 
@@ -301,7 +301,7 @@ This module provides backward-compatible shims so that Jackson 2-style code cont
 
 ## JSpecify and Null Safety
 
-I wrote a dedicated deep-dive on JSpecify: [Spring Boot 4 - What is JSpecify?](/posts/spring-boot-4-what-is-jspecify). That post covers the full picture -- what JSpecify can and cannot do, IDE setup, and practical patterns.
+I wrote a dedicated deep-dive on JSpecify: [Spring Boot 4 - What is JSpecify?](/posts/spring-boot-4-what-is-jspecify/). That post covers the full picture -- what JSpecify can and cannot do, IDE setup, and practical patterns.
 
 The short version for migration purposes:
 
@@ -539,6 +539,6 @@ Here's the ordered checklist I used for my own migration. Follow these steps in 
 - [Spring Boot 4.0 Migration Guide](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide)
 - [Spring Boot 4.0 Release Notes](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Release-Notes)
 - [Jackson 3 Migration Guide](https://github.com/FasterXML/jackson/blob/main/jackson3/MIGRATING_TO_JACKSON_3.md)
-- [Spring Boot 4 - What is JSpecify?](/posts/spring-boot-4-what-is-jspecify) (my deep-dive)
-- [Spring Version Compatibility Cheatsheet](/posts/spring-compat-cheatsheet) (my cheatsheet)
-- [Spring Boot 4 and Logbook](/posts/spring-boot-4-logbook-now-works) (Jackson 3 migration example)
+- [Spring Boot 4 - What is JSpecify?](/posts/spring-boot-4-what-is-jspecify/) (my deep-dive)
+- [Spring Version Compatibility Cheatsheet](/posts/spring-compat-cheatsheet/) (my cheatsheet)
+- [Spring Boot 4 and Logbook](/posts/spring-boot-4-logbook-now-works/) (Jackson 3 migration example)

@@ -44,7 +44,7 @@ The echo server simulates a downstream dependency. Every HTTP request and every 
 
 The 10ms sleep is the key ingredient. Without it, all calls complete near-instantly and we can't observe how the concurrency models behave under realistic I/O latency.
 
-The server lives in its own `echo-server/` directory as a [uv](/posts/python-package-manager-uv) project. It has no third-party dependencies — just the Python standard library — but keeping it self-contained means you can drop it anywhere and run it without worrying about your local Python environment.
+The server lives in its own `echo-server/` directory as a [uv](/posts/python-package-manager-uv/) project. It has no third-party dependencies — just the Python standard library — but keeping it self-contained means you can drop it anywhere and run it without worrying about your local Python environment.
 
 **`echo-server/pyproject.toml`:**
 
@@ -666,7 +666,7 @@ Then I start the app and wait for the "DONE" log line:
 | API throughput (req/s)      | 2623   | 2124               |
 | Kafka drain (1000 msgs) (s) | 2.8    | 2.9                |
 
-*These numbers are from my personal M3 Macbook Pro. Your results will vary — for reference, you can see see the [Casual Machine Perf Test](/posts/casual-machine-perf-test) post for how much machine-to-machine differences affect GraalVM native compile and startup times.*
+*These numbers are from my personal M3 Macbook Pro. Your results will vary — for reference, you can see see the [Casual Machine Perf Test](/posts/casual-machine-perf-test/) post for how much machine-to-machine differences affect GraalVM native compile and startup times.*
 
 **What to expect directionally:** Go typically wins on build time and startup time. The throughput numbers should be competitive — both concurrency models solve the same problem with architecturally similar approaches.
 

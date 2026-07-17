@@ -30,7 +30,7 @@ That's a shame, because Actuator is the single most underrated operational tool 
 
 This guide is a full, end-to-end tour. Every example comes from a real, runnable demo — actually **two** demos: one on **Spring Boot 3.5** and one on **Spring Boot 4.0**, built to be byte-for-byte identical in behaviour so the only differences you see are the ones Spring Boot 4 genuinely introduced. The code lives at [github.com/StevenPG/DemosAndArticleContent](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/ultimate-actuator).
 
-The body of this post is written against **Spring Boot 4** because that's where new projects should be starting in mid-2026. Where Spring Boot 3 differs, I call it out inline, and there's a consolidated [Spring Boot 3 → 4](#spring-boot-3--4-what-actually-changed) section near the end if you're mid-migration. If you've already read the [Spring Boot 4 migration guide](/posts/ultimate-guide-spring-boot-4-migration), the actuator-specific changes here will slot right in.
+The body of this post is written against **Spring Boot 4** because that's where new projects should be starting in mid-2026. Where Spring Boot 3 differs, I call it out inline, and there's a consolidated [Spring Boot 3 → 4](#spring-boot-3--4-what-actually-changed) section near the end if you're mid-migration. If you've already read the [Spring Boot 4 migration guide](/posts/ultimate-guide-spring-boot-4-migration/), the actuator-specific changes here will slot right in.
 
 If you just want a specific endpoint, use the table of contents. Otherwise read straight through — the mental model in the next section makes everything else click.
 
@@ -1181,4 +1181,4 @@ Spring Boot Actuator is the rare feature that's both ubiquitous and underused. T
 
 The two demo projects — Spring Boot 3.5 and Spring Boot 4.0, deliberately identical so the diffs are pure signal — are at [github.com/StevenPG/DemosAndArticleContent](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/ultimate-actuator). Each one ships `docker compose` infrastructure, a `generate-traffic.sh` to populate the metrics/caches/audit endpoints, and a `test-actuator.sh` that hits every endpoint and prints the response — the fastest way to see the whole surface at once.
 
-If you found this useful, the [Spring Boot 4 migration guide](/posts/ultimate-guide-spring-boot-4-migration), the [Spring Modulith guide](/posts/ultimate-guide-spring-modulith), and the [Spring Batch 6 guide](/posts/ultimate-guide-spring-batch-6) follow this same format for those topics.
+If you found this useful, the [Spring Boot 4 migration guide](/posts/ultimate-guide-spring-boot-4-migration/), the [Spring Modulith guide](/posts/ultimate-guide-spring-modulith/), and the [Spring Batch 6 guide](/posts/ultimate-guide-spring-batch-6/) follow this same format for those topics.

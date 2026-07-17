@@ -8,6 +8,12 @@ export interface Props {
 }
 
 const { page } = Astro.props;
+
+const withTrailingSlash = (url?: string | null) =>
+  url && !url.endsWith("/") ? `${url}/` : url;
+
+const prevUrl = withTrailingSlash(page.url.prev);
+const nextUrl = withTrailingSlash(page.url.next);
 ---
 
 {
@@ -15,7 +21,7 @@ const { page } = Astro.props;
     <nav class="pagination-wrapper" aria-label="Pagination">
       <LinkButton
         disabled={!page.url.prev}
-        href={page.url.prev as string}
+        href={prevUrl as string}
         className={`mr-4 select-none ${page.url.prev ? "" : "disabled"}`}
         ariaLabel="Previous"
       >
@@ -30,7 +36,7 @@ const { page } = Astro.props;
       {page.currentPage} / {page.lastPage}
       <LinkButton
         disabled={!page.url.next}
-        href={page.url.next as string}
+        href={nextUrl as string}
         className={`mx-4 select-none ${page.url.next ? "" : "disabled"}`}
         ariaLabel="Next"
       >

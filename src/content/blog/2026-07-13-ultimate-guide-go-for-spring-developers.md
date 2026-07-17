@@ -46,7 +46,7 @@ Everything both services implement:
 | Configuration     | Typed config with defaults                                               |
 | Observability     | Health endpoints + Prometheus metrics                                    |
 
-If you've read my [GraalVM native Spring Boot vs Go benchmark](/posts/go-vs-spring-boot-native-benchmark), this is the qualitative companion to that quantitative post. That one measured build time, startup, and throughput. This one answers the question that actually decides whether your team can adopt Go: **how does the code you write every day translate?**
+If you've read my [GraalVM native Spring Boot vs Go benchmark](/posts/go-vs-spring-boot-native-benchmark/), this is the qualitative companion to that quantitative post. That one measured build time, startup, and throughput. This one answers the question that actually decides whether your team can adopt Go: **how does the code you write every day translate?**
 
 The full project is at [github.com/StevenPG/DemosAndArticleContent](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/spring-boot-vs-golang) and is referenced throughout.
 
@@ -577,7 +577,7 @@ There is no classpath in Go — `go:embed` is what replaces "resources on the cl
 
 ## 7. Inbound Security: OAuth2 Resource Server
 
-Longtime readers know [Spring OAuth2 is a recurring topic here](/posts/ultimate-guide-spring-web-clients-oauth2), so this section and the next are the heart of the guide.
+Longtime readers know [Spring OAuth2 is a recurring topic here](/posts/ultimate-guide-spring-web-clients-oauth2/), so this section and the next are the heart of the guide.
 
 **Spring:** one property turns the app into a resource server:
 
@@ -661,7 +661,7 @@ A word of caution, because it matters: **the Spring version encodes years of har
 
 ## 8. Outbound Security: Two OAuth2 Client-Credentials Targets
 
-The demo service calls two downstream APIs — payment and inventory — each with its **own** client registration, credentials, and scope. I chose this deliberately, because single-client examples hide the plumbing, and [multi-registration setups are where Spring's OAuth2 client support gets subtle](/posts/easy-spring-rest-client-with-oauth2).
+The demo service calls two downstream APIs — payment and inventory — each with its **own** client registration, credentials, and scope. I chose this deliberately, because single-client examples hide the plumbing, and [multi-registration setups are where Spring's OAuth2 client support gets subtle](/posts/easy-spring-rest-client-with-oauth2/).
 
 **Spring:** declare both registrations in YAML:
 
@@ -932,7 +932,7 @@ No profiles, no relaxed binding, no `application-{profile}.yaml` resolution orde
 
 ## 12. Observability
 
-**Spring:** add `spring-boot-starter-actuator` and the Micrometer Prometheus registry, and you get `/actuator/health`, `/actuator/metrics`, and `/actuator/prometheus` — plus dozens of built-in metrics — for free. (If you want the full tour, I wrote an [entire guide on Actuator](/posts/ultimate-guide-spring-boot-actuator).)
+**Spring:** add `spring-boot-starter-actuator` and the Micrometer Prometheus registry, and you get `/actuator/health`, `/actuator/metrics`, and `/actuator/prometheus` — plus dozens of built-in metrics — for free. (If you want the full tour, I wrote an [entire guide on Actuator](/posts/ultimate-guide-spring-boot-actuator/).)
 
 **Go:** you assemble the same surface from parts, and it's less work than you'd guess:
 
@@ -1123,4 +1123,4 @@ If you're a Spring developer staring down your first Go service, here's the comp
 
 The full project — both services, the JWT-validating downstream stub, the Keycloak realm import, docker-compose for the infrastructure, and a `GOLANG_REFERENCE.md` that maps every concern in this post to the exact files implementing it — is at [github.com/StevenPG/DemosAndArticleContent](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/spring-boot-vs-golang). Clone it, run both apps side by side, and diff the implementations concern by concern; it's the fastest way I know to make Go feel familiar.
 
-If you found this useful, the [GraalVM native Spring Boot vs Go benchmark](/posts/go-vs-spring-boot-native-benchmark) measures these same two stacks quantitatively, and the [Spring Boot 4 migration guide](/posts/ultimate-guide-spring-boot-4-migration) and [Spring gRPC guide](/posts/ultimate-guide-spring-grpc) follow this same format for staying current on the Java side of the fence.
+If you found this useful, the [GraalVM native Spring Boot vs Go benchmark](/posts/go-vs-spring-boot-native-benchmark/) measures these same two stacks quantitatively, and the [Spring Boot 4 migration guide](/posts/ultimate-guide-spring-boot-4-migration/) and [Spring gRPC guide](/posts/ultimate-guide-spring-grpc/) follow this same format for staying current on the Java side of the fence.

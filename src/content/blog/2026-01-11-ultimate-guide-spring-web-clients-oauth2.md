@@ -1109,7 +1109,7 @@ For non-standard OAuth2 providers or complex requirements.
 
 ### Custom Token Endpoints
 
-Some OAuth2 providers require additional parameters. See my article on [Dynamically Setting Audience](/posts/spring-oauth2-client-dynamic-audience) for advanced customization patterns.
+Some OAuth2 providers require additional parameters. See my article on [Dynamically Setting Audience](/posts/spring-oauth2-client-dynamic-audience/) for advanced customization patterns.
 
 Basic example adding a custom parameter:
 
@@ -1367,7 +1367,7 @@ class KeycloakIntegrationTest {
 
 ### Logging with Logbook
 
-For detailed request/response logging, see my article on [Logging Request Body with Spring WebClient](/posts/request-body-with-spring-webclient). Here's the RestClient version:
+For detailed request/response logging, see my article on [Logging Request Body with Spring WebClient](/posts/request-body-with-spring-webclient/). Here's the RestClient version:
 
 ```java
 @Bean
@@ -1613,9 +1613,9 @@ WebClient webClient = WebClient.builder()
 - [HTTP Interfaces in Spring Boot 4 (Dan Vega)](https://www.danvega.dev/blog/http-interfaces-spring-boot-4)
 
 **My Related Articles:**
-- [Easy Spring Rest Client w/ OAuth2](/posts/spring-rest-client-oauth2)
-- [Dynamically Setting Audience for Spring OAuth2 Client](/posts/spring-oauth2-client-dynamic-audience)
-- [Logging Request Body with Spring WebClient](/posts/request-body-with-spring-webclient)
+- [Easy Spring Rest Client w/ OAuth2](/posts/spring-rest-client-oauth2/)
+- [Dynamically Setting Audience for Spring OAuth2 Client](/posts/spring-oauth2-client-dynamic-audience/)
+- [Logging Request Body with Spring WebClient](/posts/request-body-with-spring-webclient/)
 
 ---
 

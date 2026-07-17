@@ -13,7 +13,7 @@ tags:
 description: Attempting to use Logbook with Spring Boot 4 (broken on arrival)
 ---
 
-> **Update (February 2026):** This issue has been resolved! Logbook 4.x now fully supports Spring Boot 4. See my follow-up post: [Spring Boot 4 and Logbook: It Works Now!](/posts/spring-boot-4-logbook-now-works)
+> **Update (February 2026):** This issue has been resolved! Logbook 4.x now fully supports Spring Boot 4. See my follow-up post: [Spring Boot 4 and Logbook: It Works Now!](/posts/spring-boot-4-logbook-now-works/)
 
 ----
 

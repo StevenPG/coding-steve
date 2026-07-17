@@ -111,7 +111,7 @@ The most common question I get is "when do I actually use this?" Here's my hones
 
 **GraphQL** solves a different problem — flexible client-driven queries over a graph of data, typically for frontends that want to avoid over/under-fetching. It's not competing with gRPC for internal RPC; if anything they coexist (GraphQL gateway out front, gRPC to backend services).
 
-**Async messaging (Kafka, RabbitMQ, Spring Cloud Stream)** is the right tool when you want *decoupling* and *durability* — fire-and-forget events, work queues, event sourcing. gRPC is synchronous request/response (even its streams are within a single call). If the caller shouldn't wait and the message should survive a consumer being down, use a broker, not gRPC. I have a [whole guide on Spring Cloud Streams](/posts/ultimate-guide-spring-cloud-streams) for that world.
+**Async messaging (Kafka, RabbitMQ, Spring Cloud Stream)** is the right tool when you want *decoupling* and *durability* — fire-and-forget events, work queues, event sourcing. gRPC is synchronous request/response (even its streams are within a single call). If the caller shouldn't wait and the message should survive a consumer being down, use a broker, not gRPC. I have a [whole guide on Spring Cloud Streams](/posts/ultimate-guide-spring-cloud-streams/) for that world.
 
 A mature system uses all of these. The demo in this guide is deliberately the most common gRPC topology: **REST at the edge, gRPC between services.**
 
@@ -1072,4 +1072,4 @@ gRPC isn't a REST replacement — it's the right tool for **service-to-service c
 
 The demo repository used throughout this post — the full `inventory-proto`, `inventory-server`, and `storefront-client` modules with tests covering every RPC type — is available at [github.com/StevenPG/DemosAndArticleContent](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/grpc-spring-boot-ultimate-guide). The `scripts/` directory has `run-demo.sh`, `demo-requests.sh`, and `grpcurl-examples.sh` so you can see all four RPC types run end to end in a couple of commands.
 
-If you found this useful, the [Spring Boot 4 migration guide](/posts/ultimate-guide-spring-boot-4-migration), the [Spring Cloud Streams guide](/posts/ultimate-guide-spring-cloud-streams), and the [Spring Batch 6 guide](/posts/ultimate-guide-spring-batch-6) follow the same format for those topics.
+If you found this useful, the [Spring Boot 4 migration guide](/posts/ultimate-guide-spring-boot-4-migration/), the [Spring Cloud Streams guide](/posts/ultimate-guide-spring-cloud-streams/), and the [Spring Batch 6 guide](/posts/ultimate-guide-spring-batch-6/) follow the same format for those topics.

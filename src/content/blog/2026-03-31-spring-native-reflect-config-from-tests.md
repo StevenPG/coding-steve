@@ -547,7 +547,7 @@ Two commands. That's it.
 
 The `-Pagent` flag is provided by the GraalVM Native Build Tools Gradle plugin. It attaches the native-image tracing agent as a Java agent to the test JVM. While the tests execute, the agent watches every reflective call, every dynamic proxy creation, every resource load — and records them.
 
-The agent output lands in `build/native/agent-output/test/`. As of GraalVM for JDK 23, the agent produces a single unified `reachability-metadata.json` instead of the older individual files (`reachability-metadata.json`, `resource-config.json`, etc.). If you're curious about that consolidation, I covered it in the [reflect-config demystified update](/posts/graalvm-reflect-config-demystified).
+The agent output lands in `build/native/agent-output/test/`. As of GraalVM for JDK 23, the agent produces a single unified `reachability-metadata.json` instead of the older individual files (`reachability-metadata.json`, `resource-config.json`, etc.). If you're curious about that consolidation, I covered it in the [reflect-config demystified update](/posts/graalvm-reflect-config-demystified/).
 
 ```bash
 # 2. Copy generated config to the source tree

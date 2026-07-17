@@ -475,4 +475,4 @@ The next milestone to watch is post-quantum authentication: IETF certificate for
 - NIST [FIPS 203 (ML-KEM)](https://csrc.nist.gov/pubs/fips/203/final), [FIPS 204 (ML-DSA)](https://csrc.nist.gov/pubs/fips/204/final), [FIPS 205 (SLH-DSA)](https://csrc.nist.gov/pubs/fips/205/final)
 - [Signature placement in post-quantum TLS certificate hierarchies (arXiv)](https://arxiv.org/pdf/2604.06100)
 
-If you found this useful, the other deep-dives in this format — the [Spring Boot 4 migration guide](/posts/ultimate-guide-spring-boot-4-migration), the [gRPC guide](/posts/ultimate-guide-spring-grpc), and the [Spring Boot Actuator guide](/posts/ultimate-guide-spring-boot-actuator) — cover their topics the same way.
+If you found this useful, the other deep-dives in this format — the [Spring Boot 4 migration guide](/posts/ultimate-guide-spring-boot-4-migration/), the [gRPC guide](/posts/ultimate-guide-spring-grpc/), and the [Spring Boot Actuator guide](/posts/ultimate-guide-spring-boot-actuator/) — cover their topics the same way.

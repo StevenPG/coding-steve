@@ -1021,7 +1021,7 @@ spring:
 
 ### RecordRecoverableProcessor - Custom Error Handling
 
-When you need full control over error handling (not just DLT publishing), use `RecordRecoverableProcessor`. I wrote about this in detail in my [RecordRecoverableProcessor article](/posts/spring-cloud-stream-record-recoverable-processor), but here's the summary.
+When you need full control over error handling (not just DLT publishing), use `RecordRecoverableProcessor`. I wrote about this in detail in my [RecordRecoverableProcessor article](/posts/spring-cloud-stream-record-recoverable-processor/), but here's the summary.
 
 ```java
 @Component
@@ -1561,7 +1561,7 @@ spring:
 
 - [Spring Cloud Stream Reference Documentation](https://docs.spring.io/spring-cloud-stream/docs/current/reference/html/)
 - [Spring Cloud Stream Samples](https://github.com/spring-cloud/spring-cloud-stream-samples)
-- [My RecordRecoverableProcessor Article](/posts/spring-cloud-stream-record-recoverable-processor)
+- [My RecordRecoverableProcessor Article](/posts/spring-cloud-stream-record-recoverable-processor/)
 - [Kafka Streams Documentation](https://kafka.apache.org/documentation/streams/)
 
 ---
