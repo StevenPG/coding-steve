@@ -1,6 +1,6 @@
 ---
 author: StevenPG
-pubDatetime: 2026-07-17T12:00:00.000Z
+pubDatetime: 2026-07-16T12:00:00.000Z
 title: Modeling AGL Airspace Accurately with PostGIS Tessellation
 slug: modeling-agl-airspace-postgis-tessellation
 featured: false
