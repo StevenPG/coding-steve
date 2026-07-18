@@ -3,7 +3,7 @@ title: Go Version Guide
 description: What's new in each major Go release, with support status marked and links to release notes.
 slug: go-version-guide
 pubDatetime: 2026-06-26T12:00:00.000Z
-modDatetime: 2026-06-26T12:00:00.000Z
+modDatetime: 2026-07-18T12:00:00.000Z
 tags:
   - golang
 order: 2
@@ -36,7 +36,13 @@ painless.
 | [1.5](https://go.dev/doc/go1.5)        | Aug 2015 | Compiler & runtime rewritten in Go, concurrent low-latency GC, `GOMAXPROCS` defaults to all CPUs                 |
 | [1.0](https://go.dev/doc/go1)          | Mar 2012 | First stable release &mdash; the Go 1 compatibility guarantee begins                                             |
 
-> **[Go 1.27](https://go.dev/doc/go1.27)** is expected around **August 2026**. Work-in-progress release notes are already published — highlights include generic methods, `encoding/json/v2` GA, a new `uuid` package, `crypto/mldsa` (post-quantum ML-DSA), and ~30% faster small allocations. See the [release history](https://go.dev/doc/devel/release) for the latest published versions and the [milestone tracker](https://github.com/golang/go/milestones) for what's landing.
+> **[Go 1.27](https://go.dev/doc/go1.27)** is expected in **August 2026**, and as of mid-July 2026 the **first release
+> candidate is out**. Highlights from the draft release notes: **generic methods** (methods can declare their own type
+> parameters), `encoding/json/v2` GA, a new `uuid` package, `crypto/mldsa` (post-quantum ML-DSA), struct literal keys
+> can be any field selector, generalized function type inference, `go mod tidy` merging duplicate `require` blocks, the
+> `stdversion` vet check on by default in `go test`, and ~30% faster small allocations. macOS 13+ is now required. See
+> the [release history](https://go.dev/doc/devel/release) for published versions and the
+> [milestone tracker](https://github.com/golang/go/milestones) for what's landing.
 
 ## How Go Support Works
 
