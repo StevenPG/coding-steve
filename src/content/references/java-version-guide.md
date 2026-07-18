@@ -3,7 +3,7 @@ title: Java Version Guide
 description: What's new in each Java release from 8 onward, with LTS versions marked and links to release notes.
 slug: java-version-guide
 pubDatetime: 2026-06-26T12:00:00.000Z
-modDatetime: 2026-06-26T12:00:00.000Z
+modDatetime: 2026-07-18T12:00:00.000Z
 tags:
   - java
 order: 1
@@ -13,13 +13,28 @@ A "what's new" for every Java feature release since Java 8. Since Java 9, a feat
 (March and September). **LTS** (Long-Term Support) releases &mdash; the ones most teams standardize on &mdash; now
 arrive every **two years**; earlier they were three years apart.
 
-**LTS line:** 8 &middot; 11 &middot; 17 &middot; 21 &middot; 25 (next: **27** in 2027). Expand any release below for its
+**LTS line:** 8 &middot; 11 &middot; 17 &middot; 21 &middot; 25 (next: **29** in September 2027, per
+[Oracle's roadmap](https://www.oracle.com/java/technologies/java-se-support-roadmap.html)). Expand any release below for its
 highlights and a link to the release notes. For the complete picture of any version, see the
 [JEP index](https://openjdk.org/jeps/0).
 
 ## Releases
 
 <details class="ref-box" open>
+<summary><span class="ref-box-title">Java 26</span><span class="ref-box-date">Mar 2026</span></summary>
+
+- **HTTP/3 for the HTTP Client API** — talk to HTTP/3 servers with minimal code change ([JEP 517](https://openjdk.org/jeps/517))
+- **Ahead-of-time object caching with any GC** — Project Leyden's AOT cache now works with ZGC and friends ([JEP 516](https://openjdk.org/jeps/516))
+- **G1 throughput boost** — dual card tables cut synchronization; 5–15% gains for write-heavy apps ([JEP 522](https://openjdk.org/jeps/522))
+- **Warnings for deep-reflection mutation of final fields** — first step toward making `final` really mean final ([JEP 500](https://openjdk.org/jeps/500))
+- The **Applet API is gone** at last ([JEP 504](https://openjdk.org/jeps/504))
+- Still in preview/incubator: lazy constants (formerly stable values, [JEP 526](https://openjdk.org/jeps/526)), structured concurrency ([JEP 525](https://openjdk.org/jeps/525)), primitive types in patterns ([JEP 530](https://openjdk.org/jeps/530)), PEM encodings ([JEP 524](https://openjdk.org/jeps/524)), Vector API ([JEP 529](https://openjdk.org/jeps/529))
+
+[Release notes →](https://openjdk.org/projects/jdk/26/)
+
+</details>
+
+<details class="ref-box">
 <summary><span class="ref-box-title">Java 25</span><span class="ref-box-date">Sep 2025</span><span class="ref-box-lts">LTS</span></summary>
 
 - **Flexible constructor bodies** — run statements before `this()`/`super()` ([JEP 513](https://openjdk.org/jeps/513))
@@ -213,8 +228,15 @@ highlights and a link to the release notes. For the complete picture of any vers
 
 </details>
 
-> **Java 26** is the next feature release, targeted for **March 2026** (non-LTS; the next LTS is **Java 27** in
-> September 2027). Check the [OpenJDK JDK project page](https://openjdk.org/projects/jdk/) for its finalized JEPs.
+> **Java 27** (non-LTS) is the next feature release, due **September 2026**. As of mid-July 2026 its feature set is
+> frozen (Rampdown Phase One began June 4) at nine JEPs. The headliners: **compact object headers on by default**
+> ([JEP 534](https://openjdk.org/jeps/534)), **G1 as the default GC in all environments** ([JEP 523](https://openjdk.org/jeps/523)),
+> **post-quantum hybrid key exchange for TLS 1.3** ([JEP 527](https://openjdk.org/jeps/527)), and **JFR in-process data
+> redaction** ([JEP 536](https://openjdk.org/jeps/536)). The rest are re-runs: lazy constants
+> ([JEP 531](https://openjdk.org/jeps/531)), primitive type patterns ([JEP 532](https://openjdk.org/jeps/532)),
+> structured concurrency ([JEP 533](https://openjdk.org/jeps/533)), PEM encodings ([JEP 538](https://openjdk.org/jeps/538)),
+> and a twelfth Vector API incubation ([JEP 537](https://openjdk.org/jeps/537)). See the
+> [JDK 27 project page](https://openjdk.org/projects/jdk/27/) for the latest.
 
 ## How Java Support Works
 

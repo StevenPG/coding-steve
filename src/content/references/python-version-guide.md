@@ -3,7 +3,7 @@ title: Python Version Guide
 description: What's new in each Python 3 release, with support status marked and links to the official What's New notes.
 slug: python-version-guide
 pubDatetime: 2026-06-26T12:00:00.000Z
-modDatetime: 2026-06-26T12:00:00.000Z
+modDatetime: 2026-07-18T12:00:00.000Z
 tags:
   - python
 order: 3
@@ -30,7 +30,12 @@ A scannable "what's new" for modern Python 3 releases. Python ships one feature 
 | [3.7](https://docs.python.org/3/whatsnew/3.7.html)             | Jun 2018 | End of life   | `dataclasses`, `breakpoint()`, deferred annotation imports, guaranteed dict ordering                      |
 | [3.6](https://docs.python.org/3/whatsnew/3.6.html)             | Dec 2016 | End of life   | **f-strings**, variable annotations, async generators & comprehensions, `secrets`                         |
 
-> **Python 3.15** is due **October 2026**. Status labels above are approximate &mdash; the
+> **[Python 3.15](https://docs.python.org/3.15/whatsnew/3.15.html)** is due **October 1, 2026**, and as of mid-July
+> 2026 it's feature-frozen and in beta. Headliners: **explicit lazy imports**
+> ([PEP 810](https://peps.python.org/pep-0810/) &mdash; faster startup for big dependency trees), a **stable ABI for
+> free-threaded CPython**, a noticeably faster JIT (~8&ndash;13% on the benchmark suite), a new zero-overhead sampling
+> profiler, UTF-8 as the default text encoding ([PEP 686](https://peps.python.org/pep-0686/)), and a colorized CLI with
+> SQL keyword tab-completion in `sqlite3`. Status labels above are approximate &mdash; the
 > [devguide version page](https://devguide.python.org/versions/) is the source of truth for bugfix vs. security-only vs.
 > EOL dates.
 
