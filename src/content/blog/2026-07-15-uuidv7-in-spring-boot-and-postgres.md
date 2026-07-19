@@ -198,10 +198,10 @@ After the inserts, the harness pulls index size and fragmentation via `pg_indexe
 One million rows, batch size 1,000, PostgreSQL 18 in Docker on my M-series MacBook (run it yourself — the absolute numbers will differ on your machine, the _ratios_ won't):
 
 | Strategy        | Insert time (1M rows) | PK index size | Leaf fragmentation |
-| --------------- | --------------------- | ------------- | ------------------ |
-| bigint identity | 21.4 s                | 21 MB         | 0%                 |
-| UUIDv7          | 24.9 s                | 30 MB         | ~0%                |
-| UUIDv4          | 33.7 s                | 46 MB         | ~50%               |
+|-----------------|-----------------------|---------------|--------------------|
+| bigint identity | 3,615 ms              | 21 MB         | 0%                 |
+| UUIDv7          | 3,820 ms              | 30 MB         | ~0%                |
+| UUIDv4          | 4,837 ms              | 38 MB         | ~50%               |
 
 The story is consistent with the 100k-row psql experiment from the last post, just more pronounced at scale:
 
