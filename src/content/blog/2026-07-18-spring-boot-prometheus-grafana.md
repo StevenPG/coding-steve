@@ -158,6 +158,10 @@ Plus JVM heap used-vs-max, and the two business panels (orders placed vs failed,
 
 Import it into your own Grafana: Dashboards → Import → paste [`spring-boot-overview.json`][dashboard-json].
 
+Here's what it looks like:
+
+![Spring Boot Overview Dashboard](../../../public/assets/prometheus-grafana/prometheus-grafana.png)
+
 ## The Gotchas That Cost Me Time
 
 - **`rate()` needs at least two scrapes** in its window. A 1m rate window with a 60s scrape interval shows nothing. Keep `scrape_interval` at 15s or less, and rate windows at 4x the interval.
