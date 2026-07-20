@@ -156,7 +156,11 @@ The last two rows are the real decision criteria, so let me be direct about them
 
 HTMX collapses the frontend stack for server-owned-data apps into attributes on your HTML and fragments from your existing template engine. For the internal tools and CRUD apps that make up most Spring work, you write dramatically less code, ship a tenth of the JavaScript, and never touch npm — and when an app genuinely needs client-side state (offline notepads, say), you'll know, because it will be obvious the round trip can't be there.
 
-Clone [the demo](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/htmx-spring-boot), run `./gradlew bootRun`, and view source on what loads — the entire app fits in your head.
+Clone [the demo](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/htmx-spring-boot), run `./gradlew bootRun`, and view source on what loads — the entire app fits in your head. Simple!
+
+In case you don't want to run the demo, here's what the project looks like while running:
+
+![The htmx spring boot ui](../../../public/assets/htmx/htmx_project_example.png)
 
 [htmx]: https://htmx.org
 [wimdeblauwe]: https://github.com/wimdeblauwe/htmx-spring-boot
