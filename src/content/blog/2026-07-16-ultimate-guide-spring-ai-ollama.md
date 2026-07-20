@@ -24,7 +24,7 @@ description: A complete guide to Spring AI with locally-hosted Ollama models —
 
 My goal is to make posts like this the SIMPLEST place on the internet to learn how to do things that caused me trouble. This one is the guide I wish existed when I started wiring **Spring AI** to **Ollama**: every tutorial either assumed an OpenAI key or stopped at "hello world" before the parts that actually matter — embeddings, vector stores, and RAG.
 
-By the end of this post you'll have a Spring Boot service that answers questions about _this blog's posts_, running entirely on your machine. No API keys, no per-token billing, no data leaving your laptop. The complete project is at [github.com/StevenPG/DemosAndArticleContent](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/spring-ai-ollama-rag).
+By the end of this post you'll have a Spring Boot service that answers questions about a corpus of markdown documents, running entirely on your machine. No API keys, no per-token billing, no data leaving your laptop. The demo repo ships with a tiny sample corpus — three markdown posts about cats — so you can see retrieval working end-to-end before you point it at anything of your own. The complete project is at [github.com/StevenPG/DemosAndArticleContent](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/spring-ai-ollama-rag).
 
 If you've read [Running Claude Code Locally on Apple Silicon](/posts/running-claude-code-locally-on-apple-silicon), this is the same philosophy applied to application development: local models are now good enough that "just run it yourself" is a legitimate architecture, not a science project.
 
@@ -150,9 +150,9 @@ public class RagConfiguration {
 
 The `EmbeddingModel` is auto-configured from the Ollama starter, backed by `nomic-embed-text`. When the corpus outgrows memory, the change is one dependency (`spring-ai-starter-vector-store-pgvector`) and a Postgres instance — the `VectorStore` interface stays identical. Given that I've [run Postgres in 150MB of memory](/posts/postgres-on-less-than-150mb-of-memory), the "heavyweight" option is lighter than people think.
 
-## Ingestion: Turning Blog Posts into Chunks
+## Ingestion: Turning Markdown Files into Chunks
 
-The ingestion pipeline reads every markdown post, splits it into token-sized chunks, embeds each chunk, and stores it:
+The ingestion pipeline reads every markdown file in `corpus/`, splits it into token-sized chunks, embeds each chunk, and stores it. The demo's `corpus/` directory ships with three sample posts about cats — "Why Cats Knock Things Off Tables," "The Science of Cat Purring," and "Choosing a Cat Breed for Apartment Living" — small enough to ingest in a couple seconds so you can go straight to asking it questions:
 
 ```java
 @Component
@@ -203,7 +203,18 @@ Two decisions worth explaining:
 
 **Metadata on every chunk.** The `source` entry survives all the way to the prompt, which lets the model cite which post an answer came from. Cheap to add, very hard to retrofit.
 
-For my blog (~55 posts), ingestion embeds a few hundred chunks in well under a minute on Apple Silicon.
+For the demo's three cat posts, that's just 4 chunks and ingestion finishes before the log has scrolled past it:
+
+```text
+2026-07-20T03:48:20.099-04:00  INFO 27316 --- [spring-ai-ollama-rag] [           main] c.example.blograg.BlogIngestionService   : Embedding 4 chunks from corpus — first run downloads take a while
+2026-07-20T03:48:20.858-04:00  INFO 27316 --- [spring-ai-ollama-rag] [           main] o.s.ai.vectorstore.SimpleVectorStore     : Calling EmbeddingModel for document id = 62ff0ffc-f32c-45d2-aa49-179ffe7b034d
+2026-07-20T03:48:20.977-04:00  INFO 27316 --- [spring-ai-ollama-rag] [           main] o.s.ai.vectorstore.SimpleVectorStore     : Calling EmbeddingModel for document id = c62477a1-86e0-4533-a3d2-3999fbcd59d3
+2026-07-20T03:48:21.018-04:00  INFO 27316 --- [spring-ai-ollama-rag] [           main] o.s.ai.vectorstore.SimpleVectorStore     : Calling EmbeddingModel for document id = 2784a9b5-8936-417f-a664-742c1910abba
+2026-07-20T03:48:21.044-04:00  INFO 27316 --- [spring-ai-ollama-rag] [           main] o.s.ai.vectorstore.SimpleVectorStore     : Calling EmbeddingModel for document id = 641db504-fc85-4541-8ca4-7c205bbad24e
+2026-07-20T03:48:21.121-04:00  INFO 27316 --- [spring-ai-ollama-rag] [           main] c.example.blograg.BlogIngestionService   : Ingestion complete
+```
+
+Swap in your own markdown — a blog, internal docs, meeting notes — and the same pipeline scales to however many files you drop in `corpus/`; ingestion time grows roughly linearly with chunk count.
 
 ## RAG: The QuestionAnswerAdvisor
 
@@ -218,7 +229,7 @@ public class ChatController {
     public ChatController(ChatClient.Builder builder, VectorStore vectorStore) {
         this.chatClient = builder
                 .defaultSystem("""
-                        You answer questions about StevenPG's blog posts.
+                        You answer questions about the documents in the corpus.
                         Only answer from the provided context. If the context
                         doesn't contain the answer, say you don't know rather
                         than guessing. Mention which post the answer came from.
@@ -247,15 +258,18 @@ public class ChatController {
 
 Every request now automatically: embeds the question, pulls the top 5 chunks above the similarity threshold, prepends them to the prompt, and sends the whole thing to the local model. The controller reads like a normal REST endpoint because it is one.
 
-Try it:
+Try it against the sample corpus:
 
 ```bash
-curl -s localhost:8080/chat \
-  -H 'Content-Type: application/json' \
-  -d '{"question": "Why is UUID4 a bad primary key?"}'
+curl -s localhost:8080/chat -H 'Content-Type: application/json' \
+  -d '{"question": "What do cats like to do"}'
 ```
 
-With this blog as the corpus, the model comes back with the B-tree fragmentation argument and correctly attributes it to the UUID post. Dogfooding your own content as a corpus is a surprisingly good test — you know instantly when retrieval pulls the wrong post.
+```json
+{"answer":"Cats like to engage in behaviors such as knocking things off tables, which stems from their natural hunting instincts, curiosity, and playfulness. This behavior helps them test objects in their environment, seek attention, or simply enjoy the interaction. The answer comes from the blog post **\"Why Cats Knock Things Off Tables\"** (2026-01-05)."}
+```
+
+The model pulls the right chunk out of the three cat posts and cites the specific one it came from. That citation is the whole point of the exercise — swap in your own markdown as the corpus and you'll know instantly when retrieval pulls the wrong document, because the answer will name the wrong source.
 
 ## Tuning What Actually Matters
 
@@ -276,7 +290,7 @@ Things that moved the quality needle for me, in order:
 
 Spring AI plus Ollama gives you the full modern AI stack — chat, embeddings, vector search, RAG — with the operational footprint of a single localhost dependency. The abstractions are genuinely portable: everything in this post except the `ollama:` config block works unchanged against OpenAI, Anthropic, or a beefier self-hosted server.
 
-Clone the [demo project](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/spring-ai-ollama-rag), drop some markdown into `corpus/`, and you'll have a private RAG chatbot over your own documents in about ten minutes — most of which is the model download.
+Clone the [demo project](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/spring-ai-ollama-rag) and it runs out of the box against the three sample cat posts in `corpus/` — ask it what cats like to do and watch it cite its source. Swap those files for your own markdown and you'll have a private RAG chatbot over your own documents in about ten minutes — most of which is the model download.
 
 [spring-ai-docs]: https://docs.spring.io/spring-ai/reference/
 [ollama]: https://ollama.com
