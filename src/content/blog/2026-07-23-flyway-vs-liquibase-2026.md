@@ -120,6 +120,91 @@ Run both through the same ten migrations and the forward path is a tie — plain
 
 Both projects — 10 migrations each, Testcontainers-verified against Postgres 18 — are at [github.com/StevenPG/DemosAndArticleContent](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/flyway-vs-liquibase) to use as starting templates. Like the [Spring compatibility cheatsheet](/posts/ultimate-guide-spring-boot-4-migration), I'll revisit this comparison when the landscape moves.
 
+Here's their output just to have a look at the differences:
+
+### Flyway
+
+```log
+2026-07-20T19:52:27.161 --- [flyway-demo] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:52839/test?loggerLevel=OFF (PostgreSQL 18.4)
+2026-07-20T19:52:27.183 --- [flyway-demo] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "public"."flyway_schema_history" does not exist yet
+2026-07-20T19:52:27.184 --- [flyway-demo] o.f.core.internal.command.DbValidate     : Successfully validated 10 migrations (execution time 00:00.007s)
+2026-07-20T19:52:27.196 --- [flyway-demo] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "public"."flyway_schema_history" ...
+2026-07-20T19:52:27.222 --- [flyway-demo] o.f.core.internal.command.DbMigrate      : Current version of schema "public": << Empty Schema >>
+2026-07-20T19:52:27.225 --- [flyway-demo] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "1 - create customers"
+2026-07-20T19:52:27.236 --- [flyway-demo] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "2 - create orders"
+2026-07-20T19:52:27.244 --- [flyway-demo] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "3 - index orders customer"
+2026-07-20T19:52:27.250 --- [flyway-demo] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "4 - add order status"
+2026-07-20T19:52:27.255 --- [flyway-demo] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "5 - backfill order status"
+2026-07-20T19:52:27.260 --- [flyway-demo] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "6 - split customer name add columns"
+2026-07-20T19:52:27.266 --- [flyway-demo] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "7 - split customer name migrate data"
+2026-07-20T19:52:27.271 --- [flyway-demo] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "8 - split customer name contract"
+2026-07-20T19:52:27.277 --- [flyway-demo] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "9 - create order summary view"
+2026-07-20T19:52:27.284 --- [flyway-demo] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "10 - orders total to cents"
+2026-07-20T19:52:27.292 --- [flyway-demo] o.f.core.internal.command.DbMigrate      : Successfully applied 10 migrations to schema "public", now at version v10 (execution time 00:00.019s)
+```
+
+### Liquibase
+
+```log
+2026-07-20T19:53:29.082 --- [liquibase-demo] liquibase.changelog                      : Reading resource: db/changelog/changes/001-create-customers.sql
+2026-07-20T19:53:29.108 --- [liquibase-demo] liquibase.changelog                      : Creating database changelog table with name: public.databasechangelog
+2026-07-20T19:53:29.126 --- [liquibase-demo] liquibase.changelog                      : Reading from public.databasechangelog
+2026-07-20T19:53:29.128 --- [liquibase-demo] liquibase.changelog                      : Reading resource: db/changelog/changes/002-create-orders.sql
+2026-07-20T19:53:29.130 --- [liquibase-demo] liquibase.changelog                      : Reading resource: db/changelog/changes/003-index-orders-customer.sql
+2026-07-20T19:53:29.131 --- [liquibase-demo] liquibase.changelog                      : Reading resource: db/changelog/changes/004-add-order-status.sql
+2026-07-20T19:53:29.132 --- [liquibase-demo] liquibase.changelog                      : Reading resource: db/changelog/changes/005-backfill-order-status.sql
+2026-07-20T19:53:29.133 --- [liquibase-demo] liquibase.changelog                      : Reading resource: db/changelog/changes/006-split-customer-name-add-columns.sql
+2026-07-20T19:53:29.134 --- [liquibase-demo] liquibase.changelog                      : Reading resource: db/changelog/changes/007-split-customer-name-migrate-data.sql
+2026-07-20T19:53:29.135 --- [liquibase-demo] liquibase.changelog                      : Reading resource: db/changelog/changes/008-split-customer-name-contract.sql
+2026-07-20T19:53:29.136 --- [liquibase-demo] liquibase.changelog                      : Reading resource: db/changelog/changes/009-create-order-summary-view.sql
+2026-07-20T19:53:29.137 --- [liquibase-demo] liquibase.changelog                      : Reading resource: db/changelog/changes/010-orders-total-to-cents.sql
+2026-07-20T19:53:29.149 --- [liquibase-demo] liquibase.snapshot                       : Creating snapshot
+2026-07-20T19:53:29.201 --- [liquibase-demo] liquibase.lockservice                    : Successfully acquired change log lock
+2026-07-20T19:53:29.203 --- [liquibase-demo] liquibase.command                        : Using deploymentId: 4591608844
+2026-07-20T19:53:29.204 --- [liquibase-demo] liquibase.changelog                      : Reading from public.databasechangelog
+2026-07-20T19:53:29.219 --- [liquibase-demo] liquibase.ui                             : Running Changeset: db/changelog/changes/001-create-customers.sql::001::steve
+2026-07-20T19:53:29.230 --- [liquibase-demo] liquibase.changelog                      : Custom SQL executed
+2026-07-20T19:53:29.232 --- [liquibase-demo] liquibase.changelog                      : ChangeSet db/changelog/changes/001-create-customers.sql::001::steve ran successfully in 11ms
+2026-07-20T19:53:29.238 --- [liquibase-demo] liquibase.ui                             : Running Changeset: db/changelog/changes/002-create-orders.sql::002::steve
+2026-07-20T19:53:29.243 --- [liquibase-demo] liquibase.changelog                      : Custom SQL executed
+2026-07-20T19:53:29.243 --- [liquibase-demo] liquibase.changelog                      : ChangeSet db/changelog/changes/002-create-orders.sql::002::steve ran successfully in 5ms
+2026-07-20T19:53:29.247 --- [liquibase-demo] liquibase.ui                             : Running Changeset: db/changelog/changes/003-index-orders-customer.sql::003::steve
+2026-07-20T19:53:29.250 --- [liquibase-demo] liquibase.changelog                      : Custom SQL executed
+2026-07-20T19:53:29.250 --- [liquibase-demo] liquibase.changelog                      : ChangeSet db/changelog/changes/003-index-orders-customer.sql::003::steve ran successfully in 3ms
+2026-07-20T19:53:29.253 --- [liquibase-demo] liquibase.ui                             : Running Changeset: db/changelog/changes/004-add-order-status.sql::004::steve
+2026-07-20T19:53:29.256 --- [liquibase-demo] liquibase.changelog                      : Custom SQL executed
+2026-07-20T19:53:29.256 --- [liquibase-demo] liquibase.changelog                      : ChangeSet db/changelog/changes/004-add-order-status.sql::004::steve ran successfully in 3ms
+2026-07-20T19:53:29.259 --- [liquibase-demo] liquibase.ui                             : Running Changeset: db/changelog/changes/005-backfill-order-status.sql::005::steve
+2026-07-20T19:53:29.265 --- [liquibase-demo] liquibase.changelog                      : Custom SQL executed
+2026-07-20T19:53:29.265 --- [liquibase-demo] liquibase.changelog                      : ChangeSet db/changelog/changes/005-backfill-order-status.sql::005::steve ran successfully in 6ms
+2026-07-20T19:53:29.267 --- [liquibase-demo] liquibase.ui                             : Running Changeset: db/changelog/changes/006-split-customer-name-add-columns.sql::006::steve
+2026-07-20T19:53:29.270 --- [liquibase-demo] liquibase.changelog                      : Custom SQL executed
+2026-07-20T19:53:29.270 --- [liquibase-demo] liquibase.changelog                      : ChangeSet db/changelog/changes/006-split-customer-name-add-columns.sql::006::steve ran successfully in 3ms
+2026-07-20T19:53:29.272 --- [liquibase-demo] liquibase.ui                             : Running Changeset: db/changelog/changes/007-split-customer-name-migrate-data.sql::007::steve
+2026-07-20T19:53:29.275 --- [liquibase-demo] liquibase.changelog                      : Custom SQL executed
+2026-07-20T19:53:29.276 --- [liquibase-demo] liquibase.changelog                      : ChangeSet db/changelog/changes/007-split-customer-name-migrate-data.sql::007::steve ran successfully in 3ms
+2026-07-20T19:53:29.278 --- [liquibase-demo] liquibase.ui                             : Running Changeset: db/changelog/changes/008-split-customer-name-contract.sql::008::steve
+2026-07-20T19:53:29.281 --- [liquibase-demo] liquibase.changelog                      : Custom SQL executed
+2026-07-20T19:53:29.282 --- [liquibase-demo] liquibase.changelog                      : ChangeSet db/changelog/changes/008-split-customer-name-contract.sql::008::steve ran successfully in 4ms
+2026-07-20T19:53:29.284 --- [liquibase-demo] liquibase.ui                             : Running Changeset: db/changelog/changes/009-create-order-summary-view.sql::009::steve
+2026-07-20T19:53:29.288 --- [liquibase-demo] liquibase.changelog                      : Custom SQL executed
+2026-07-20T19:53:29.289 --- [liquibase-demo] liquibase.changelog                      : ChangeSet db/changelog/changes/009-create-order-summary-view.sql::009::steve ran successfully in 5ms
+2026-07-20T19:53:29.291 --- [liquibase-demo] liquibase.ui                             : Running Changeset: db/changelog/changes/010-orders-total-to-cents.sql::010::steve
+2026-07-20T19:53:29.299 --- [liquibase-demo] liquibase.changelog                      : Custom SQL executed
+2026-07-20T19:53:29.300 --- [liquibase-demo] liquibase.changelog                      : ChangeSet db/changelog/changes/010-orders-total-to-cents.sql::010::steve ran successfully in 9ms
+2026-07-20T19:53:29.304 --- [liquibase-demo] liquibase.util                           : UPDATE SUMMARY
+2026-07-20T19:53:29.305 --- [liquibase-demo] liquibase.util                           : Run:                         10
+2026-07-20T19:53:29.305 --- [liquibase-demo] liquibase.util                           : Previously run:               0
+2026-07-20T19:53:29.305 --- [liquibase-demo] liquibase.util                           : Filtered out:                 0
+2026-07-20T19:53:29.305 --- [liquibase-demo] liquibase.util                           : -------------------------------
+2026-07-20T19:53:29.305 --- [liquibase-demo] liquibase.util                           : Total change sets:           10
+2026-07-20T19:53:29.305 --- [liquibase-demo] liquibase.util                           : Update summary generated
+2026-07-20T19:53:29.307 --- [liquibase-demo] liquibase.command                        : Update command completed successfully.
+2026-07-20T19:53:29.307 --- [liquibase-demo] liquibase.ui                             : Liquibase: Update has been successful. Rows affected: 0
+2026-07-20T19:53:29.309 --- [liquibase-demo] liquibase.lockservice                    : Successfully released change log lock
+2026-07-20T19:53:29.310 --- [liquibase-demo] liquibase.command                        : Command execution complete
+```
+
 [flyway-docs]: https://documentation.red-gate.com/flyway
 [liquibase-docs]: https://docs.liquibase.com/
 [formatted-sql]: https://docs.liquibase.com/concepts/changelogs/sql-format.html
