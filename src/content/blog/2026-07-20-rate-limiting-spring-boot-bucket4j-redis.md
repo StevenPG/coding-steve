@@ -174,7 +174,78 @@ export const options = {
 };
 ```
 
+Before reaching for k6, the fastest sanity check is a bash loop against the anonymous endpoint (burst capacity 20) — the first 20 requests should sail through, then the bucket runs dry:
+
+```bash
+for i in $(seq 1 25); do curl -s -o /dev/null -w '%{http_code}\n' localhost:8080/api/quote; done
+```
+
+```
+200
+200
+200
+200
+200
+200
+200
+200
+200
+200
+200
+200
+200
+200
+200
+200
+200
+200
+200
+200
+429
+429
+429
+429
+429
+```
+
+Exactly what the bucket math predicts: 20 tokens spent, then five straight rejections. No timing games, no ambiguity — the limiter just works.
+
 Run `docker compose up -d`, `./gradlew bootRun`, then `k6 run k6/rate-limit-test.js`. Over the 2-minute run the counters land where the bucket math says they must: the anonymous scenario sends 120 requests against a budget of 20/min + 20 burst and gets roughly **60 accepted / 60 rejected**, while the API-key scenario — under its refill rate the whole time — comes through with **zero 429s**. Watching k6 report exactly the numbers you predicted from `capacity` and `refillGreedy` is the moment this stops feeling like configuration and starts feeling like arithmetic.
+
+```
+     execution: local
+        script: k6/rate-limit-test.js
+        output: -
+
+     scenarios: (100.00%) 2 scenarios, 20 max VUs, 2m30s max duration (incl. graceful stop):
+              * anonymous: 1.00 iterations/s for 2m0s (maxVUs: 10, gracefulStop: 30s)
+              * with_api_key: 1.50 iterations/s for 2m0s (maxVUs: 10, exec: withApiKey, gracefulStop: 30s)
+
+
+  █ TOTAL RESULTS
+
+    checks_total.......: 302     2.516511/s
+    checks_succeeded...: 100.00% 302 out of 302
+    checks_failed......: 0.00%   0 out of 302
+
+    ✓ status is 200 or 429
+
+    CUSTOM
+    responses_200..................: 240    1.999877/s
+    responses_429..................: 62     0.516635/s
+
+    HTTP
+    http_req_duration..............: avg=6ms    min=1.47ms med=5.97ms max=11.15ms p(90)=8.65ms p(95)=9.12ms
+      { expected_response:true }...: avg=6.47ms min=1.72ms med=6.69ms max=11.15ms p(90)=8.72ms p(95)=9.14ms
+    http_req_failed................: 20.52% 62 out of 302
+    http_reqs......................: 302    2.516511/s
+
+running (2m00.0s), 00/20 VUs, 302 complete and 0 interrupted iterations
+anonymous    ✓ [======================================] 00/10 VUs  2m0s  1.00 iters/s
+with_api_key ✓ [======================================] 00/10 VUs  2m0s  1.50 iters/s
+```
+
+240 accepted, 62 rejected, zero failed checks — the anonymous scenario (60 req/min against a 20/min limit) is exactly where the token math says it should land, and every single response was a clean 200 or 429, never a timeout or a 500. That's the whole point of testing a rate limiter under load: it should fail predictably, not fail *badly*.
 
 There's also a Testcontainers integration test asserting the precise 20-accepted/5-rejected boundary, in the spirit of the [Testcontainers post coming later this week](/posts/ultimate-guide-testcontainers-spring-boot).
 
