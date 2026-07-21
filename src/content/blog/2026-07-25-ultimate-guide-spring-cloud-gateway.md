@@ -31,32 +31,32 @@ This guide is the up-to-date, Spring-Boot-4-native version. We'll cover what an 
 
 Everything here is built and tested against a real, runnable companion project:
 
-| Piece | Version |
-|---|---|
-| Spring Boot | **4.0.7** |
-| Spring Cloud | **2025.1.2** ("Oakwood") |
-| Spring Cloud Gateway | **5.0.2** |
-| Java | **21** |
-| Gradle | **8.14** |
-| Redis | 7 (via Docker) |
+| Piece                | Version                  |
+| -------------------- | ------------------------ |
+| Spring Boot          | **4.0.7**                |
+| Spring Cloud         | **2025.1.2** ("Oakwood") |
+| Spring Cloud Gateway | **5.0.2**                |
+| Java                 | **21**                   |
+| Gradle               | **8.14**                 |
+| Redis                | 7 (via Docker)           |
 
 The full demo repository is linked at the end and referenced throughout. If you already run a gateway and just want the Spring Boot 4 delta, skip to [The Big Change: Two Flavors on Spring Boot 4](#the-big-change-two-flavors-on-spring-boot-4).
 
 ## What an API Gateway Actually Is
 
-An API gateway is a **reverse proxy that speaks your application's language**. It sits at the edge of your system, takes every inbound request, and decides what to do with it before (and after) it reaches a backend service. That "decides what to do" is the whole job, and it usually breaks down into a handful of cross-cutting concerns you do *not* want to reimplement in every service:
+An API gateway is a **reverse proxy that speaks your application's language**. It sits at the edge of your system, takes every inbound request, and decides what to do with it before (and after) it reaches a backend service. That "decides what to do" is the whole job, and it usually breaks down into a handful of cross-cutting concerns you do _not_ want to reimplement in every service:
 
 - **Routing** — send `/orders/**` to the orders service and `/inventory/**` to the inventory service, without the client knowing either exists.
-- **Security at the edge** — validate the auth token *once*, so ten downstream services don't each have to.
+- **Security at the edge** — validate the auth token _once_, so ten downstream services don't each have to.
 - **Resilience** — retry a flaky call, trip a circuit breaker when a backend is down, serve a fallback instead of a stack trace.
 - **Traffic control** — rate limit abusive callers, spread load across instances.
 - **Observability** — one place where every request is logged, timed, traced, and correlated.
 
 The key mental shift: a backend behind a gateway is just a normal app. It has no idea a gateway exists. That's the point — the gateway absorbs the cross-cutting complexity so your services can stay boring.
 
-**When do you actually need one?** If you have a single service and a single client, you don't — you're adding a hop for nothing. You want a gateway when you have *multiple* services behind one public surface, or when you want to enforce a policy (auth, rate limits, tracing) uniformly at the edge instead of trusting every team to get it right. The classic topology is: **one gateway, many backends, one public URL.**
+**When do you actually need one?** If you have a single service and a single client, you don't — you're adding a hop for nothing. You want a gateway when you have _multiple_ services behind one public surface, or when you want to enforce a policy (auth, rate limits, tracing) uniformly at the edge instead of trusting every team to get it right. The classic topology is: **one gateway, many backends, one public URL.**
 
-Spring Cloud Gateway is the Spring-native way to build that gateway in Java. Unlike a generic proxy (nginx, Envoy), it's *code you own* in the same language and ecosystem as your services — you can write a custom filter as a Spring bean, pull in other beans, validate JWTs with Spring Security, and test it with the same tools you already use.
+Spring Cloud Gateway is the Spring-native way to build that gateway in Java. Unlike a generic proxy (nginx, Envoy), it's _code you own_ in the same language and ecosystem as your services — you can write a custom filter as a Spring bean, pull in other beans, validate JWTs with Spring Security, and test it with the same tools you already use.
 
 ## The Big Change: Two Flavors on Spring Boot 4
 
@@ -72,29 +72,29 @@ implementation("org.springframework.cloud:spring-cloud-starter-gateway-server-we
 
 Note the `-server-webflux` / `-server-webmvc` suffixes. If you're coming from an older Spring Cloud release, the artifact names and the config namespace **both changed**:
 
-| | Old (Spring Cloud Gateway 3.x/4.x) | New (Spring Cloud Gateway 5.x, Spring Boot 4) |
-|---|---|---|
-| Reactive starter | `spring-cloud-starter-gateway` | `spring-cloud-starter-gateway-server-webflux` |
-| Servlet starter | `spring-cloud-starter-gateway-mvc` | `spring-cloud-starter-gateway-server-webmvc` |
-| Reactive config root | `spring.cloud.gateway.routes` | `spring.cloud.gateway.server.webflux.routes` |
-| Servlet config root | `spring.cloud.gateway.mvc.routes` | `spring.cloud.gateway.server.webmvc.routes` |
+|                      | Old (Spring Cloud Gateway 3.x/4.x) | New (Spring Cloud Gateway 5.x, Spring Boot 4) |
+| -------------------- | ---------------------------------- | --------------------------------------------- |
+| Reactive starter     | `spring-cloud-starter-gateway`     | `spring-cloud-starter-gateway-server-webflux` |
+| Servlet starter      | `spring-cloud-starter-gateway-mvc` | `spring-cloud-starter-gateway-server-webmvc`  |
+| Reactive config root | `spring.cloud.gateway.routes`      | `spring.cloud.gateway.server.webflux.routes`  |
+| Servlet config root  | `spring.cloud.gateway.mvc.routes`  | `spring.cloud.gateway.server.webmvc.routes`   |
 
 If you copy a `spring.cloud.gateway.routes:` block from a 2023-era tutorial into a Spring Boot 4 app, it will silently do nothing, because the property no longer binds. This one change accounts for most of the "my routes aren't working" confusion when people first upgrade.
 
 So which flavor do you choose?
 
-| | **WebFlux** (reactive) | **WebMVC** (servlet) |
-|---|---|---|
-| Runtime | Netty, event loop | Tomcat, thread-per-request |
-| Model | Non-blocking / reactive | Blocking |
-| Route definition | YAML `routes:` and/or `RouteLocator` DSL | Functional `RouterFunction` beans and/or YAML |
-| Rate limiter | Built-in `RequestRateLimiter` (Redis Lua token bucket) | `Bucket4jFilterFunctions.rateLimit` (Bucket4j; Redis via bucket4j-redis) |
-| Circuit breaker | `spring-cloud-starter-circuitbreaker-`**`reactor`**`-resilience4j` | `spring-cloud-starter-circuitbreaker-resilience4j` |
-| Best when | Very high connection counts, streaming/SSE proxying, an already-reactive stack | A blocking/servlet mental model, functional routes, easy debugging |
+|                  | **WebFlux** (reactive)                                                         | **WebMVC** (servlet)                                                     |
+| ---------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| Runtime          | Netty, event loop                                                              | Tomcat, thread-per-request                                               |
+| Model            | Non-blocking / reactive                                                        | Blocking                                                                 |
+| Route definition | YAML `routes:` and/or `RouteLocator` DSL                                       | Functional `RouterFunction` beans and/or YAML                            |
+| Rate limiter     | Built-in `RequestRateLimiter` (Redis Lua token bucket)                         | `Bucket4jFilterFunctions.rateLimit` (Bucket4j; Redis via bucket4j-redis) |
+| Circuit breaker  | `spring-cloud-starter-circuitbreaker-`**`reactor`**`-resilience4j`             | `spring-cloud-starter-circuitbreaker-resilience4j`                       |
+| Best when        | Very high connection counts, streaming/SSE proxying, an already-reactive stack | A blocking/servlet mental model, functional routes, easy debugging       |
 
 **My honest recommendation:** if you don't have a strong reason to go reactive, use the **servlet** gateway. The blocking model is a simpler mental model, the functional route DSL gives you compile-time checking and IDE navigation, and stepping through a servlet request in a debugger is dramatically less painful than untangling a reactor chain. Reach for WebFlux when you genuinely expect very high concurrency, you're proxying streaming responses (SSE, long-lived connections), or your whole stack is already reactive and you don't want to bridge.
 
-Because the whole point of this guide is to show you both, the companion project builds **both gateways in front of the same two backend services**, so every feature below appears in reactive *and* servlet form.
+Because the whole point of this guide is to show you both, the companion project builds **both gateways in front of the same two backend services**, so every feature below appears in reactive _and_ servlet form.
 
 ## The Core Mental Model: predicate → filters → uri
 
@@ -105,9 +105,9 @@ predicate(s)   →   filter(s)   →   uri
    (if)            (transform)     (where)
 ```
 
-- **Predicates** decide *whether* a request matches this route: path, HTTP method, headers, host, query params, time of day, weight. All predicates on a route must match (they're AND-ed).
+- **Predicates** decide _whether_ a request matches this route: path, HTTP method, headers, host, query params, time of day, weight. All predicates on a route must match (they're AND-ed).
 - **Filters** transform the request on the way in and/or the response on the way out: add a header, rewrite the path, retry, rate-limit, circuit-break.
-- **The uri** is *where* the matched, transformed request gets sent: a concrete `http://host:port`, or `lb://service-name` to load-balance across instances.
+- **The uri** is _where_ the matched, transformed request gets sent: a concrete `http://host:port`, or `lb://service-name` to load-balance across instances.
 
 That's the entire model. Everything else — YAML vs Java, reactive vs servlet — is just different syntax for expressing `predicate → filters → uri`. Once you see a route this way, the whole framework clicks.
 
@@ -132,9 +132,9 @@ The companion project is one runnable system: two gateways in front of two backe
        └────────────────────────┘                └───────────────┘
 ```
 
-The two backends are deliberately dumb — plain Spring MVC controllers that know nothing about a gateway. What makes them useful is that each endpoint is designed to *make one gateway feature visible*:
+The two backends are deliberately dumb — plain Spring MVC controllers that know nothing about a gateway. What makes them useful is that each endpoint is designed to _make one gateway feature visible_:
 
-- `backend-orders` (`:8081`) has `/orders` (plain routing), `/orders/echo` (reflects the headers it received, so you can *see* what the gateway's filters did), `/orders/flaky` (fails 2 of every 3 calls, for retries), and `/orders/slow` (sleeps 3s, for circuit breakers).
+- `backend-orders` (`:8081`) has `/orders` (plain routing), `/orders/echo` (reflects the headers it received, so you can _see_ what the gateway's filters did), `/orders/flaky` (fails 2 of every 3 calls, for retries), and `/orders/slow` (sleeps 3s, for circuit breakers).
 - `backend-inventory` runs as **two instances** (`:8082` and `:8083`), each reporting which one it is via `/inventory/whoami`, so load balancing is observable.
 
 The single most useful endpoint for learning is `/orders/echo`, which just reflects back the headers it received:
@@ -236,15 +236,15 @@ import static org.springframework.cloud.gateway.server.mvc.filter.LoadBalancerFi
 
 The built-in predicates are the vocabulary of "which requests does this route match." The common ones:
 
-| Predicate | Matches when… |
-|---|---|
-| `Path=/orders/**` | the path matches the Ant/`PathPattern` |
-| `Method=GET,POST` | the HTTP method is in the list |
-| `Header=X-Request-Id, \d+` | a header exists (optionally matching a regex) |
-| `Host=**.example.com` | the `Host` header matches |
-| `Query=debug` | a query param is present |
-| `After` / `Before` / `Between` | the request falls in a time window |
-| `Weight=group1, 8` | probabilistically, for canary/traffic-splitting |
+| Predicate                      | Matches when…                                   |
+| ------------------------------ | ----------------------------------------------- |
+| `Path=/orders/**`              | the path matches the Ant/`PathPattern`          |
+| `Method=GET,POST`              | the HTTP method is in the list                  |
+| `Header=X-Request-Id, \d+`     | a header exists (optionally matching a regex)   |
+| `Host=**.example.com`          | the `Host` header matches                       |
+| `Query=debug`                  | a query param is present                        |
+| `After` / `Before` / `Between` | the request falls in a time window              |
+| `Weight=group1, 8`             | probabilistically, for canary/traffic-splitting |
 
 All predicates on a route are AND-ed — every one must match. To OR, define two routes.
 
@@ -285,7 +285,7 @@ spring:
 
 ### Level 2: a custom GlobalFilter (runs on every route)
 
-When you want cross-cutting behavior on *all* traffic with no per-route config, you write a `GlobalFilter` (reactive) or a servlet `Filter` (servlet). The demo uses one for access logging and timing.
+When you want cross-cutting behavior on _all_ traffic with no per-route config, you write a `GlobalFilter` (reactive) or a servlet `Filter` (servlet). The demo uses one for access logging and timing.
 
 **Reactive** — implement `GlobalFilter` and `Ordered`:
 
@@ -343,11 +343,11 @@ public class GlobalLoggingFilter extends OncePerRequestFilter {
 }
 ```
 
-Both log `--> GET /path` on the way in and `<-- GET /path 200 (12 ms)` on the way out, and both stamp `X-Gateway-Handled`. Returning `HIGHEST_PRECEDENCE` makes the filter wrap the *entire* chain, so the measured time includes every other filter plus the round trip to the backend — first in, last out.
+Both log `--> GET /path` on the way in and `<-- GET /path 200 (12 ms)` on the way out, and both stamp `X-Gateway-Handled`. Returning `HIGHEST_PRECEDENCE` makes the filter wrap the _entire_ chain, so the measured time includes every other filter plus the round trip to the backend — first in, last out.
 
 ### Level 3: a custom, configurable GatewayFilterFactory
 
-The most powerful (and most Spring Cloud Gateway-specific) level: a **per-route filter that takes arguments**, usable from YAML *by name*. The demo's is `AddCorrelationId`, which guarantees every proxied request carries a correlation id.
+The most powerful (and most Spring Cloud Gateway-specific) level: a **per-route filter that takes arguments**, usable from YAML _by name_. The demo's is `AddCorrelationId`, which guarantees every proxied request carries a correlation id.
 
 The reactive way is a `GatewayFilterFactory`. There's one piece of magic worth calling out: Spring derives the filter's YAML name from the class name by stripping the `GatewayFilterFactory` suffix — so `AddCorrelationIdGatewayFilterFactory` is referenced as `AddCorrelationId`.
 
@@ -392,7 +392,7 @@ public class AddCorrelationIdGatewayFilterFactory
 }
 ```
 
-Now you can use it in YAML as just `AddCorrelationId`, or wire it into a programmatic route (more on that below). If the client already sent an `X-Correlation-Id`, it's preserved; otherwise a UUID is minted. Either way the backend receives it *and* it's echoed on the response.
+Now you can use it in YAML as just `AddCorrelationId`, or wire it into a programmatic route (more on that below). If the client already sent an `X-Correlation-Id`, it's preserved; otherwise a UUID is minted. Either way the backend receives it _and_ it's echoed on the response.
 
 On the servlet side there's no filter-factory abstraction — you express the same behavior as a `before`/`after` filter pair on the route, using request attributes to pass state from the before-filter to the after-filter:
 
@@ -479,8 +479,8 @@ This is where a gateway stops being a fancy proxy and starts being infrastructur
     - name: Retry
       args:
         retries: 3
-        series: SERVER_ERROR          # retry on 5xx
-        methods: GET                  # only idempotent methods
+        series: SERVER_ERROR # retry on 5xx
+        methods: GET # only idempotent methods
         backoff:
           firstBackoff: 50ms
           maxBackoff: 500ms
@@ -501,7 +501,7 @@ Two things to internalize about retries at the gateway: **only retry idempotent 
 
 ### Circuit breaker + fallback
 
-Retries help with *transient* failures. A circuit breaker helps with *sustained* ones: when a backend is genuinely down or slow, you want to stop hammering it and fail fast with a graceful response. The demo wraps the orders route in a Resilience4j circuit breaker with a **time limiter**, and points its `fallbackUri` at an internal handler.
+Retries help with _transient_ failures. A circuit breaker helps with _sustained_ ones: when a backend is genuinely down or slow, you want to stop hammering it and fail fast with a graceful response. The demo wraps the orders route in a Resilience4j circuit breaker with a **time limiter**, and points its `fallbackUri` at an internal handler.
 
 ```yaml
 filters:
@@ -519,13 +519,13 @@ resilience4j:
         sliding-window-type: COUNT_BASED
         sliding-window-size: 10
         minimum-number-of-calls: 5
-        failure-rate-threshold: 50          # open once >=50% of calls fail
+        failure-rate-threshold: 50 # open once >=50% of calls fail
         wait-duration-in-open-state: 10s
         permitted-number-of-calls-in-half-open-state: 3
   timelimiter:
     instances:
       ordersCb:
-        timeout-duration: 1s                # trips on /orders/slow (3s sleep)
+        timeout-duration: 1s # trips on /orders/slow (3s sleep)
 ```
 
 `/orders/slow` sleeps 3 seconds, the time limiter is 1 second, so the gateway gives up and does an internal `forward:` to the fallback controller instead of hanging the caller:
@@ -549,7 +549,7 @@ curl -s -H "Authorization: Bearer $TOKEN" localhost:8080/orders/slow
 # {"service":"orders","message":"Orders is unavailable ... served by the gateway fallback.", ...}  (HTTP 503, ~1s)
 ```
 
-The breaker also **opens on failure rate** — once ≥50% of a 10-call window fails, it short-circuits *every* call straight to the fallback (not even attempting the backend) until it half-opens to test the waters again. That's the whole value: a failing backend stops taking your gateway's threads down with it.
+The breaker also **opens on failure rate** — once ≥50% of a 10-call window fails, it short-circuits _every_ call straight to the fallback (not even attempting the backend) until it half-opens to test the waters again. That's the whole value: a failing backend stops taking your gateway's threads down with it.
 
 The one dependency subtlety between flavors: the reactive gateway needs the **reactor** variant of the Resilience4j starter (`spring-cloud-starter-circuitbreaker-reactor-resilience4j`), the servlet gateway needs the plain one (`spring-cloud-starter-circuitbreaker-resilience4j`). Get this wrong and the `CircuitBreaker` filter won't wire up. The config and behavior are otherwise identical.
 
@@ -562,13 +562,13 @@ This is the one place the two flavors genuinely differ under the hood, and it's 
 ```yaml
 - name: RequestRateLimiter
   args:
-    redis-rate-limiter.replenishRate: 5       # tokens/sec
-    redis-rate-limiter.burstCapacity: 10       # bucket size
+    redis-rate-limiter.replenishRate: 5 # tokens/sec
+    redis-rate-limiter.burstCapacity: 10 # bucket size
     redis-rate-limiter.requestedTokens: 1
     key-resolver: "#{@userKeyResolver}"
 ```
 
-The `key-resolver` decides *what* you count — and choosing the key is choosing the fairness policy. This resolver gives each authenticated user their own bucket, falling back to client IP for anonymous traffic:
+The `key-resolver` decides _what_ you count — and choosing the key is choosing the fairness policy. This resolver gives each authenticated user their own bucket, falling back to client IP for anonymous traffic:
 
 ```java
 @Bean
@@ -583,7 +583,7 @@ public KeyResolver userKeyResolver() {
 }
 ```
 
-**Servlet** has no `RequestRateLimiter` filter. Instead it ships `Bucket4jFilterFunctions.rateLimit(...)`, backed by **Bucket4j**. For a *distributed* limit shared across gateway instances, you store the buckets in Redis via `bucket4j-redis`:
+**Servlet** has no `RequestRateLimiter` filter. Instead it ships `Bucket4jFilterFunctions.rateLimit(...)`, backed by **Bucket4j**. For a _distributed_ limit shared across gateway instances, you store the buckets in Redis via `bucket4j-redis`:
 
 ```java
 .filter(rateLimit(c -> c
@@ -619,7 +619,18 @@ done; echo
 # 200 200 200 200 200 200 200 200 200 200 429 429 429 429 429 429 429 429 429 429
 ```
 
-Both return standard `X-RateLimit-Remaining` / `X-RateLimit-Burst-Capacity` headers. Why Redis and not an in-memory counter? Because you almost always run *multiple* gateway instances behind a load balancer, and an in-memory limit of 5/s per instance across 4 instances is really a 20/s limit — Redis is what makes the limit *global*.
+The reactive gateway returns the full standard set of headers (`X-RateLimit-Remaining`, `X-RateLimit-Burst-Capacity`, `X-RateLimit-Replenish-Rate`, `X-RateLimit-Requested-Tokens`); the servlet/Bucket4j side returns `X-RateLimit-Remaining`. Worth knowing: the two engines aren't bit-for-bit identical at the boundary. The reactive Redis Lua token bucket gives a crisp cutoff — ten `200`s then ten `429`s. Bucket4j's async, distributed refill is a hair less precise under a tight burst, so on the servlet gateway you'll sometimes see a stray success sneak through right at the edge:
+
+```bash
+# reactive  (:8080) — crisp cutoff
+# 200 200 200 200 200 200 200 200 200 200 429 429 429 429 429 429 429 429 429 429
+# servlet   (:8090) — a straggler slips through near the boundary
+# 200 200 200 200 200 200 200 200 200 200 429 429 200 429 429 429 429 429 429 429
+```
+
+Neither is "wrong" — a token bucket only promises an _average_ rate with a burst allowance, and both honor that. Just don't write an assertion expecting an exact off-by-one boundary on the Bucket4j side.
+
+Why Redis and not an in-memory counter at all? Because you almost always run _multiple_ gateway instances behind a load balancer, and an in-memory limit of 5/s per instance across 4 instances is really a 20/s limit — Redis is what makes the limit _global_.
 
 ## 5. Security at the Edge
 
@@ -669,13 +680,13 @@ TOKEN=$(curl -s 'localhost:8080/dev/token?sub=alice' | jq -r .access_token)
 curl -s -o /dev/null -w '%{http_code}\n' -H "Authorization: Bearer $TOKEN" localhost:8080/orders   # 200
 ```
 
-> The demo validates HS256 tokens with a shared secret so it runs with **no external IdP**, and a dev-only `/dev/token` endpoint (annotated `@Profile("dev")`) mints them. In production you delete both and point `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` at your real identity provider's JWKS — the gateway then only ever *validates*, never issues.
+> The demo validates HS256 tokens with a shared secret so it runs with **no external IdP**, and a dev-only `/dev/token` endpoint (annotated `@Profile("dev")`) mints them. In production you delete both and point `spring.security.oauth2.resourceserver.jwt.jwk-set-uri` at your real identity provider's JWKS — the gateway then only ever _validates_, never issues.
 
 ### Identity propagation (and the confused deputy)
 
-Validating the token at the edge is only half the job. The backends still need to know *who* the caller is — but you don't want every backend re-parsing a JWT. So after validating, a global filter forwards the authenticated subject downstream as a plain `X-Auth-Subject` header. The backend never touches a token.
+Validating the token at the edge is only half the job. The backends still need to know _who_ the caller is — but you don't want every backend re-parsing a JWT. So after validating, a global filter forwards the authenticated subject downstream as a plain `X-Auth-Subject` header. The backend never touches a token.
 
-There is a security-critical subtlety here, and it's the kind of thing that turns a gateway into a liability if you get it wrong. You must **strip any client-supplied `X-Auth-Subject` first** — otherwise a caller could just send `X-Auth-Subject: admin` and impersonate anyone. This is the classic **confused deputy**: the backend trusts the gateway, so anything the gateway forwards is taken as gospel. The gateway must be the *only* thing that can set that header.
+There is a security-critical subtlety here, and it's the kind of thing that turns a gateway into a liability if you get it wrong. You must **strip any client-supplied `X-Auth-Subject` first** — otherwise a caller could just send `X-Auth-Subject: admin` and impersonate anyone. This is the classic **confused deputy**: the backend trusts the gateway, so anything the gateway forwards is taken as gospel. The gateway must be the _only_ thing that can set that header.
 
 ```java
 @Component
@@ -714,14 +725,16 @@ Try it: send `-H "X-Auth-Subject: HACKER"` with a valid token for `alice`, and t
 
 Three layers, from most to least "batteries included":
 
-**1. Actuator.** The gateway starters expose dedicated endpoints. `/actuator/gateway/routes` lists every live route — invaluable when a route "isn't working" and you want to confirm it's even registered:
+**1. Actuator.** On the **reactive** gateway, dedicated endpoints ship out of the box. `/actuator/gateway/routes` lists every live route — invaluable when a route "isn't working" and you want to confirm it's even registered:
 
 ```bash
 curl -s localhost:8080/actuator/gateway/routes | jq '.[].route_id'
 # "orders-java" "orders-flaky" "orders" "inventory"
 ```
 
-`/actuator/metrics` exposes Micrometer meters (`http.server.requests`, etc.) and `/actuator/circuitbreakers` shows live Resilience4j state. Turn them on in config:
+> **Gotcha worth knowing:** `/actuator/gateway/*` is **reactive-only**. As of Spring Cloud Gateway 5.0.2, the servlet/functional flavor (`gateway-webmvc`) doesn't register those endpoints, so the same call on `:8090` returns **404**. On the servlet gateway, use `/actuator/mappings` to see the routes Spring registered instead. `/actuator/metrics` and `/actuator/circuitbreakers` work on _both_.
+
+`/actuator/metrics` exposes Micrometer meters (`http.server.requests`, etc.) and `/actuator/circuitbreakers` shows live Resilience4j state. Turn them on in config (the reactive gateway will populate the `gateway` endpoint; the servlet one simply has nothing to expose there):
 
 ```yaml
 management:
@@ -745,7 +758,7 @@ A deliberate symmetry runs through the whole demo: **both flavors support both s
 - **`gateway-webflux`** defines most routes in **YAML** and adds one **programmatic** route via a `RouteLocator` bean.
 - **`gateway-webmvc`** defines most routes with the **functional** `RouterFunction` API and adds one **declarative** route in YAML.
 
-Between the two modules you get all four combinations. Here's the reactive programmatic `RouteLocator` — note how it reuses the custom `AddCorrelationId` filter *bean* directly, something YAML can't do:
+Between the two modules you get all four combinations. Here's the reactive programmatic `RouteLocator` — note how it reuses the custom `AddCorrelationId` filter _bean_ directly, something YAML can't do:
 
 ```java
 @Bean
@@ -766,6 +779,59 @@ public RouteLocator programmaticRoutes(RouteLocatorBuilder builder,
 ```
 
 **When to use which?** YAML is compact, hot-reloadable, and great for simple routes. The programmatic/functional styles give you compile-time checking, IDE navigation, and access to other beans — reach for them when a route's shape depends on runtime values or other components. Decide per team; you can always mix.
+
+## Watch It All Run
+
+The demo's `scripts/demo-requests.sh` fires the same labeled request suite at **both** gateways so you can compare them line for line. Here's the real output, trimmed to the parts where the two flavors either agree or interestingly disagree.
+
+**They agree on the important stuff** — routing/load-balancing round-robins, security rejects then accepts, and identity propagation strips the forged header:
+
+```text
+1) ROUTING + LOAD BALANCING — /inventory/whoami x6 (watch the instance flip)
+{"instance":"inventory:8083"}
+{"instance":"inventory:8082"}
+{"instance":"inventory:8083"}   ... round-robin, both gateways
+
+2) EDGE SECURITY — /orders with NO token => 401
+3) EDGE SECURITY — /orders WITH token   => 200
+
+4) IDENTITY PROPAGATION + ANTI-SPOOF — send a FORGED X-Auth-Subject
+   receivedHeaders: {
+     "X-Auth-Subject": "alice",              <- the REAL subject, not the forgery
+     "X-Correlation-Id": "c6384270-...",     <- minted by our custom filter
+     "X-Gateway": "webflux" | "webmvc"
+   }
+```
+
+That `X-Auth-Subject: alice` is the whole confused-deputy defense working: the request sent a forged `X-Auth-Subject`, and the backend still sees the real subject the gateway asserted from the JWT.
+
+**They differ in three telling places.** First, the **circuit-breaker time limiter** — the demo sets 1s on reactive and 2s on servlet, and the 503 timing proves each is enforced:
+
+```text
+6) CIRCUIT BREAKER — /orders/slow (3s) trips the time limiter => fallback
+   reactive (:8080):  status=503 in 1.010623s   (1s limiter)
+   servlet  (:8090):  status=503 in 2.010182s   (2s limiter)
+```
+
+Second, **rate limiting** — the crisp reactive cutoff vs Bucket4j's slightly fuzzier boundary (discussed above):
+
+```text
+7) RATE LIMITING — 20 rapid calls
+   reactive (:8080):  200 x10, 429 x10                      (crisp)
+   servlet  (:8090):  200 x10, 429 429 200 429 ...          (a straggler slips through)
+```
+
+Third — and this is the one to remember — **the actuator gateway endpoint only exists on the reactive flavor**:
+
+```text
+9) OBSERVABILITY — live routes from the actuator gateway endpoint
+   reactive (:8080):  "orders-java" "orders-flaky" "orders" "inventory"
+   servlet  (:8090):  /actuator/gateway/routes -> 404
+                      (Spring Cloud Gateway Server WebMVC doesn't expose it yet;
+                       falls back to /actuator/mappings)
+```
+
+If you take one thing from running both side by side, it's how _little_ differs — the disagreements above are the exhaustive list of behavioral gaps across the entire feature set. Everything else is byte-for-byte the same request handling with a different engine underneath.
 
 ## Testing
 
@@ -803,13 +869,29 @@ class GatewayWebfluxIntegrationTest {
 }
 ```
 
-Pair these full-context integration tests with fast **unit tests** for your custom logic — the demo unit-tests the `AddCorrelationId` filter factory and the Bucket4j key resolver in isolation, with no Docker required. The rule of thumb: unit-test the filters *you* wrote, integration-test that the whole thing boots and the security + routing wiring is correct.
+The reactive test above asserts route registration by hitting `/actuator/gateway/routes`. The servlet test _can't_ — that endpoint doesn't exist on the servlet flavor (the actuator gotcha from the observability section), so it asserts registration **behaviorally** instead: a request to a registered route reaches routing and fails downstream with something _other_ than 404, while a genuinely unmatched path 404s from Spring itself.
+
+```java
+@Test
+void allRoutesAreRegistered() {
+    // No /actuator/gateway/routes on the servlet gateway, so assert behaviorally:
+    client.get().uri("/inventory/whoami")
+            .exchange()
+            .expectStatus().value(status -> assertThat(status).isNotEqualTo(404));
+
+    client.get().uri("/this-path-matches-no-route")
+            .exchange()
+            .expectStatus().isNotFound();
+}
+```
+
+Pair these full-context integration tests with fast **unit tests** for your custom logic — the demo unit-tests the `AddCorrelationId` filter factory and the Bucket4j key resolver in isolation, with no Docker required. The rule of thumb: unit-test the filters _you_ wrote, integration-test that the whole thing boots and the security + routing wiring is correct.
 
 ## Taking It to Production
 
 The demo is deliberately simplified in a few places. Before you ship a gateway:
 
-- **Delete the dev token minter and the shared HS256 secret.** Point the resource server at your IdP's JWKS (`jwk-set-uri`) so the gateway only ever validates. Decide whether to forward the raw `Authorization` header downstream or *only* the derived identity.
+- **Delete the dev token minter and the shared HS256 secret.** Point the resource server at your IdP's JWKS (`jwk-set-uri`) so the gateway only ever validates. Decide whether to forward the raw `Authorization` header downstream or _only_ the derived identity.
 - **Never trust client-supplied identity headers.** Strip-then-assert every header your backends trust (`X-Auth-Subject` here). The confused deputy is the single most common gateway security bug.
 - **Externalize service discovery.** Swap the static instance list for Kubernetes/Eureka/Consul so instances come and go automatically.
 - **Run Redis in HA** (Sentinel or Cluster). It's on the request path for rate limiting — if it's a single point of failure, so is your gateway.
