@@ -1,6 +1,7 @@
 ---
 author: StevenPG
 pubDatetime: 2026-01-29T12:00:00.000Z
+modDatetime: 2026-08-01T12:00:00.000Z
 title: Guide to Migrating From Retired Ingress Nginx
 slug: guide-to-migrating-from-retired-ingress-nginx
 featured: true
@@ -28,6 +29,8 @@ I get it. You've spent time configuring ingress-nginx, tuning its annotations, s
 The good news? The Kubernetes Gateway API represents a genuine improvement in how we handle ingress traffic. The concepts are cleaner, the API is more expressive, and the ecosystem of implementations gives you real choice. The bad news? We all still have to do the migration.
 
 Let's walk through what's changing, why, and how to get your clusters onto a supported solution before the deadline.
+
+> **Update (August 2026):** this guide covers the core migration. For the annotations that *don't* map one-to-one — `limit-rps` rate limiting, cert-manager TLS automation, CORS, allowlists, snippets — see [Part 2: Rate Limiting, TLS, and the Annotations That Don't Map](/posts/ingress-nginx-migration-rate-limiting-tls-gateway-api).
 
 ## What is Ingress Nginx and How You're Probably Using It
 
