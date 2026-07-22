@@ -670,6 +670,29 @@ curl -s -X POST http://localhost:8080/orders \
 curl -s http://localhost:8080/orders/received | jq .
 ```
 
+The `POST` returns as soon as the event is handed to the producer - the id and status come straight back:
+
+```json
+{"orderId":"23efc541-584b-4091-983e-b8b190fb46ed","status":"PLACED"}
+```
+
+And once the consumer picks the record back up off the topic, `GET /orders/received` shows the fully-deserialized `OrderEvent` - a typed object, not a bag of bytes, on both ends of Kafka:
+
+```json
+[
+  {
+    "currency": "USD",
+    "createdAt": "2026-07-22T01:15:54.842Z",
+    "orderId": "23efc541-584b-4091-983e-b8b190fb46ed",
+    "customerId": "customer-42",
+    "status": "PLACED",
+    "amount": 129.99
+  }
+]
+```
+
+Same `orderId` on both sides of the round trip - `23efc541-...` went in as JSON over HTTP, came out the other end of a Kafka topic as an Avro-encoded, schema-registered message, and landed back as JSON. That whole path went through the registry without a single line of your application code mentioning it.
+
 Open Kafka UI to watch the `orders` topic fill up and see the `orders-value` schema the producer registered. Then try registering the incompatible schema by hand and watch the registry say no.
 
 Or skip all of that and just run the tests - they start their own infrastructure via Testcontainers and prove the whole story:
