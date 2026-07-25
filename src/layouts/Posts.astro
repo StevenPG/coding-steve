@@ -5,6 +5,7 @@ import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import Pagination from "@components/Pagination.astro";
 import Card from "@components/Card";
+import PostsRepoLinks from "@components/PostsRepoLinks.astro";
 import { SITE } from "@config";
 import type { Page } from "astro";
 import type { CollectionEntry } from "astro:content";
@@ -24,6 +25,7 @@ const { page } = Astro.props;
         All Posts Single Page
       </a>
     </p>
+    <PostsRepoLinks />
     <ul>
       {
         page.data.map(({ data }) => (

@@ -1,0 +1,53 @@
+---
+const repos = [
+  {
+    title: "DemosAndArticleContent",
+    href: "https://github.com/StevenPG/DemosAndArticleContent",
+    desc: "Source code for the demos and reproductions behind these articles.",
+  },
+  {
+    title: "DemoVisualizationsAndSites",
+    href: "https://github.com/StevenPG/DemoVisualizationsAndSites",
+    desc: "Web UI demos, deployed at demos.stevenpg.com.",
+  },
+];
+---
+
+<div class="repo-links">
+  <p class="repo-links-intro">Code that goes along with these posts:</p>
+  <ul>
+    {
+      repos.map(repo => (
+        <li>
+          <a
+            href={repo.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-skin-accent underline-offset-4 hover:underline"
+          >
+            {repo.title}
+          </a>
+          <span class="repo-links-desc"> — {repo.desc}</span>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .repo-links {
+    @apply my-4 rounded-lg border border-skin-line bg-skin-card/40 px-4 py-3;
+  }
+  .repo-links-intro {
+    @apply mb-1 text-sm font-semibold opacity-90;
+  }
+  .repo-links ul {
+    @apply list-none space-y-1;
+  }
+  .repo-links li {
+    @apply text-sm;
+  }
+  .repo-links-desc {
+    @apply opacity-70;
+  }
+</style>

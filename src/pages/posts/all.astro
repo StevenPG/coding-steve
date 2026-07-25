@@ -4,6 +4,7 @@ import Main from "@layouts/Main.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import Card from "@components/Card";
+import PostsRepoLinks from "@components/PostsRepoLinks.astro";
 import { getCollection } from "astro:content";
 import getSortedPosts from "@utils/getSortedPosts";
 import { SITE, LOCALE } from "@config";
@@ -33,6 +34,7 @@ for (const entry of sortedPosts) {
 <Layout title={`All Posts by Month | ${SITE.title}`}>
   <Header activeNav="posts" />
   <Main pageTitle="All Posts" pageDesc="Every article on one page, grouped by month.">
+    <PostsRepoLinks />
     {Array.from(monthGroups.values()).map(group => (
       <section class="month-group">
         <h2>{group.label}</h2>
