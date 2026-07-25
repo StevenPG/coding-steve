@@ -443,6 +443,19 @@ public class CsvOrderMessageConverter extends AbstractMessageConverter {
 
     public CsvOrderMessageConverter() {
         super(new MimeType("text", "csv"));
+        // The web adapter copies the HTTP Content-Type into the message headers
+        // under the key "Content-Type", NOT under MessageHeaders.CONTENT_TYPE
+        // ("contentType"). If the resolver only checks the latter it returns null
+        // for HTTP requests — and with the DEFAULT lenient matching, a null
+        // content type makes this converter claim to support EVERY request. So we
+        // check both keys and turn on strict matching. (More on why below.)
+        setContentTypeResolver(headers -> {
+            Object ct = headers.get(MessageHeaders.CONTENT_TYPE);
+            if (ct == null) ct = headers.get("Content-Type");
+            if (ct == null) return null;
+            return ct instanceof MimeType mt ? mt : MimeType.valueOf(ct.toString());
+        });
+        setStrictContentTypeMatch(true);
     }
 
     @Override
@@ -490,17 +503,21 @@ public class ConverterConfig {
 
 The converter's job is **input conversion**: it turns an inbound `text/csv` payload into an `Order` so the very same `enrichOrder` function runs unchanged. Its correctness is proven directly by a unit test that round-trips CSV ↔ `Order` in both directions, independent of any surface. This is exactly how you support a legacy wire format on a messaging surface — the whole Kafka record is one content type, in and out — without touching business logic.
 
-### A sharp edge: custom content types over function-web
+### Two sharp edges: custom content types over function-web
 
-Here's a gotcha worth the detour, because it caused me trouble and it's the kind of thing no tutorial mentions. Exposing a custom *request* content type over `spring-cloud-function-web` is subtle when the function's **output type differs from its input type**, as `enrichOrder` (`Order` → `EnrichedOrder`) does.
+Custom converters are the part of this guide that caused me the most trouble, and the two gotchas below are exactly the kind of thing no tutorial mentions. Both are worth the detour.
 
-The converter only knows how to read/write an `Order`. So when a `text/csv` request hits `/enrichOrder`, the request body converts fine, but the web layer then tries to negotiate the *response*, and can end up trying to write the `EnrichedOrder` result back as `text/csv` — for which there is no converter. The result is an `HttpMessageNotWritableException` and an HTTP 500 (`No converter for [EnrichedOrder] with preset Content-Type 'text/csv'`). Worse, Spring MVC caches producible media types per handler method, so once an endpoint has served a mix of content types, the failure becomes **order-dependent**: the CSV call to `/enrichOrder` succeeds in isolation right after startup (which is why an isolated `@SpringBootTest` for it stays green) but 500s partway through a mixed sequence of requests — and no `Accept` header reliably prevents it once the endpoint is in that state.
+**Gotcha 1 — a custom converter can silently claim *every* request.** This is what the extra lines in the constructor above are for. `AbstractMessageConverter` uses **lenient** content-type matching by default: if it can't resolve a message's content type, it assumes the message is a match. And the web adapter copies the HTTP `Content-Type` into the message headers under the key `Content-Type`, *not* under Spring's `MessageHeaders.CONTENT_TYPE` (`contentType`) — so a converter that only checks the latter resolves `null` for every HTTP request and, being lenient, claims to support all of them. For plain `Order`-typed functions you get away with it: a failed CSV parse of a JSON body is swallowed and retried with the next converter. But a function that takes a raw `Message<Order>` (like `decideWithHeaders`) uses a different code path with no such fallback, so a JSON request wrongly routed into the CSV parser surfaces as an uncaught 500 (`NumberFormatException` on the JSON quote character). The fix is the two lines in the constructor: a content-type resolver that checks **both** header keys, plus `setStrictContentTypeMatch(true)` so the converter only ever claims `text/csv`.
+
+**Gotcha 2 — asymmetric input/output types still bite on the response side.** Even with a correct, strict converter, exposing `text/csv` on a function whose **output type differs from its input** (`enrichOrder` is `Order` → `EnrichedOrder`) is fragile. The converter only knows `Order`, so when the web layer negotiates the *response* it can preset the response Content-Type to `text/csv` and then fail to write the `EnrichedOrder` — `HttpMessageNotWritableException: No converter for [EnrichedOrder] with preset Content-Type 'text/csv'`, another 500. And because Spring MVC caches producible media types per handler, it's **order-dependent**: the CSV call to `/enrichOrder` succeeds on a freshly-started endpoint but 500s once a JSON request has hit that same path first — which is why an isolated test stays green while the call fails partway through a mixed request sequence.
 
 The takeaways:
 
-- **The converter concept is sound**; the sharp edge is entirely in the HTTP response-negotiation layer, not in your function or your converter.
+- **Configure custom converters strictly.** Set a content-type resolver that checks both header keys and turn on `setStrictContentTypeMatch(true)`, or your converter will quietly intercept traffic it shouldn't.
 - **Drive custom content types where they're unambiguous.** They shine at the `FunctionCatalog`/messaging level, where the payload's content type is explicit and there's no HTTP response negotiation second-guessing you.
 - **If you must expose one over `function-web`, keep the I/O symmetric** — apply it to a function whose output the converter can also write (e.g. an `Order → Order` transform), so the response is negotiable too.
+
+That "green in a unit test, 500 in a real request sequence" behavior is a perfect example of why this guide exists — obvious in hindsight, maddening in the moment.
 
 That "works in a unit test, flakes in a real request sequence" behavior is a perfect example of why this guide exists — it's obvious in hindsight and maddening in the moment.
 
@@ -672,7 +689,7 @@ curl -X POST localhost:8080/enrichOrder -H 'Content-Type: application/json' \
 
 # CSV in via the custom converter. NOTE: works in isolation but is fragile over
 # function-web because enrichOrder returns a different type (EnrichedOrder) that
-# can't be written back as text/csv — see "A sharp edge" above. Drive custom
+# can't be written back as text/csv — see "Two sharp edges" above. Drive custom
 # content types at the catalog/messaging level for a clean result.
 curl -X POST localhost:8080/enrichOrder -H 'Content-Type: text/csv' -d 'ord-9,cust-alice,199.99,USD,3'
 
