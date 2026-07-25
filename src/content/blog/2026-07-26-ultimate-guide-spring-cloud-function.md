@@ -488,7 +488,21 @@ public class ConverterConfig {
 }
 ```
 
-Now a caller can `POST` a body of `ord-9,cust-alice,199.99,USD,3` with `Content-Type: text/csv` to `/enrichOrder` and get back an enriched order as JSON — the *input* converter turned CSV into an `Order`, the function ran unchanged, and the *output* converter (JSON, the default) serialized the result. That's how you support a legacy wire format without touching business logic.
+The converter's job is **input conversion**: it turns an inbound `text/csv` payload into an `Order` so the very same `enrichOrder` function runs unchanged. Its correctness is proven directly by a unit test that round-trips CSV ↔ `Order` in both directions, independent of any surface. This is exactly how you support a legacy wire format on a messaging surface — the whole Kafka record is one content type, in and out — without touching business logic.
+
+### A sharp edge: custom content types over function-web
+
+Here's a gotcha worth the detour, because it caused me trouble and it's the kind of thing no tutorial mentions. Exposing a custom *request* content type over `spring-cloud-function-web` is subtle when the function's **output type differs from its input type**, as `enrichOrder` (`Order` → `EnrichedOrder`) does.
+
+The converter only knows how to read/write an `Order`. So when a `text/csv` request hits `/enrichOrder`, the request body converts fine, but the web layer then tries to negotiate the *response*, and can end up trying to write the `EnrichedOrder` result back as `text/csv` — for which there is no converter. The result is an `HttpMessageNotWritableException` and an HTTP 500 (`No converter for [EnrichedOrder] with preset Content-Type 'text/csv'`). Worse, Spring MVC caches producible media types per handler method, so once an endpoint has served a mix of content types, the failure becomes **order-dependent**: the CSV call to `/enrichOrder` succeeds in isolation right after startup (which is why an isolated `@SpringBootTest` for it stays green) but 500s partway through a mixed sequence of requests — and no `Accept` header reliably prevents it once the endpoint is in that state.
+
+The takeaways:
+
+- **The converter concept is sound**; the sharp edge is entirely in the HTTP response-negotiation layer, not in your function or your converter.
+- **Drive custom content types where they're unambiguous.** They shine at the `FunctionCatalog`/messaging level, where the payload's content type is explicit and there's no HTTP response negotiation second-guessing you.
+- **If you must expose one over `function-web`, keep the I/O symmetric** — apply it to a function whose output the converter can also write (e.g. an `Order → Order` transform), so the response is negotiable too.
+
+That "works in a unit test, flakes in a real request sequence" behavior is a perfect example of why this guide exists — it's obvious in hindsight and maddening in the moment.
 
 ## Dynamic Function Registration
 
@@ -656,7 +670,10 @@ Because functions are transport-neutral, headers and content negotiation just wo
 curl -X POST localhost:8080/enrichOrder -H 'Content-Type: application/json' \
   -d '{"orderId":"ord-1","customerId":"cust-alice","amount":199.99,"currency":"USD","itemCount":2}'
 
-# CSV in (thanks to our custom converter), JSON out.
+# CSV in via the custom converter. NOTE: works in isolation but is fragile over
+# function-web because enrichOrder returns a different type (EnrichedOrder) that
+# can't be written back as text/csv — see "A sharp edge" above. Drive custom
+# content types at the catalog/messaging level for a clean result.
 curl -X POST localhost:8080/enrichOrder -H 'Content-Type: text/csv' -d 'ord-9,cust-alice,199.99,USD,3'
 
 # A header the function reads via Message<Order>; it echoes headers back on the response.
