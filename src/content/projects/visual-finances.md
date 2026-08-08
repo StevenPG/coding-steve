@@ -6,7 +6,7 @@ image: /assets/projects/visualfinances.png
 tags:
   - Web App
 featured: true
-order: 2
+order: 3
 relatedTag: finances
 ---
 
