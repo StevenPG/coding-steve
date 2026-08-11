@@ -3,7 +3,7 @@ title: Spring Version Compatibility Cheatsheet
 description: A continuously updated reference for aligning Java, Gradle, Spring Boot, and Spring Cloud versions.
 slug: spring-version-compatibility
 pubDatetime: 2025-05-04T12:00:00.000Z
-modDatetime: 2026-07-18T12:00:00.000Z
+modDatetime: 2026-08-11T12:00:00.000Z
 tags:
   - gradle
   - java
@@ -38,9 +38,10 @@ ship &mdash; bookmark it. For the official, authoritative matrix, see Spring's
 | 2.0.x               | Java 8 - 9                                    |
 | 1.5.x               | Java 6 - 8                                    |
 
-Spring Boot 4.x and 3.x baseline on Java 17. As of July 2026, only **4.1.x** (released June 2026) and **4.0.x** are in
-open-source support &mdash; **3.5.x reached OSS end-of-life on June 30, 2026** (commercial support continues). Source:
-[endoflife.date](https://endoflife.date/spring-boot#java-compatibility).
+Spring Boot 4.x and 3.x baseline on Java 17. As of August 2026, only **4.1.x** (released June 2026) and **4.0.x** are in
+open-source support &mdash; 4.0.x until **December 31, 2026** and 4.1.x until **July 31, 2027**. **3.5.x reached OSS
+end-of-life on June 30, 2026** (commercial support continues). The next feature release, **4.2**, is expected in
+November 2026. Source: [endoflife.date](https://endoflife.date/spring-boot#java-compatibility).
 
 ## Spring Cloud &harr; Spring Boot
 
@@ -59,9 +60,10 @@ open-source support &mdash; **3.5.x reached OSS end-of-life on June 30, 2026** (
 | Edgware                                                                                                     | Spring Boot 1.5.x                                                             |
 
 Don't mix trains and Boot versions arbitrarily &mdash; always confirm against the specific release train's docs. As of
-July 2026 the current train is **Oakwood** (latest patch:
+August 2026 the current train is **Oakwood** (latest patch:
 [2025.1.2](https://spring.io/blog/2026/06/11/spring-cloud-2025-1-2-aka-oakwood-has-been-released/), June 2026, adding
-Spring Boot 4.1 compatibility); the next train, codenamed **Paddington**, will track Spring Boot 4.2.
+Spring Boot 4.1 compatibility); the next train, **2026.0.x (Paddington)**, is in milestones against Spring Boot 4.2 and
+should ship alongside it.
 
 ## Gradle &harr; Java
 
@@ -80,9 +82,10 @@ Spring Boot 4.1 compatibility); the next train, codenamed **Paddington**, will t
 | 7.0            | Java 16                       |
 | 6.7            | Java 15                       |
 
-Shows the Gradle version that _first_ added support for running on each Java release (latest is Gradle 9.6.1, July
-2026). As of July 2026 no Gradle release runs on Java 27 yet &mdash; you can still compile/test against newer JDKs via
-toolchains while running Gradle itself on Java 17&ndash;26. Source:
+Shows the Gradle version that _first_ added support for running on each Java release (latest is Gradle 9.7, August
+2026). As of August 2026 no Gradle release runs on Java 27 yet &mdash; the compatibility docs still list JVM 27 as
+unsupported, and Java 27 itself isn't GA until September. You can still compile/test against newer JDKs via toolchains
+while running Gradle itself on Java 17&ndash;26. Source:
 [Gradle compatibility docs](https://docs.gradle.org/current/userguide/compatibility.html).
 
 ---

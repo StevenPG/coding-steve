@@ -3,7 +3,7 @@ title: Python Version Guide
 description: What's new in each Python 3 release, with support status marked and links to the official What's New notes.
 slug: python-version-guide
 pubDatetime: 2026-06-26T12:00:00.000Z
-modDatetime: 2026-07-18T12:00:00.000Z
+modDatetime: 2026-08-11T12:00:00.000Z
 tags:
   - python
 order: 3
@@ -30,12 +30,16 @@ A scannable "what's new" for modern Python 3 releases. Python ships one feature 
 | [3.7](https://docs.python.org/3/whatsnew/3.7.html)             | Jun 2018 | End of life   | `dataclasses`, `breakpoint()`, deferred annotation imports, guaranteed dict ordering                      |
 | [3.6](https://docs.python.org/3/whatsnew/3.6.html)             | Dec 2016 | End of life   | **f-strings**, variable annotations, async generators & comprehensions, `secrets`                         |
 
-> **[Python 3.15](https://docs.python.org/3.15/whatsnew/3.15.html)** is due **October 1, 2026**, and as of mid-July
-> 2026 it's feature-frozen and in beta. Headliners: **explicit lazy imports**
-> ([PEP 810](https://peps.python.org/pep-0810/) &mdash; faster startup for big dependency trees), a **stable ABI for
-> free-threaded CPython**, a noticeably faster JIT (~8&ndash;13% on the benchmark suite), a new zero-overhead sampling
-> profiler, UTF-8 as the default text encoding ([PEP 686](https://peps.python.org/pep-0686/)), and a colorized CLI with
-> SQL keyword tab-completion in `sqlite3`. Status labels above are approximate &mdash; the
+> **[Python 3.15](https://docs.python.org/3.15/whatsnew/3.15.html)** is due **October 1, 2026**. **Release candidate 1
+> landed August 4, 2026** and rc2 is scheduled for September 1, so the feature set is locked. Headliners: **explicit
+> lazy imports** ([PEP 810](https://peps.python.org/pep-0810/) &mdash; faster startup for big dependency trees),
+> **UTF-8 as the default text encoding** ([PEP 686](https://peps.python.org/pep-0686/) &mdash; `open()` no longer
+> follows the locale), new `frozendict` ([PEP 814](https://peps.python.org/pep-0814/)) and `sentinel`
+> ([PEP 661](https://peps.python.org/pep-0661/)) builtins, unpacking in comprehensions
+> ([PEP 798](https://peps.python.org/pep-0798/)), a dedicated profiling package with the Tachyon sampling profiler
+> ([PEP 799](https://peps.python.org/pep-0799/)), frame pointers on by default
+> ([PEP 831](https://peps.python.org/pep-0831/)), a **stable ABI for free-threaded CPython**, and a noticeably faster
+> JIT (~8&ndash;13% on the benchmark suite). Status labels above are approximate &mdash; the
 > [devguide version page](https://devguide.python.org/versions/) is the source of truth for bugfix vs. security-only vs.
 > EOL dates.
 
@@ -45,6 +49,8 @@ A scannable "what's new" for modern Python 3 releases. Python ships one feature 
   patches until it reaches roughly 5 years old.
 - The **latest one or two releases** are the ones receiving regular bug fixes (the "Active" rows above). Older supported
   versions get security fixes only.
+- **3.10 goes end-of-life in October 2026**, right around the 3.15 release &mdash; if you're still on it, plan the jump
+  now.
 - **Free-threading** (PEP 703 / 779) is the big ongoing shift: experimental in 3.13, officially supported in 3.14. It
   removes the GIL but is still opt-in via a separate build.
 

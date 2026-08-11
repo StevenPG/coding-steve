@@ -3,7 +3,7 @@ title: Java Version Guide
 description: What's new in each Java release from 8 onward, with LTS versions marked and links to release notes.
 slug: java-version-guide
 pubDatetime: 2026-06-26T12:00:00.000Z
-modDatetime: 2026-07-18T12:00:00.000Z
+modDatetime: 2026-08-11T12:00:00.000Z
 tags:
   - java
 order: 1
@@ -228,8 +228,10 @@ highlights and a link to the release notes. For the complete picture of any vers
 
 </details>
 
-> **Java 27** (non-LTS) is the next feature release, due **September 2026**. As of mid-July 2026 its feature set is
-> frozen (Rampdown Phase One began June 4) at nine JEPs. The headliners: **compact object headers on by default**
+> **Java 27** (non-LTS) is the next feature release, with GA targeted for **September 15, 2026**. As of early August
+> 2026 it's in Rampdown Phase Two (began July 16) with the feature set frozen at nine JEPs; the initial release
+> candidate slipped from August 6 to **August 20** so it lands after the quarterly Critical Patch Update, leaving about
+> three weeks of RC feedback instead of five. The headliners: **compact object headers on by default**
 > ([JEP 534](https://openjdk.org/jeps/534)), **G1 as the default GC in all environments** ([JEP 523](https://openjdk.org/jeps/523)),
 > **post-quantum hybrid key exchange for TLS 1.3** ([JEP 527](https://openjdk.org/jeps/527)), and **JFR in-process data
 > redaction** ([JEP 536](https://openjdk.org/jeps/536)). The rest are re-runs: lazy constants
