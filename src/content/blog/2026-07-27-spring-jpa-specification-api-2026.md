@@ -40,7 +40,9 @@ Everything below is built against a real companion project:
 | PostgreSQL          | 18                       |
 | Testcontainers      | **2.0.5**                |
 
-If you already use Specifications and just want the delta, skip to [What Changed in the 4.x Line](#what-changed-in-the-4x-line). If you've never used them, start at the top.
+**Two ways to read this.** If you already use Specifications and want the 2026 delta, go straight to [What Changed in the 4.x Line](#what-changed-in-the-4x-line) — that section is written for you.
+
+If you're learning the API, read [What a Specification Actually Is](#what-a-specification-actually-is) and [Your First Specification](#your-first-specification), then skip ahead to [Setup](#setup-and-the-two-dependencies-that-trip-people-up) and work forward from there. The 4.x section in between is a comparison against an older API you never used — it'll mean much more after you've written a few specifications, and nothing is lost by saving it for last.
 
 ## First: No, the Criteria API Is Not Deprecated
 
@@ -82,6 +84,82 @@ public interface FlightRepository extends JpaRepository<Flight, Long>,
 ```
 
 That single addition gives you `findAll(Specification)`, `findAll(Specification, Pageable)`, `count`, `exists`, `update`, `delete`, and the fluent `findBy` — with no implementation on your side.
+
+## Your First Specification
+
+Everything in this post is a variation on about fifteen lines of code, so let's write those fifteen lines before anything else.
+
+Take an entity trimmed to what this example needs (the full mapping shows up [further down](#the-domain)):
+
+```java
+@Entity
+public class Flight {
+    @Id @GeneratedValue private Long id;
+    private String flightNumber;
+    private BigDecimal basePrice;
+    @Embedded private Route route;        // has an `origin` field
+}
+```
+
+A specification is a lambda. This one means "base price at or below X":
+
+```java
+public static Specification<Flight> priceAtMost(BigDecimal max) {
+    return (root, query, cb) -> cb.lessThanOrEqualTo(root.get("basePrice"), max);
+}
+```
+
+Read the three parameters concretely:
+
+- **`root`** is _the flight_ — the thing you navigate to get at columns. `root.get("basePrice")` is the `base_price` column.
+- **`cb`** is the factory you build comparisons with. `lessThanOrEqualTo`, `equal`, `between`, `like`, `and`, `or` — they all live here.
+- **`query`** is the surrounding query. **Unused here**, and unused in most predicates you'll write, which is worth noticing early: it's the reason the 4.x line added a slimmer interface without it.
+
+Call it:
+
+```java
+List<Flight> cheap = flights.findAll(priceAtMost(new BigDecimal("300")));
+```
+
+and Hibernate runs:
+
+```sql
+select f1_0.id, f1_0.base_price, f1_0.flight_number, ...
+from flight f1_0
+where f1_0.base_price<=?
+```
+
+That's the entire mechanism. `cb.lessThanOrEqualTo(...)` builds a `Predicate`, the `Predicate` becomes the `WHERE` clause, `findAll` executes it. No proxies, no query parsing, no magic method names.
+
+Now the move that makes it worth the ceremony. Write a second one:
+
+```java
+public static Specification<Flight> flyingFrom(String origin) {
+    return (root, query, cb) -> cb.equal(root.get("route").get("origin"), origin);
+}
+```
+
+and combine them with `and`:
+
+```java
+List<Flight> cheapFromAtlanta = flights.findAll(
+        flyingFrom("ATL").and(priceAtMost(new BigDecimal("300"))));
+```
+
+```sql
+where f1_0.origin=? and f1_0.base_price<=?
+```
+
+Against the demo's 120 flights, `flyingFrom("ATL")` on its own returns 15; adding the price filter takes it to 7.
+
+Two independent objects, each testable on its own, producing one query. And because `and` is an ordinary method call rather than a compile-time construct, **you can decide at runtime which filters to apply** — that is the whole reason this API exists, and the rest of this post is variations on those two moves: write a predicate, compose predicates.
+
+Two things about the code above are deliberately simplified, and both get fixed later:
+
+- **`root.get("basePrice")` is an unchecked string.** Rename the field and this compiles fine, then fails at runtime. Real code uses the generated metamodel — `root.get(Flight_.basePrice)` — which [Type Safety](#type-safety-use-the-metamodel) covers. Strings appear here only so this first example needs no build configuration.
+- **`priceAtMost` returns `Specification`, which asks for a `query` it never uses.** The 4.x line added `PredicateSpecification` for exactly this shape, and it's what most of the cookbook uses. That's the next section.
+
+If you're new to Specifications, you now know enough to be productive; the rest is detail, and you can jump to [Setup](#setup-and-the-two-dependencies-that-trip-people-up) and come back.
 
 ## The Problem Specifications Solve
 
@@ -725,7 +803,7 @@ Returning `null` from `toPredicate` is exactly what `unrestricted()` does — th
 You can watch the guard work. The page query carries the joins:
 
 ```sql
-select f1_0.id, f1_0.dtype, f1_0.airline_id, ..., f1_0.seats_available
+select f1_0.id, f1_0.flight_number, f1_0.airline_id, f1_0.aircraft_id, ...
 from flight f1_0
 left join airline a1_0 on a1_0.id=f1_0.airline_id
 left join aircraft a2_0 on a2_0.id=f1_0.aircraft_id
