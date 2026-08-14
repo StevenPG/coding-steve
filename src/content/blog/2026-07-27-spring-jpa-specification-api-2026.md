@@ -639,6 +639,39 @@ private static <V> Specification<Flight> and(
 
 That little `and` helper is the whole trick. **Null-checking happens once, in one place**, which is what lets every specification factory assume its arguments are real. Before 4.0 people leaned on null-tolerant composition to achieve the same thing implicitly; now that it throws, doing it explicitly is both required and better.
 
+Against the demo's 120-flight dataset, adding one filter at a time to the same endpoint — one repository method, one query per request — narrows like this:
+
+| Filters                                                             | Matched |
+| ------------------------------------------------------------------- | ------: |
+| _(none)_                                                            |     120 |
+| `origin=ATL`                                                        |      15 |
+| `+ maxPrice=300`                                                    |       7 |
+| `+ airlineCodes=DL,UA`                                              |       6 |
+| `+ requiredAmenities=WIFI,POWER`                                    |       3 |
+| `origin=ATL, maxPrice=300, POWER, cabinClass=BUSINESS, minSeats=10` |       2 |
+| `wifiVendor=Starlink` _(jsonb)_                                     |      30 |
+| `earliestDepartureHourUtc=6&latest=11` _(`date_part`)_              |      30 |
+| `bookedByTier=PLATINUM` _(EXISTS subquery)_                         |      52 |
+
+And here's what three of those become in one statement — a column predicate, a `date_part()` call, and a `jsonb_extract_path_text()` call, all folded into the same `WHERE`:
+
+```sql
+where f1_0.origin=?
+  and date_part('hour', f1_0.departure_time) between ? and ?
+  and jsonb_extract_path_text(f1_0.metadata, 'wifiVendor')=?
+order by f1_0.departure_time
+offset ? rows fetch first ? rows only
+```
+
+```
+binding parameter (1:VARCHAR) <- [ATL]
+binding parameter (2:DOUBLE)  <- [6.0]
+binding parameter (3:DOUBLE)  <- [11.0]
+binding parameter (4:VARCHAR) <- [Starlink]
+```
+
+No `is null or` padding, no dead branches, no string concatenation — just the predicates the caller actually asked for.
+
 For a runtime-sized list of alternatives, `allOf` / `anyOf` fold without a loop:
 
 ```java
@@ -689,6 +722,26 @@ public static Specification<Flight> fetchAirlineAndAircraft() {
 
 Returning `null` from `toPredicate` is exactly what `unrestricted()` does — this specification adds a fetch and no filtering.
 
+You can watch the guard work. The page query carries the joins:
+
+```sql
+select f1_0.id, f1_0.dtype, f1_0.airline_id, ..., f1_0.seats_available
+from flight f1_0
+left join airline a1_0 on a1_0.id=f1_0.airline_id
+left join aircraft a2_0 on a2_0.id=f1_0.aircraft_id
+where f1_0.origin=?
+order by f1_0.departure_time
+offset ? rows fetch first ? rows only
+```
+
+and the count query derived from the same specification keeps the predicate and drops them:
+
+```sql
+select count(f1_0.id)
+from flight f1_0
+where f1_0.origin=?
+```
+
 **Three better options, in the order I'd reach for them:**
 
 1. **`@EntityGraph` on a derived query.** Spring Data applies the graph to the page query only and leaves the count query alone. Use this whenever the graph you need is static.
@@ -712,7 +765,36 @@ Page<FlightSummary> page = flights.findBy(spec, query -> query
         .page(PageRequest.of(0, 20, Sort.by("departureTime"))));
 ```
 
-No lazy associations, no persistence-context bookkeeping, no possible N+1. The record's component names must match property names on the entity, which is why this one is flat rather than nesting the embedded route.
+No lazy associations, no persistence-context bookkeeping, no possible N+1. The record's component names must match property names on the entity, which is why this one is flat rather than nesting the embedded route. What comes back is exactly those six fields and nothing else:
+
+```json
+[
+  {
+    "id": 1,
+    "flightNumber": "DL1000",
+    "departureTime": "2026-08-01T00:00:00Z",
+    "arrivalTime": "2026-08-01T01:35:00Z",
+    "basePrice": 120.0,
+    "status": "SCHEDULED"
+  },
+  {
+    "id": 9,
+    "flightNumber": "AA1008",
+    "departureTime": "2026-08-01T08:00:00Z",
+    "arrivalTime": "2026-08-01T10:15:00Z",
+    "basePrice": 480.0,
+    "status": "SCHEDULED"
+  }
+]
+```
+
+While you're returning `Page<T>` from a controller: on Spring Data 4 you also want
+
+```yaml
+spring.data.web.pageable.serialization-mode: via-dto
+```
+
+Without it you get `PageImpl`'s own field layout plus a startup warning that serializing it as-is has "no guarantee about the stability of the resulting JSON structure." `via-dto` emits the stable `{"content": [...], "page": {...}}` shape instead. Nothing to do with Specifications — but you will hit it building this exact endpoint.
 
 **"The cheapest one" without a `Pageable`:**
 
@@ -733,6 +815,8 @@ Window<FlightSummary> window = flights.findBy(spec, query -> query
 
 ScrollPosition next = window.positionAt(window.getContent().size() - 1);
 ```
+
+Walking the demo's Atlanta departures four at a time returns ids 1, 9, 17, 25; feeding the last row's `(departureTime, id)` back as the cursor continues with 33, 41, 49, 57. No `OFFSET` appears in either statement.
 
 Two rules: **the sort must end in a unique column** (hence the `id` tie-breaker — without it the cursor is ambiguous and you'll skip or repeat rows), and you carry the cursor forward rather than an offset. Rebuilding it from request parameters looks like:
 
@@ -849,13 +933,16 @@ Half of what's above doesn't exist on an in-memory database — `jsonb`, `date_p
 
 ```java
 @SpringBootTest
-@Testcontainers
+@ActiveProfiles("test")
 @Transactional
 public abstract class AbstractPostgresTest {
 
-    @Container
     @ServiceConnection
     static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:18-alpine");
+
+    static {
+        POSTGRES.start();
+    }
 
     @PersistenceContext protected EntityManager entityManager;
     @Autowired protected FlightRepository flights;
@@ -867,9 +954,16 @@ public abstract class AbstractPostgresTest {
 }
 ```
 
-`@ServiceConnection` wires the JDBC URL, username, and password into the context with no `@DynamicPropertySource` boilerplate. The `static` container starts once and is reused across every test class. Class-level `@Transactional` rolls each test back, so they can't see each other's writes.
+`@ServiceConnection` wires the JDBC URL, username, and password into the context with no `@DynamicPropertySource` boilerplate. Class-level `@Transactional` rolls each test back, so they can't see each other's writes.
 
-The one thing to remember for bulk-operation tests: `flush()` then `clear()` before asserting, or you're reading the stale persistence context rather than the database.
+**Note what's missing: `@Testcontainers` and `@Container`.** That combination is what every tutorial shows, including the first draft of this demo, and it does not survive a multi-class suite. The JUnit extension starts the annotated field in `beforeAll` and **stops it in `afterAll` of every subclass** — while Spring caches one application context across all of them. So the second test class gets a fresh container on a fresh random port, the cached `DataSource` still points at the dead one, and everything after the first class dies with `SQLTransientConnectionException: connection is not available`. In this suite that was 43 of 44 tests.
+
+Starting the container from a static initialiser and never stopping it — the **singleton container pattern** — fixes it. Nothing leaks: Testcontainers' Ryuk sidecar reaps the container when the JVM exits. It's also dramatically faster, because you stop paying for a container start per test class. This suite went from **3m25s to 57s**.
+
+Two smaller things that run turned up:
+
+- **Keep your seeder out of the tests.** The demo app seeds 120 flights from a `CommandLineRunner`. Left enabled under test it commits _before_ each test seeds its own copy, and every count in the suite doubles. Hence `@Profile("!test")` on the runner and `@ActiveProfiles("test")` above.
+- **For bulk-operation tests, `flush()` then `clear()` before asserting**, or you're reading the stale persistence context rather than the database.
 
 If you want more on this setup, I went deeper in [the Testcontainers guide](/posts/ultimate-guide-testcontainers-spring-boot/).
 
@@ -889,6 +983,8 @@ Everything that cost me time, in one list:
 10. **Bulk update/delete don't refresh the persistence context** — and a stale managed entity can overwrite your update at flush time.
 11. **Keyset scrolling needs a unique tie-breaker column** in the sort.
 12. **Write `PredicateSpecification` by default**; reach for `Specification` only when you need the `CriteriaQuery`.
+13. **`@Testcontainers` + `@Container` breaks a multi-class suite.** Use the singleton container pattern.
+14. **Returning `Page<T>` from a controller wants `serialization-mode: via-dto`** on Spring Data 4.
 
 ## Wrapping Up
 
@@ -897,5 +993,7 @@ The Specification API in 2026 is in the best shape it's ever been. `PredicateSpe
 What hasn't changed is the core judgement call. Specifications are for **predicates that vary at runtime**. When your filters are fixed, a derived query is shorter and clearer. When you're changing the shape of the query rather than its restrictions, you want JPQL, jOOQ, or SQL. When you have twenty optional filters and one endpoint — which is most search features anyone actually ships — nothing else in the JPA ecosystem comes close.
 
 The companion project used throughout this post is at [github.com/StevenPG/DemosAndArticleContent](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/spring-jpa-specifications-2026). It has the full cookbook, the twenty-filter search endpoint, a seeded 120-flight dataset so every number above is reproducible, `scripts/demo-requests.sh` to watch filters compose one at a time, and a Testcontainers suite covering each capability.
+
+Every count and JSON body above came out of an actual run — 44 tests green against a real PostgreSQL 18 container, plus `bootRun` and the demo script — and the SQL is Hibernate's own output, abridged only for width. The full capture, including the five defects that first run turned up, is in [`reference-output.md`](https://github.com/StevenPG/DemosAndArticleContent/blob/main/blog/spring-jpa-specifications-2026/reference-output.md). Two of those defects made it into this post as gotchas: the Testcontainers lifecycle trap, and the `Page` serialization mode.
 
 If this was useful, the [Testcontainers guide](/posts/ultimate-guide-testcontainers-spring-boot/), the [Flyway vs Liquibase comparison](/posts/flyway-vs-liquibase-2026/), and the [UUIDv7 in Spring Boot and Postgres](/posts/uuidv7-in-spring-boot-and-postgres/) post cover the neighbouring pieces of a JPA stack.
