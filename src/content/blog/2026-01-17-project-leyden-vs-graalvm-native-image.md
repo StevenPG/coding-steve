@@ -1,6 +1,7 @@
 ---
 author: StevenPG
 pubDatetime: 2026-01-17T12:00:00.000Z
+modDatetime: 2026-07-29T12:00:00.000Z
 title: Project Leyden vs GraalVM Native Image - A Complete Guide
 slug: project-leyden-vs-graalvm-native-image
 featured: true
@@ -22,6 +23,8 @@ description: A comprehensive comparison of Project Leyden and GraalVM Native Ima
 Java's startup time and memory footprint have been pain points since the language's inception. Two major approaches have emerged to solve this: **GraalVM Native Image** and **Project Leyden**. Both aim to make Java applications start faster and use less memory, but they take fundamentally different approaches.
 
 This post explains both technologies, their histories, how they work, and most importantly—when you should choose one over the other.
+
+> **Update (July 2026):** Java 26's JEP 516 extended the AOT object cache to *every* garbage collector, including ZGC — removing one of Leyden's biggest asterisks. I re-ran the startup benchmarks in [Java 26 AOT Cache with ZGC: Leyden Startup Benchmarks, Revisited](/posts/java-26-aot-cache-zgc-leyden-benchmarks).
 
 # The TL;DR Comparison
 

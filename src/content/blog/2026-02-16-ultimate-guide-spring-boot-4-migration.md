@@ -1,6 +1,7 @@
 ---
 author: StevenPG
 pubDatetime: 2026-02-16T12:00:00.000Z
+modDatetime: 2026-07-17T12:00:00.000Z
 title: "The Ultimate Guide to Spring Boot 4 Migration"
 slug: ultimate-guide-spring-boot-4-migration
 featured: true
@@ -27,6 +28,8 @@ My goal is to make posts like this the SIMPLEST place on the internet to learn h
 This guide is for anyone migrating a production application or a side project from Spring Boot 3.x to 4.0. Whether you're dealing with a monolith, a handful of microservices, or a weekend project that's been sitting on 3.2 for a while, this covers the full scope of what you need to change.
 
 These are all manually validated, and you can try them yourself.
+
+> **Update (July 2026):** Spring Boot 4.1 is out. Once you've finished the 3.x → 4.0 migration below, the follow-up is much smaller — I cover it in [Spring Boot 4.0 → 4.1: What's New and What Breaks](/posts/spring-boot-4-1-whats-new-what-breaks).
 
 I'm not going to sugarcoat it -- this is one of the larger Spring Boot migrations in recent memory. The Jackson 3 changes alone will touch most of your codebase. But if you approach it methodically, it's entirely manageable. The official [Spring Boot 4.0 Migration Guide](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide) is the canonical reference. This post is my attempt at making the practical side of that migration as painless as possible.
 
@@ -372,7 +375,7 @@ Spring Boot 4 removed several features that had been deprecated in earlier versi
 | Spock testing support | JUnit 5 with Mockito |
 | Classic loader implementation | Remove `LoaderImplementation.CLASSIC` configuration |
 
-If you're using Undertow as your embedded server, this is probably the most disruptive removal. You'll need to switch to Tomcat (the default) or Jetty. For most applications, swapping the starter dependency is all that's needed.
+If you're using Undertow as your embedded server, this is probably the most disruptive removal. You'll need to switch to Tomcat (the default) or Jetty. For most applications, swapping the starter dependency is all that's needed — but if you tuned `server.undertow.*` properties or hit the startup `ClassNotFoundException`, I wrote a dedicated deep-dive with the full property mapping: [Undertow Is Gone in Spring Boot 4](/posts/spring-boot-4-undertow-classnotfoundexception).
 
 ## Testing
 
