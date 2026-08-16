@@ -4,7 +4,7 @@ pubDatetime: 2026-07-20T12:00:00.000Z
 title: "HTTP/3 in Java 26's HttpClient: Working Code and a Real Benchmark"
 slug: java-26-httpclient-http3
 featured: false
-draft: true
+draft: false
 ogImage: /assets/default-og-image.png
 tags:
   - software
