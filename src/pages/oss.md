@@ -31,6 +31,18 @@ A Spring Boot 4 auto-configuration starter that fills a gap in the Spring ecosys
 
 </details>
 
+<details class="oss-box">
+<summary><span class="oss-box-title">cesium-spatial</span><span class="oss-box-role">Core Maintainer</span></summary>
+
+A pair of TypeScript libraries that render H3 hexagons and S2 quadrilaterals on a CesiumJS globe, published as [`@stevenpg/cesium-h3`](https://www.npmjs.com/package/@stevenpg/cesium-h3) and [`@stevenpg/cesium-s2`](https://www.npmjs.com/package/@stevenpg/cesium-s2) over a shared core. [View on GitHub](https://github.com/StevenPG/cesium-spatial)
+
+*   **Impact:** Makes discrete global grids approachable in Cesium — a camera-driven layer picks its own resolution and respects a cell budget, so putting a working grid on a globe is one object rather than a level-of-detail and batching exercise. The [live demo](https://stevenpg.github.io/cesium-spatial/demo.html) doubles as a place to explore H3 and S2 themselves.
+*   **Technologies:** TypeScript, CesiumJS, H3, S2, Vite, Playwright, Changesets.
+*   **Key Achievement:** Verified the compatibility promise instead of claiming it — CI typechecks and tests against five CesiumJS versions and four TypeScript versions, installs the published tarballs from npm to confirm the `exports` map, signatures and provenance all resolve, and drives the demo in a real browser.
+*   **Blog Post:** [H3 and S2 Cells on a Cesium Globe](/posts/cesium-h3-s2-grid-libraries)
+
+</details>
+
 ## Contributions
 
 <details class="oss-box">
