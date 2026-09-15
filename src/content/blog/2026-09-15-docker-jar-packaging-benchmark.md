@@ -358,8 +358,8 @@ holds linked, resolved classes, so loading more of them costs less.
 They also come out ahead on memory — 271MB idle for the AOT variant against 301MB for the
 fat jar — because the archive is memory-mapped rather than parsed onto the heap.
 
-The bill arrives in two places. First, image size: the AOT cache is a **128MB file** and the
-CDS archive is 99MB, which is why variant 06 is the largest image in the table at 712MB on
+The bill arrives in two places. First, image size: the AOT cache is a **132MB file** and the
+CDS archive is 103MB, which is why variant 06 is the largest image in the table at 712MB on
 disk. Second, layer churn: **every code change invalidates the whole cache**, so a one-line
 fix re-pulls 195MB instead of 0.4MB. CDS/AOT and small deltas are directly opposed, and you
 have to pick which one your deployment cares about.
