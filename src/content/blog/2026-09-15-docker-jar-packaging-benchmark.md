@@ -23,7 +23,7 @@ description: Fat jar, JRE base, layered jar, extracted jar, AppCDS, JDK 25 AOT c
 
 # The question
 
-`COPY app.jar` and `ENTRYPOINT ["java","-jar","/app/app.jar"]` is three lines, works
+`FROM eclipse-temurin:latest`, `COPY app.jar` and `ENTRYPOINT ["java","-jar","/app/app.jar"]` is three lines, works
 everywhere, and is what most Spring Boot services in production actually look like.
 
 There is also a pile of advice telling you not to do that: use the JRE image, use the
