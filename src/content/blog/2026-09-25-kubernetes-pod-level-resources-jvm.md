@@ -24,18 +24,18 @@ description: Pod-level resources let a pod's containers share one CPU and memory
 Kubernetes 1.37 shipped on August 26. One of the features in it that I think will get adopted fastest is
 [pod-level resources](https://kubernetes.io/docs/tasks/configure-pod-container/assign-pod-level-resources/). It has
 been beta and on by default since 1.34, and it keeps getting pieces around it; in-place resize of pod-level
-resources is alpha in 1.37. Instead of guessing a limit for every container, you give the *pod* a budget:
+resources is alpha in 1.37. Instead of guessing a limit for every container, you give the _pod_ a budget:
 
 ```yaml
 apiVersion: v1
 kind: Pod
 spec:
   resources:
-    requests: {cpu: "1", memory: 1Gi}
-    limits:   {cpu: "1", memory: 1Gi}
+    requests: { cpu: "1", memory: 1Gi }
+    limits: { cpu: "1", memory: 1Gi }
   containers:
-    - name: app          # no resources block
-    - name: log-shipper  # no resources block
+    - name: app # no resources block
+    - name: log-shipper # no resources block
 ```
 
 Anyone who runs Envoy, a log shipper, an OpenTelemetry collector or a Vault agent next to their service knows why
@@ -56,7 +56,7 @@ The code is in
 
 # The JVM does see a limit. The wrong one.
 
-My first guess was that the JVM would see *no* limit and size itself against the whole node. The
+My first guess was that the JVM would see _no_ limit and size itself against the whole node. The
 [KEP](https://github.com/kubernetes/enhancements/tree/master/keps/sig-node/2837-pod-level-resource-spec) says
 otherwise, and names the JVM specifically:
 
@@ -66,7 +66,7 @@ otherwise, and names the JVM specifically:
 
 So a JVM in an unlimited container reads `memory.max` = 1 GiB and `cpu.max` = 1 CPU from its own cgroup, and sizes
 itself as if it were alone in a 1 CPU / 1 GiB container. That's a sensible default. But the sidecar reads the same
-1 GiB from *its* cgroup. Every container in the pod is told the whole budget is its own, and only the pod's
+1 GiB from _its_ cgroup. Every container in the pod is told the whole budget is its own, and only the pod's
 cgroup, one level up, knows they're sharing it.
 
 That's fine until you combine it with the flag almost every production JVM image sets:
@@ -75,7 +75,7 @@ That's fine until you combine it with the flag almost every production JVM image
 -XX:MaxRAMPercentage=75
 ```
 
-Now the JVM plans a heap of 75% of the *pod*.
+Now the JVM plans a heap of 75% of the _pod_.
 
 # Reproducing it
 
@@ -92,27 +92,27 @@ something is one of two very different things:
 
 - **A Java `OutOfMemoryError`**: the heap ceiling was below the real limit. The app gets an exception it can log,
   `-XX:+HeapDumpOnOutOfMemoryError` works, and the incident is debuggable.
-- **The kernel's OOM killer**: the heap ceiling was *above* the real limit. The process is killed mid-allocation with
+- **The kernel's OOM killer**: the heap ceiling was _above_ the real limit. The process is killed mid-allocation with
   exit 137. No stack trace, no heap dump, just `OOMKilled` in `kubectl describe`.
 
 The "busy" sidecar writes 384 MiB into an in-memory `emptyDir`, which stands in for a log shipper's buffer during
 a burst. A native-sidecar `startupProbe` holds the app back until it has.
 
-| # | Pod budget | App container limit | Sidecar |
-|---|---|---|---|
-| 01 | none | 1 CPU / 1 GiB | 64 MiB limit, idle |
-| 02 | 1 CPU / 1 GiB | none | no limit, idle |
-| 03 | 1 CPU / 1 GiB | none | no limit, **holding 384 MiB** |
-| 04 | 1 CPU / 1 GiB | **640 MiB** | no limit, **holding 384 MiB** |
+| #   | Pod budget    | App container limit | Sidecar                       |
+| --- | ------------- | ------------------- | ----------------------------- |
+| 01  | none          | 1 CPU / 1 GiB       | 64 MiB limit, idle            |
+| 02  | 1 CPU / 1 GiB | none                | no limit, idle                |
+| 03  | 1 CPU / 1 GiB | none                | no limit, **holding 384 MiB** |
+| 04  | 1 CPU / 1 GiB | **640 MiB**         | no limit, **holding 384 MiB** |
 
 # Results
 
-| # | JVM saw | Max heap | Outcome |
-|---|---|---:|---|
-| 01 | 1024 MiB, 1 CPU | 742 MiB | `OutOfMemoryError` after 688 MiB |
-| 02 | 1024 MiB, 1 CPU | 742 MiB | `OutOfMemoryError` after 688 MiB |
-| 03 | 1024 MiB, 1 CPU | 742 MiB | **killed by the kernel after 512 MiB, exit 137** |
-| 04 | 640 MiB, 1 CPU | 464 MiB | `OutOfMemoryError` after 416 MiB, sidecar unaffected |
+| #   | JVM saw         | Max heap | Outcome                                              |
+| --- | --------------- | -------: | ---------------------------------------------------- |
+| 01  | 1024 MiB, 1 CPU |  742 MiB | `OutOfMemoryError` after 688 MiB                     |
+| 02  | 1024 MiB, 1 CPU |  742 MiB | `OutOfMemoryError` after 688 MiB                     |
+| 03  | 1024 MiB, 1 CPU |  742 MiB | **killed by the kernel after 512 MiB, exit 137**     |
+| 04  | 640 MiB, 1 CPU  |  464 MiB | `OutOfMemoryError` after 416 MiB, sidecar unaffected |
 
 **Scenario 02 is the trap.** The pod-level migration looks like a success: same budget, same heap, same behavior as
 before. You'd ship it. Then one day the log shipper buffers during a downstream outage, and scenario 03 happens in
@@ -133,12 +133,12 @@ Scenario 04 is the pattern I'd use: **pod-level resources for the budget, and a 
 ```yaml
 spec:
   resources:
-    limits: {cpu: "1", memory: 1Gi}      # the whole pod's budget
+    limits: { cpu: "1", memory: 1Gi } # the whole pod's budget
   containers:
     - name: app
       resources:
-        limits: {memory: 640Mi}          # what the JVM sizes itself from
-    - name: log-shipper                  # no limit: bursts into whatever the app isn't using
+        limits: { memory: 640Mi } # what the JVM sizes itself from
+    - name: log-shipper # no limit: bursts into whatever the app isn't using
 ```
 
 The JVM sizes its heap from 640 MiB and fails cleanly if it outgrows that. The sidecar keeps the flexibility that
@@ -149,7 +149,7 @@ was the point of the feature. The pod still can't exceed 1 GiB. The alternatives
 - **Lower `MaxRAMPercentage`** for pod-level pods. It's the weakest fix, because the right percentage depends on what
   the neighbors do, and that can change without anyone touching your deployment.
 
-What *not* to do is adopt pod-level resources as a pure refactor, deleting per-container limits and moving the numbers
+What _not_ to do is adopt pod-level resources as a pure refactor, deleting per-container limits and moving the numbers
 up a level, on any pod that runs a JVM (or anything else that sizes itself from cgroups: Go with `GOMEMLIMIT`
 derived from the limit, Node with a heap flag computed at startup, .NET). They'll all believe the pod is theirs.
 

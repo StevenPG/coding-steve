@@ -31,12 +31,12 @@ FROM eclipse-temurin:27-jre
 No new flags and no code changes. Then the service is running under different defaults, because four of
 the nine JEPs in this release change behavior you never opted into:
 
-| JEP | What changed | Undo it with |
-|---|---|---|
-| [534: Compact Object Headers by Default](https://openjdk.org/jeps/534) | Object headers shrink from 12 bytes to 8 | `-XX:-UseCompactObjectHeaders` |
-| [523: Make G1 the Default GC in All Environments](https://openjdk.org/jeps/523) | A JVM that sees 1 CPU or < 1792 MB no longer picks Serial | `-XX:+UseSerialGC` |
-| [527: Post-Quantum Hybrid Key Exchange for TLS 1.3](https://openjdk.org/jeps/527) | `X25519MLKEM768` is offered first in every TLS handshake | `-Djdk.tls.namedGroups=...` |
-| [536: JFR In-Process Data Redaction](https://openjdk.org/jeps/536) | Flight recordings redact secret-looking env vars, properties and arguments | `-XX:FlightRecorderOptions:redact-key=none,redact-argument=none` |
+| JEP                                                                               | What changed                                                               | Undo it with                                                     |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| [534: Compact Object Headers by Default](https://openjdk.org/jeps/534)            | Object headers shrink from 12 bytes to 8                                   | `-XX:-UseCompactObjectHeaders`                                   |
+| [523: Make G1 the Default GC in All Environments](https://openjdk.org/jeps/523)   | A JVM that sees 1 CPU or < 1792 MB no longer picks Serial                  | `-XX:+UseSerialGC`                                               |
+| [527: Post-Quantum Hybrid Key Exchange for TLS 1.3](https://openjdk.org/jeps/527) | `X25519MLKEM768` is offered first in every TLS handshake                   | `-Djdk.tls.namedGroups=...`                                      |
+| [536: JFR In-Process Data Redaction](https://openjdk.org/jeps/536)                | Flight recordings redact secret-looking env vars, properties and arguments | `-XX:FlightRecorderOptions:redact-key=none,redact-argument=none` |
 
 The other five are previews and incubators you have to opt into: lazy constants, primitive
 patterns, structured concurrency, the Vector API, and PEM encodings.
@@ -61,14 +61,14 @@ docker run --rm --cpus 1 --memory 1g -v $PWD/.jdks:/jdks:ro -v $PWD/probes:/p \
   debian:trixie-slim /jdks/jdk26/bin/java /p/DefaultsProbe.java
 ```
 
-| | JDK 26 | JDK 27 |
-|---|---|---|
-| `availableProcessors` | 1 | 1 |
-| Collector | **Serial** (`Copy`, `MarkSweepCompact`) | **G1** |
-| Max heap | 255 MiB | 256 MiB |
-| `UseCompactObjectHeaders` | false | **true** |
-| First TLS named group | `x25519` | **`X25519MLKEM768`** |
-| TLS named groups offered | 10 | **9** |
+|                           | JDK 26                                  | JDK 27               |
+| ------------------------- | --------------------------------------- | -------------------- |
+| `availableProcessors`     | 1                                       | 1                    |
+| Collector                 | **Serial** (`Copy`, `MarkSweepCompact`) | **G1**               |
+| Max heap                  | 255 MiB                                 | 256 MiB              |
+| `UseCompactObjectHeaders` | false                                   | **true**             |
+| First TLS named group     | `x25519`                                | **`X25519MLKEM768`** |
+| TLS named groups offered  | 10                                      | **9**                |
 
 With no container limits on a 4-core host, JDK 26 already picks G1. That's why the collector
 change is easy to miss if you test on a laptop and deploy to small pods. The difference only shows
@@ -93,18 +93,18 @@ by 8, depending on whether the 4 bytes you saved were holding it just past an 8-
 divides the heap delta by the count. These are retained bytes per instance on JDK 27, with the header
 change turned off and on:
 
-| Shape | 12-byte header | 8-byte header | Saved |
-|---|---:|---:|---:|
-| `new Object()` | 16 | 8 | **8** |
-| `Integer` (outside the cache) | 16 | 16 | 0 |
-| `Long` | 24 | 16 | **8** |
-| `record Point(int x, int y)` | 24 | 16 | **8** |
-| `Node { Node next; int value; }` | 24 | 16 | **8** |
-| `record Sample(long, int, float, float, float, short)` | 40 | 40 | 0 |
-| `byte[16]` | 32 | 32 | 0 |
-| `String`, 8 Latin-1 chars (object + `byte[]`) | 48 | 48 | 0 |
-| `ArrayList` holding 4 `Integer`s | 120 | 120 | 0 |
-| `HashMap` entry, `Long` key -> `Point` value | 89 | 65 | **24** |
+| Shape                                                  | 12-byte header | 8-byte header |  Saved |
+| ------------------------------------------------------ | -------------: | ------------: | -----: |
+| `new Object()`                                         |             16 |             8 |  **8** |
+| `Integer` (outside the cache)                          |             16 |            16 |      0 |
+| `Long`                                                 |             24 |            16 |  **8** |
+| `record Point(int x, int y)`                           |             24 |            16 |  **8** |
+| `Node { Node next; int value; }`                       |             24 |            16 |  **8** |
+| `record Sample(long, int, float, float, float, short)` |             40 |            40 |      0 |
+| `byte[16]`                                             |             32 |            32 |      0 |
+| `String`, 8 Latin-1 chars (object + `byte[]`)          |             48 |            48 |      0 |
+| `ArrayList` holding 4 `Integer`s                       |            120 |           120 |      0 |
+| `HashMap` entry, `Long` key -> `Point` value           |             89 |            65 | **24** |
 
 JDK 25's default (no flag) measures the same as the 12-byte column, to within 0.2 bytes.
 
@@ -149,7 +149,7 @@ public record Position(long epochMillis, double lat, double lon,
 ```
 
 That's 32 bytes of fields: 48 bytes with the old header, 40 with the new one. I picked it on purpose
-as a shape that *does* benefit. The probe table above covers shapes that don't.
+as a shape that _does_ benefit. The probe table above covers shapes that don't.
 
 The load generator mixes three requests 70/20/10:
 
@@ -166,19 +166,19 @@ into one `debian:trixie-slim` container. The OS layer is identical for every row
 No `-Xmx` anywhere: the point is the defaults, so max heap is the JVM's usual 25% of the
 container limit.
 
-| Profile | Limits | What it isolates |
-|---|---|---|
-| `small` | `--cpus 1 --memory 1g` | Below JEP 523's old threshold: 25 and 26 pick Serial, 27 picks G1 |
+| Profile  | Limits                 | What it isolates                                                   |
+| -------- | ---------------------- | ------------------------------------------------------------------ |
+| `small`  | `--cpus 1 --memory 1g` | Below JEP 523's old threshold: 25 and 26 pick Serial, 27 picks G1  |
 | `medium` | `--cpus 2 --memory 2g` | Above it: every JDK picks G1, so only the header change is in play |
 
-| Row | Flags |
-|---|---|
-| `jdk25` | none |
-| `jdk25+coh` | `-XX:+UseCompactObjectHeaders` |
-| `jdk26` | none |
-| `jdk27` | none |
-| `jdk27-coh` | `-XX:-UseCompactObjectHeaders` |
-| `jdk27+serial` | `-XX:+UseSerialGC` |
+| Row            | Flags                          |
+| -------------- | ------------------------------ |
+| `jdk25`        | none                           |
+| `jdk25+coh`    | `-XX:+UseCompactObjectHeaders` |
+| `jdk26`        | none                           |
+| `jdk27`        | none                           |
+| `jdk27-coh`    | `-XX:-UseCompactObjectHeaders` |
+| `jdk27+serial` | `-XX:+UseSerialGC`             |
 
 The last two rows each undo exactly one of JDK 27's changes. That's what separates "G1 did this"
 from "headers did this."
@@ -194,25 +194,25 @@ at 16 client threads, after a warm-up. Three runs per row, medians reported.
 
 ## `small`: 1 CPU, 1 GiB
 
-| Row | Collector | Live set MiB | Container MiB (loaded) | req/s | p50 ms | p99 ms | GC pauses / ms |
-|---|---|---:|---:|---:|---:|---:|---:|
-| `jdk25` | Serial | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
-| `jdk25+coh` | Serial | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
-| `jdk26` | Serial | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
-| `jdk27` | G1 | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
-| `jdk27-coh` | G1 | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
-| `jdk27+serial` | Serial | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
+| Row            | Collector | Live set MiB | Container MiB (loaded) | req/s | p50 ms | p99 ms | GC pauses / ms |
+| -------------- | --------- | -----------: | ---------------------: | ----: | -----: | -----: | -------------: |
+| `jdk25`        | Serial    |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
+| `jdk25+coh`    | Serial    |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
+| `jdk26`        | Serial    |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
+| `jdk27`        | G1        |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
+| `jdk27-coh`    | G1        |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
+| `jdk27+serial` | Serial    |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
 
 ## `medium`: 2 CPUs, 2 GiB
 
-| Row | Collector | Live set MiB | Container MiB (loaded) | req/s | p50 ms | p99 ms | GC pauses / ms |
-|---|---|---:|---:|---:|---:|---:|---:|
-| `jdk25` | G1 | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
-| `jdk25+coh` | G1 | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
-| `jdk26` | G1 | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
-| `jdk27` | G1 | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
-| `jdk27-coh` | G1 | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
-| `jdk27+serial` | Serial | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
+| Row            | Collector | Live set MiB | Container MiB (loaded) | req/s | p50 ms | p99 ms | GC pauses / ms |
+| -------------- | --------- | -----------: | ---------------------: | ----: | -----: | -----: | -------------: |
+| `jdk25`        | G1        |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
+| `jdk25+coh`    | G1        |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
+| `jdk26`        | G1        |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
+| `jdk27`        | G1        |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
+| `jdk27-coh`    | G1        |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
+| `jdk27+serial` | Serial    |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
 
 ## What to look for
 
@@ -222,7 +222,7 @@ shape. Watch whether the M3 confirms it:
 - **The live set drops by the same amount on every JDK that has compact headers.** It was about 15%
   (119 to 101 MiB), whether the headers came from JDK 27's default or from `-XX:+UseCompactObjectHeaders` on
   JDK 25. The header change is the same change on 25 and 27. JDK 27 just stops asking you to opt in.
-- **On one CPU, G1 was *slower* than Serial.** `jdk27` served noticeably fewer requests with a worse
+- **On one CPU, G1 was _slower_ than Serial.** `jdk27` served noticeably fewer requests with a worse
   p99 than `jdk26`, and `jdk27+serial` recovered it. If that holds on real hardware, then JDK 27's
   default is a regression for single-CPU pods, even though the header change on its own is a win.
 - **On two CPUs, the defaults agree.** Every default row is G1, so the difference between `jdk26` and `jdk27` is
@@ -236,7 +236,7 @@ shape. Watch whether the M3 confirms it:
 JEP 527 puts the hybrid `X25519MLKEM768` group (classical X25519 combined with the ML-KEM-768
 post-quantum KEM) first in the client's and server's TLS 1.3 named groups. Clients offer it, and if
 the other side supports it, the handshake uses it. If not, it falls back to `x25519` as before. I covered
-*why* hybrid key exchange matters (harvest-now-decrypt-later) in
+_why_ hybrid key exchange matters (harvest-now-decrypt-later) in
 [the post-quantum cryptography guide](/posts/ultimate-guide-post-quantum-cryptography-tls).
 
 The costs are small but real. The hybrid key share adds about 1.2 KB to the ClientHello (a 1,184-byte
@@ -274,7 +274,7 @@ them verbatim. `probes/jfr-redaction.sh` starts a JVM with a secret in each plac
 Names that don't look sensitive, like `AWS_REGION`, pass through. The default patterns cover the usual suspects
 (`*password*`, `*secret*`, `*token*`, `*credential*` and friends). Two sub-options of `-XX:FlightRecorderOptions`
 control it: `redact-key` covers environment variables and system properties, and `redact-argument` covers JVM and
-program arguments. A leading `+` adds your own patterns to the defaults. Turning redaction fully off takes *both*
+program arguments. A leading `+` adds your own patterns to the defaults. Turning redaction fully off takes _both_
 set to `none`. I checked: `redact-argument=none` on its own still redacts the environment variables.
 
 The part to act on: every `.jfr` file your JDK 25 or 26 services produced, and attached to a support ticket or

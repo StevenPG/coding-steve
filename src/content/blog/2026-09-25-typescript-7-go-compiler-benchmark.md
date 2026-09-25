@@ -63,12 +63,12 @@ say out loud: a single static binary that starts in milliseconds.
 
 ## Configurations
 
-| Configuration | What it isolates |
-|---|---|
-| `tsc 6` | the JavaScript compiler on Node: the baseline |
-| `tsc 7 --singleThreaded` | the Go port with every form of parallelism off: **the "native code" speedup** |
-| `tsc 7 --checkers 1 / 2 / 8` | the number of type-checking workers |
-| `tsc 7` | the default, 4 checkers: **native + parallel** |
+| Configuration                | What it isolates                                                              |
+| ---------------------------- | ----------------------------------------------------------------------------- |
+| `tsc 6`                      | the JavaScript compiler on Node: the baseline                                 |
+| `tsc 7 --singleThreaded`     | the Go port with every form of parallelism off: **the "native code" speedup** |
+| `tsc 7 --checkers 1 / 2 / 8` | the number of type-checking workers                                           |
+| `tsc 7`                      | the default, 4 checkers: **native + parallel**                                |
 
 TypeScript 7's parallelism is shared-memory. Parsing and binding fan out across files, and `--checkers N` splits
 type-checking across N workers that each check a slice of the program. That's goroutines over one address space, not
@@ -77,11 +77,11 @@ JavaScript.
 
 ## Targets
 
-| Target | Size | Notes |
-|---|---|---|
-| This blog | small | Astro 6 site, `tsc --noEmit` after `astro sync` generates content types |
-| [cesium-spatial](/projects/cesium-spatial) | medium | my pnpm monorepo, three packages checked one after another |
-| microsoft/playwright | large | also in Microsoft's own table, so it doubles as a sanity check |
+| Target                                     | Size   | Notes                                                                   |
+| ------------------------------------------ | ------ | ----------------------------------------------------------------------- |
+| This blog                                  | small  | Astro 6 site, `tsc --noEmit` after `astro sync` generates content types |
+| [cesium-spatial](/projects/cesium-spatial) | medium | my pnpm monorepo, three packages checked one after another              |
+| microsoft/playwright                       | large  | also in Microsoft's own table, so it doubles as a sanity check          |
 
 Each is pinned to a commit. Every configuration has to report the **same number of type errors** as TypeScript 6,
 so a run can't look faster because it checked less. Five timed runs after a warm-up, median reported, with total CPU
@@ -91,29 +91,29 @@ time and peak RSS for each.
 
 ### Wall time
 
-| Target | `tsc 6` | `tsc 7 --singleThreaded` | `tsc 7` (4 checkers) | Native speedup | Parallel speedup | Total |
-|---|---:|---:|---:|---:|---:|---:|
-| coding-steve | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
-| cesium-spatial | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
-| playwright | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
+| Target         | `tsc 6` | `tsc 7 --singleThreaded` | `tsc 7` (4 checkers) | Native speedup | Parallel speedup | Total |
+| -------------- | ------: | -----------------------: | -------------------: | -------------: | ---------------: | ----: |
+| coding-steve   |   _TBD_ |                    _TBD_ |                _TBD_ |          _TBD_ |            _TBD_ | _TBD_ |
+| cesium-spatial |   _TBD_ |                    _TBD_ |                _TBD_ |          _TBD_ |            _TBD_ | _TBD_ |
+| playwright     |   _TBD_ |                    _TBD_ |                _TBD_ |          _TBD_ |            _TBD_ | _TBD_ |
 
 ### Scaling with `--checkers` (playwright)
 
-| Checkers | Wall s | CPU s | Peak RSS MiB |
-|---:|---:|---:|---:|
-| single-threaded | *TBD* | *TBD* | *TBD* |
-| 1 | *TBD* | *TBD* | *TBD* |
-| 2 | *TBD* | *TBD* | *TBD* |
-| 4 (default) | *TBD* | *TBD* | *TBD* |
-| 8 | *TBD* | *TBD* | *TBD* |
+|        Checkers | Wall s | CPU s | Peak RSS MiB |
+| --------------: | -----: | ----: | -----------: |
+| single-threaded |  _TBD_ | _TBD_ |        _TBD_ |
+|               1 |  _TBD_ | _TBD_ |        _TBD_ |
+|               2 |  _TBD_ | _TBD_ |        _TBD_ |
+|     4 (default) |  _TBD_ | _TBD_ |        _TBD_ |
+|               8 |  _TBD_ | _TBD_ |        _TBD_ |
 
 ### Memory
 
-| Target | `tsc 6` peak RSS MiB | `tsc 7` peak RSS MiB |
-|---|---:|---:|
-| coding-steve | *TBD* | *TBD* |
-| cesium-spatial | *TBD* | *TBD* |
-| playwright | *TBD* | *TBD* |
+| Target         | `tsc 6` peak RSS MiB | `tsc 7` peak RSS MiB |
+| -------------- | -------------------: | -------------------: |
+| coding-steve   |                _TBD_ |                _TBD_ |
+| cesium-spatial |                _TBD_ |                _TBD_ |
+| playwright     |                _TBD_ |                _TBD_ |
 
 ## What to look for
 
@@ -125,7 +125,7 @@ Here's what to check against the M3:
   two small codebases most of the win is startup: Node has to load and JIT-warm a very large JavaScript compiler
   before it checks a single file, and a Go binary doesn't.
 - **Checkers cost memory, and too many cost time.** On Playwright, peak RSS rose from about 750 MiB single-threaded
-  to about 1.1 GiB at the default 4 checkers and about 1.45 GiB at 8. On a 4-core machine, 8 checkers was *slower*
+  to about 1.1 GiB at the default 4 checkers and about 1.45 GiB at 8. On a 4-core machine, 8 checkers was _slower_
   than 4. That's the classic oversubscription curve, and a good reason to set `--checkers` from your runner's core
   count rather than just raising it.
 - **TypeScript 6 spends about twice its wall time in CPU**, on Node's GC and JIT threads. `tsc 7 --singleThreaded`
@@ -180,7 +180,7 @@ what `@typescript/typescript6` is for: it installs a `tsc6` binary and the JavaS
 
 Here's the trap. `@typescript/typescript6` depends on `typescript@^6` under the npm alias **`@typescript/old`**, and
 that package also declares a `tsc` binary. On npm 10.9.7, installing both linked `@typescript/old`'s `tsc` into
-`node_modules/.bin` *over* TypeScript 7's:
+`node_modules/.bin` _over_ TypeScript 7's:
 
 ```bash
 $ npm i -D typescript@7.0.2 @typescript/typescript6@6.0.2

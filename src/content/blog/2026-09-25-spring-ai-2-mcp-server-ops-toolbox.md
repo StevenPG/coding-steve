@@ -27,7 +27,7 @@ wrong. The model then works from whatever you remembered to copy: one exception,
 endpoint is failing or how often.
 
 The [Model Context Protocol](https://modelcontextprotocol.io/) fixes the copy-and-paste step. An MCP server
-exposes *tools* the model can call itself. Spring AI 2.0 (GA in June, 2.0.1 current) made writing one about as
+exposes _tools_ the model can call itself. Spring AI 2.0 (GA in June, 2.0.1 current) made writing one about as
 hard as writing a `@RestController`. So instead of a toy calculator server, this post builds something I'd
 actually attach to a service. The service exposes its own health, metrics, traffic, logs and thread state as MCP
 tools, so Claude Code (or any MCP client) can triage the running instance directly.
@@ -80,7 +80,7 @@ the cheapest way to tell the model how to use your tools.
 ## Stateless or Streamable?
 
 With `STREAMABLE`, the server keeps a session per client. That lets it push messages to the client: progress
-notifications, *sampling* (asking the client's model to generate something) and *elicitation* (asking the user a
+notifications, _sampling_ (asking the client's model to generate something) and _elicitation_ (asking the user a
 question). With `STATELESS`, every JSON-RPC request stands alone.
 
 For an ops interface I want stateless. Any replica behind a plain load balancer can answer, with no sticky
@@ -93,7 +93,7 @@ curl -s localhost:8080/mcp -H "Authorization: Bearer dev-key" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"http_traffic_summary","arguments":{}}}'
 ```
 
-One caveat on "any replica can answer": these tools describe *the instance that answers*. Behind a load
+One caveat on "any replica can answer": these tools describe _the instance that answers_. Behind a load
 balancer, each call may hit a different pod. For a whole fleet you'd want the tools to query Prometheus and Loki
 instead. For one pod you port-forward to, or a local dev instance, in-process is exactly right.
 
@@ -101,15 +101,15 @@ instead. For one pod you port-forward to, or a local dev instance, in-process is
 
 Nine tools, one resource and one prompt:
 
-| Tool | Backed by | Read-only |
-|---|---|---|
-| `get_health` | the actuator's `HealthEndpoint` bean | yes |
-| `list_metrics` / `get_metric` | Micrometer `MeterRegistry` | yes |
-| `http_traffic_summary` | the `http.server.requests` timers, aggregated per endpoint | yes |
-| `recent_logs` | a Logback ring-buffer appender | yes |
-| `get_log_level` | Boot's `LoggingSystem` | yes |
-| `set_log_level_temporarily` | Boot's `LoggingSystem`, with a TTL | **no** |
-| `jvm_summary` / `thread_summary` | the platform MXBeans | yes |
+| Tool                             | Backed by                                                  | Read-only |
+| -------------------------------- | ---------------------------------------------------------- | --------- |
+| `get_health`                     | the actuator's `HealthEndpoint` bean                       | yes       |
+| `list_metrics` / `get_metric`    | Micrometer `MeterRegistry`                                 | yes       |
+| `http_traffic_summary`           | the `http.server.requests` timers, aggregated per endpoint | yes       |
+| `recent_logs`                    | a Logback ring-buffer appender                             | yes       |
+| `get_log_level`                  | Boot's `LoggingSystem`                                     | yes       |
+| `set_log_level_temporarily`      | Boot's `LoggingSystem`, with a TTL                         | **no**    |
+| `jvm_summary` / `thread_summary` | the platform MXBeans                                       | yes       |
 
 ## A tool is an annotated method
 
@@ -249,25 +249,33 @@ The guard rails:
 - **An allow-list, not a deny-list.** `ops.mcp.writable-logger-prefixes=com.stevenpg,org.springframework.web`.
   `ROOT` isn't on it, because TRACE on ROOT is how you fill a disk.
 - **Every change expires.** The default is 15 minutes, with a hard cap of 60. Calling it again extends the TTL
-  but keeps the *original* level as the revert target. On shutdown, pending changes revert immediately. An agent
+  but keeps the _original_ level as the revert target. On shutdown, pending changes revert immediately. An agent
   can't leave DEBUG on over a weekend.
 - **Every change is logged at WARN**, so the humans reading the logs know an agent did it.
 - **Throw, don't return an error string.** A thrown exception becomes a tool result with `isError: true`, which
   clients show differently and models treat as a failure:
 
 ```json
-{"content":[{"type":"text","text":"Logger 'ROOT' is not under an allow-listed prefix [com.stevenpg, org.springframework.web]\n..."}],"isError":true}
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Logger 'ROOT' is not under an allow-listed prefix [com.stevenpg, org.springframework.web]\n..."
+    }
+  ],
+  "isError": true
+}
 ```
 
-What I deliberately *didn't* build: an environment or configuration dump. It's the obvious next tool,
+What I deliberately _didn't_ build: an environment or configuration dump. It's the obvious next tool,
 and it's the one most likely to put a database password into a chat transcript that gets stored somewhere you
 don't control.
 
 # Resources and prompts
 
-Tools are what the *model* decides to call. MCP has two other primitives, and Spring AI 2.0 annotates both.
+Tools are what the _model_ decides to call. MCP has two other primitives, and Spring AI 2.0 annotates both.
 
-A **resource** is context the *client* can attach without the model asking. Here, it's which instance you're
+A **resource** is context the _client_ can attach without the model asking. Here, it's which instance you're
 looking at:
 
 ```java
@@ -276,7 +284,7 @@ looking at:
 public String appInfo() { ... }
 ```
 
-A **prompt** is a template the *user* invokes, and most clients show it as a slash command. I used it to encode the
+A **prompt** is a template the _user_ invokes, and most clients show it as a slash command. I used it to encode the
 triage order an on-call engineer would follow, so the model doesn't open with thread dumps while the database is down:
 
 ```java
@@ -298,8 +306,8 @@ A plain `String` return is converted into a single user message.
 
 # Security: the starters are wide open
 
-This is straight from the Spring AI docs, and easy to miss: *the HTTP-based server transports expose an
-unauthenticated JSON-RPC endpoint by default.* A tool that reads your logs is a data-exfiltration endpoint if
+This is straight from the Spring AI docs, and easy to miss: _the HTTP-based server transports expose an
+unauthenticated JSON-RPC endpoint by default._ A tool that reads your logs is a data-exfiltration endpoint if
 anybody can reach it.
 
 The project ships the smallest thing that isn't nothing: a filter on `/mcp` only that requires
@@ -334,7 +342,7 @@ The test sets the demo endpoint's failure rate to 100%, sends three requests, an
 That's the whole triage loop, checked end to end. Other tests check that the refusal on `ROOT` comes back as
 `isError`, that exactly one tool isn't read-only, and that a client with the wrong key can't initialize.
 
-One SDK note: in MCP Java SDK 2.0, the request records' old constructors *and* their no-arg `builder()` are
+One SDK note: in MCP Java SDK 2.0, the request records' old constructors _and_ their no-arg `builder()` are
 deprecated. Use `CallToolRequest.builder(name)`, `ReadResourceRequest.builder(uri)` and
 `GetPromptRequest.builder(name)`.
 

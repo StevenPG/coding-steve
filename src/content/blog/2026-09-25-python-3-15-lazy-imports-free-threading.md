@@ -90,7 +90,7 @@ turns out to matter more than I expected.
 - `summary flights.csv`: needs `csv`, `json`, `statistics`
 - `report flights.csv`: needs everything
 
-The two lazy variants are *generated* from the eager file by a script (`scripts/make_variants.py`), so the three
+The two lazy variants are _generated_ from the eager file by a script (`scripts/make_variants.py`), so the three
 can't drift apart. The generated `lazy` variant is exactly what you'd get by adding the keyword to every line of
 the import block.
 
@@ -98,18 +98,18 @@ the import block.
 
 This is the deterministic half: count the modules `-X importtime` reports for each command. On 3.15:
 
-| Variant | `version` | `summary` | `report` |
-|---|---:|---:|---:|
-| eager | 381 | 381 | 387 |
-| `lazy` keyword | **64** | **83** | 385 |
-| `__lazy_modules__` | **64** | **83** | 385 |
-| eager + `-X lazy_imports=all` | **60** | **73** | **268** |
+| Variant                       | `version` | `summary` | `report` |
+| ----------------------------- | --------: | --------: | -------: |
+| eager                         |       381 |       381 |      387 |
+| `lazy` keyword                |    **64** |    **83** |      385 |
+| `__lazy_modules__`            |    **64** |    **83** |      385 |
+| eager + `-X lazy_imports=all` |    **60** |    **73** |  **268** |
 
 On 3.14, every variant that runs imports 377–384 modules. The `lazy` keyword variant doesn't run at all
 (`SyntaxError: invalid syntax`), and `__lazy_modules__` quietly behaves exactly like eager. That's the point of it.
 
 The last column is the interesting one. `report` uses every module in the import block, so the per-file variants
-save nothing: all of them get reified. But `-X lazy_imports=all` *also* defers the imports that `requests` and
+save nothing: all of them get reified. But `-X lazy_imports=all` _also_ defers the imports that `requests` and
 `rich` make internally, and a lot of those are never touched by what `fleetctl` actually calls. That's 117 fewer
 modules for a command that "uses everything."
 
@@ -117,16 +117,16 @@ modules for a command that "uses everything."
 
 Median wall time of a full process launch, 30 launches after one warm-up (so `.pyc` files exist and the page cache is warm):
 
-| Interpreter | Variant | `version` ms | `summary` ms | `report` ms |
-|---|---|---:|---:|---:|
-| 3.14 | eager | *TBD* | *TBD* | *TBD* |
-| 3.14 | `__lazy_modules__` | *TBD* | *TBD* | *TBD* |
-| 3.15 | eager | *TBD* | *TBD* | *TBD* |
-| 3.15 | `lazy` keyword | *TBD* | *TBD* | *TBD* |
-| 3.15 | `__lazy_modules__` | *TBD* | *TBD* | *TBD* |
-| 3.15 | eager + `-X lazy_imports=all` | *TBD* | *TBD* | *TBD* |
-| 3.15t | eager | *TBD* | *TBD* | *TBD* |
-| 3.15t | `lazy` keyword | *TBD* | *TBD* | *TBD* |
+| Interpreter | Variant                       | `version` ms | `summary` ms | `report` ms |
+| ----------- | ----------------------------- | -----------: | -----------: | ----------: |
+| 3.14        | eager                         |        _TBD_ |        _TBD_ |       _TBD_ |
+| 3.14        | `__lazy_modules__`            |        _TBD_ |        _TBD_ |       _TBD_ |
+| 3.15        | eager                         |        _TBD_ |        _TBD_ |       _TBD_ |
+| 3.15        | `lazy` keyword                |        _TBD_ |        _TBD_ |       _TBD_ |
+| 3.15        | `__lazy_modules__`            |        _TBD_ |        _TBD_ |       _TBD_ |
+| 3.15        | eager + `-X lazy_imports=all` |        _TBD_ |        _TBD_ |       _TBD_ |
+| 3.15t       | eager                         |        _TBD_ |        _TBD_ |       _TBD_ |
+| 3.15t       | `lazy` keyword                |        _TBD_ |        _TBD_ |       _TBD_ |
 
 A bare `python -c pass` costs roughly 17–23 ms, so that's the floor for any row.
 
@@ -147,7 +147,7 @@ These are all verified on 3.15.0rc2:
   `try: import x / except ImportError:` can't be lazy anyway, because `lazy` inside `try` is a `SyntaxError`.
 - **No `__future__` escape hatch.** `lazy` is a hard syntax error before 3.15. If you support 3.14, use
   `__lazy_modules__`.
-- **`-X lazy_imports=all` is a sharp tool.** It changes when *other people's* code runs its import-time side
+- **`-X lazy_imports=all` is a sharp tool.** It changes when _other people's_ code runs its import-time side
   effects: plugin registration, monkey-patching, `logging.basicConfig` at import. Great for a CLI you control
   end to end. Test it before turning it on for a service. `sys.set_lazy_imports_filter()` exists to exempt
   modules that need to stay eager.
@@ -161,11 +161,11 @@ across 1, 2 and 4 threads, keeps the best of three runs, and runs the same work 
 because importing a C extension that isn't marked free-threading-safe can silently turn the GIL back on.
 
 | Interpreter | GIL | 1 thread | 2 threads | 4 threads | 4 processes |
-|---|---|---:|---:|---:|---:|
-| 3.14 | on | *TBD* | *TBD* | *TBD* | *TBD* |
-| 3.14t | off | *TBD* | *TBD* | *TBD* | *TBD* |
-| 3.15 | on | *TBD* | *TBD* | *TBD* | *TBD* |
-| 3.15t | off | *TBD* | *TBD* | *TBD* | *TBD* |
+| ----------- | --- | -------: | --------: | --------: | ----------: |
+| 3.14        | on  |    _TBD_ |     _TBD_ |     _TBD_ |       _TBD_ |
+| 3.14t       | off |    _TBD_ |     _TBD_ |     _TBD_ |       _TBD_ |
+| 3.15        | on  |    _TBD_ |     _TBD_ |     _TBD_ |       _TBD_ |
+| 3.15t       | off |    _TBD_ |     _TBD_ |     _TBD_ |       _TBD_ |
 
 The shape to confirm on real hardware:
 
@@ -188,9 +188,9 @@ it, off by default, and `PYTHON_JIT=1` turns it on. The benchmark runs every int
 and drops the row if `sys._jit.is_enabled()` says it didn't engage:
 
 | Interpreter | 1 thread, JIT off | 1 thread, `PYTHON_JIT=1` | 4 processes, JIT off | 4 processes, `PYTHON_JIT=1` |
-|---|---:|---:|---:|---:|
-| 3.14 | *TBD* | *TBD* | *TBD* | *TBD* |
-| 3.15 | *TBD* | *TBD* | *TBD* | *TBD* |
+| ----------- | ----------------: | -----------------------: | -------------------: | --------------------------: |
+| 3.14        |             _TBD_ |                    _TBD_ |                _TBD_ |                       _TBD_ |
+| 3.15        |             _TBD_ |                    _TBD_ |                _TBD_ |                       _TBD_ |
 
 The shape from the preliminary run is the most surprising result in this post:
 

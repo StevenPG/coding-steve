@@ -32,7 +32,7 @@ through upgrades, and it isn't available on every managed service.
 
 PostgreSQL 19 (GA expected in October, Beta 4 out now) moves this into core:
 
-- **`REPACK`** is a new command that *replaces* `VACUUM FULL` and `CLUSTER`. `REPACK t` is `VACUUM FULL t`, and
+- **`REPACK`** is a new command that _replaces_ `VACUUM FULL` and `CLUSTER`. `REPACK t` is `VACUUM FULL t`, and
   `REPACK t USING INDEX i` is `CLUSTER t USING i`. The old commands still work.
 - **`REPACK (CONCURRENTLY)`** copies the table while reads and writes continue. It captures the changes made
   during the copy through logical decoding, replays them, and takes `ACCESS EXCLUSIVE` only for the final file swap.
@@ -71,11 +71,11 @@ and worst latency. For the seconds the method was running, the harness reports:
 
 ## Results
 
-| Method | Duration | Heap MB before → after | Writer tps before → during | Seconds with zero commits | Worst writer latency (baseline) |
-|---|---:|---:|---:|---:|---:|
-| `VACUUM FULL` | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
-| `REPACK` | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
-| `REPACK (CONCURRENTLY)` | *TBD* | *TBD* | *TBD* | *TBD* | *TBD* |
+| Method                  | Duration | Heap MB before → after | Writer tps before → during | Seconds with zero commits | Worst writer latency (baseline) |
+| ----------------------- | -------: | ---------------------: | -------------------------: | ------------------------: | ------------------------------: |
+| `VACUUM FULL`           |    _TBD_ |                  _TBD_ |                      _TBD_ |                     _TBD_ |                           _TBD_ |
+| `REPACK`                |    _TBD_ |                  _TBD_ |                      _TBD_ |                     _TBD_ |                           _TBD_ |
+| `REPACK (CONCURRENTLY)` |    _TBD_ |                  _TBD_ |                      _TBD_ |                     _TBD_ |                           _TBD_ |
 
 What to look for:
 
@@ -105,7 +105,7 @@ Less than I expected, and a few hard limits:
   that isn't a heap table. It can't run inside a transaction block.
 - **It still takes `ACCESS EXCLUSIVE` at the end.** It's brief, but it's a lock. If a long-running transaction is
   holding the table, the swap queues behind it, and every new query queues behind the swap. `lock_timeout` in the
-  session running it makes the command give up instead. The catch: it gives up on the *whole* command, so the copy
+  session running it makes the command give up instead. The catch: it gives up on the _whole_ command, so the copy
   work is thrown away and you retry later. Check `pg_stat_activity` for old transactions first.
 
 ```sql
@@ -120,7 +120,7 @@ same rule applies: the short exclusive lock is never the problem. The queue that
 
 The other PostgreSQL 19 feature I'd use right away is aimed at the 3 a.m. incident where a query that has run
 fine for a year suddenly picks a terrible plan after an `ANALYZE`. Postgres has famously refused planner hints.
-`pg_plan_advice` is its answer: *advice* the planner follows, with feedback on whether it could.
+`pg_plan_advice` is its answer: _advice_ the planner follows, with feedback on whether it could.
 
 It's a contrib module you `LOAD` (or preload). `EXPLAIN (PLAN_ADVICE)` prints the advice that would reproduce the
 plan it just chose:
@@ -188,7 +188,7 @@ ALTER ROLE app_user SET pg_stash_advice.stash_name = 'prod';
 ```
 
 The query ID comes from `EXPLAIN (VERBOSE)`. The demo script pulls it out of the JSON plan in a `DO` block. Because
-it's the *normalized* query's ID, the advice applies to every literal. In the demo, advice stashed for
+it's the _normalized_ query's ID, the advice applies to every literal. In the demo, advice stashed for
 `type = 'E175'` also drives the plan for `type = 'A320'`.
 
 Treat it the way you'd treat a pinned dependency version: a fix for today with an owner and an expiry, not a
