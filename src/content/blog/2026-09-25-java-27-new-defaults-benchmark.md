@@ -12,7 +12,7 @@ tags:
   - performance
   - spring boot
   - docker
-description: JDK 27 turns on compact object headers, makes G1 the default collector even on one-CPU containers, and offers post-quantum hybrid TLS first. The same Spring Boot jar measured on JDK 25, 26 and 27 to see what changes when you only change the base image tag.
+description: JDK 27 turns on compact object headers, makes G1 the default collector even on one-CPU containers, offers post-quantum hybrid TLS first, and redacts secrets from JFR recordings. The same Spring Boot jar measured on JDK 25, 26 and 27 to see what changes when you only change the base image tag.
 ---
 
 ## Table of Contents
@@ -28,7 +28,7 @@ FROM eclipse-temurin:26-jre
 FROM eclipse-temurin:27-jre
 ```
 
-No new flags and no code changes. Then the service is running under different defaults, because three of
+No new flags and no code changes. Then the service is running under different defaults, because four of
 the nine JEPs in this release change behavior you never opted into:
 
 | JEP | What changed | Undo it with |
@@ -36,12 +36,12 @@ the nine JEPs in this release change behavior you never opted into:
 | [534: Compact Object Headers by Default](https://openjdk.org/jeps/534) | Object headers shrink from 12 bytes to 8 | `-XX:-UseCompactObjectHeaders` |
 | [523: Make G1 the Default GC in All Environments](https://openjdk.org/jeps/523) | A JVM that sees 1 CPU or < 1792 MB no longer picks Serial | `-XX:+UseSerialGC` |
 | [527: Post-Quantum Hybrid Key Exchange for TLS 1.3](https://openjdk.org/jeps/527) | `X25519MLKEM768` is offered first in every TLS handshake | `-Djdk.tls.namedGroups=...` |
+| [536: JFR In-Process Data Redaction](https://openjdk.org/jeps/536) | Flight recordings redact secret-looking env vars, properties and arguments | `-XX:FlightRecorderOptions:redact-key=none,redact-argument=none` |
 
-The other six are previews and incubators you have to opt into: lazy constants, primitive
-patterns, structured concurrency, the Vector API, and PEM encodings. The last one, JFR in-process
-redaction, is a feature you turn on when you want it.
+The other five are previews and incubators you have to opt into: lazy constants, primitive
+patterns, structured concurrency, the Vector API, and PEM encodings.
 
-This post is about the three that happen to you. I built a small harness that runs the same
+This post is about the four that happen to you. I built a small harness that runs the same
 Spring Boot jar on JDK 25, 26 and 27. It changes nothing but the `java` binary, inside containers
 sized the way we actually size pods. Everything is in
 [DemosAndArticleContent/blog/java-27-defaults-benchmark](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/java-27-defaults-benchmark).
@@ -52,7 +52,7 @@ sized the way we actually size pods. Everything is in
 
 # What the JVM picks, before and after
 
-The quickest way to see all three changes is to ask the JVM. `probes/DefaultsProbe.java` is a
+The quickest way to see three of the changes is to ask the JVM. `probes/DefaultsProbe.java` is a
 single-file program with no dependencies that prints what ergonomics decided. Here it is in a
 `--cpus 1 --memory 1g` container, which is a completely ordinary pod size:
 
@@ -251,6 +251,36 @@ test an outbound call before rolling out. To pin the old behavior per JVM:
 
 That line also restores the two FFDHE groups JDK 27 dropped.
 
+# JFR stops writing your secrets into recordings
+
+This one is pure upside, and it's also a reason to look at recordings you've already made. A flight recording
+captures the JVM's environment variables, system properties and command-line arguments. Before JDK 27 it captured
+them verbatim. `probes/jfr-redaction.sh` starts a JVM with a secret in each place and prints what ended up in the
+`.jfr` file:
+
+```
+== openjdk version "26.0.2.1"
+  key = "DB_PASSWORD"	  value = "hunter2"
+  key = "API_TOKEN"	  value = "abc123"
+  key = "app.secret"	  value = "s3cr3t"
+  jvmArguments = "-XX:StartFlightRecording:... -Dapp.secret=s3cr3t ..."
+== openjdk version "27"
+  key = "DB_PASSWORD"	  value = "[REDACTED]"
+  key = "API_TOKEN"	  value = "[REDACTED]"
+  key = "app.secret"	  value = "[REDACTED]"
+  jvmArguments = "-XX:StartFlightRecording:... [REDACTED] ..."
+```
+
+Names that don't look sensitive, like `AWS_REGION`, pass through. The default patterns cover the usual suspects
+(`*password*`, `*secret*`, `*token*`, `*credential*` and friends). Two sub-options of `-XX:FlightRecorderOptions`
+control it: `redact-key` covers environment variables and system properties, and `redact-argument` covers JVM and
+program arguments. A leading `+` adds your own patterns to the defaults. Turning redaction fully off takes *both*
+set to `none`. I checked: `redact-argument=none` on its own still redacts the environment variables.
+
+The part to act on: every `.jfr` file your JDK 25 or 26 services produced, and attached to a support ticket or
+left in a diagnostics bucket, has those values in plain text. If your secrets arrive as environment variables,
+which in Kubernetes they usually do, it's worth a look.
+
 # What I'd do
 
 **Take compact headers.** It's the same feature that has been production-ready since JDK 25. Amazon
@@ -263,6 +293,8 @@ shows. If your base image or Helm chart sets `JAVA_TOOL_OPTIONS`, add `-XX:+UseG
 run this benchmark's `small` profile against your own service and pick the one that wins.
 
 **Check your TLS peers**, especially anything that needed `ffdhe6144` or `ffdhe8192`.
+
+**Treat old JFR recordings as sensitive**, and enjoy not having to on JDK 27.
 
 # Run it yourself
 
@@ -280,4 +312,5 @@ The probes need nothing but a JDK:
 java probes/DefaultsProbe.java
 java -Xmx2g probes/HeaderFootprint.java
 java -Xmx2g -XX:-UseCompactObjectHeaders probes/HeaderFootprint.java
+./probes/jfr-redaction.sh .jdks/jdk26 .jdks/jdk27
 ```
