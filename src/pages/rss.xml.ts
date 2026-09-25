@@ -10,8 +10,10 @@ export async function GET() {
     title: SITE.title,
     description: SITE.desc,
     site: SITE.website,
-    items: sortedPosts.map(({ data, slug }) => ({
-      link: `posts/${slug}/`,
+    items: sortedPosts.map(({ data }) => ({
+      // Same slug the post routes use (src/pages/posts/[slug]/index.astro).
+      // Content-layer entries have no top-level `slug`, so reading it gave posts/undefined/.
+      link: `posts/${data.slug}/`,
       title: data.title,
       description: data.description,
       pubDate: new Date(data.modDatetime ?? data.pubDatetime),
