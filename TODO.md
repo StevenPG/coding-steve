@@ -54,3 +54,39 @@ Flip each post to `draft: false` only after its checklist is complete.
   8. 08-01 Ingress-NGINX part 2
 - [ ] Posts dated in the future relative to publish day: either confirm the site build hides future-dated posts or adjust `pubDatetime` at publish time
 - [ ] The three updated older posts (migration guide, Leyden, ingress part 1) already have `modDatetime` bumps matching their new companion posts — verify the "Update" callout links resolve once the drafts go live
+
+## September 2026 "what's new" series (all `draft: true`)
+
+Each post has a companion project in DemosAndArticleContent with its own PR. Merge the PR before publishing
+the post: the posts link to `tree/main/blog/...` paths that only resolve after merge. Container runs in each
+project are shape-only; the posts' `*TBD*` tables need the M3 numbers.
+
+### `2026-09-25-java-27-new-defaults-benchmark.md` — [PR #25](https://github.com/StevenPG/DemosAndArticleContent/pull/25)
+- [ ] `./scripts/fetch-jdks.sh && (cd bench-app && ./gradlew bootJar) && python3 scripts/benchmark.py measure` on the M3; fill both `*TBD*` tables
+- [ ] Reconcile "What to look for" with the M3 run (container run: G1 ~25% slower than Serial on 1 CPU, Serial also ahead on 2 CPUs)
+- [ ] Remove the `[DRAFT NOTE]` callout
+
+### `2026-09-25-spring-ai-2-mcp-server-ops-toolbox.md` — [PR #26](https://github.com/StevenPG/DemosAndArticleContent/pull/26)
+- [ ] Connect Claude Code (`claude mcp add --transport http ...`) and the MCP Inspector to the demo; neither client was run yet
+- [ ] Replace the `[DRAFT NOTE]` with a real Claude Code transcript against the flaky `/api/orders` endpoint
+
+### `2026-09-25-python-3-15-lazy-imports-free-threading.md` — [PR #27](https://github.com/StevenPG/DemosAndArticleContent/pull/27)
+- [ ] After 3.15.0 final (Oct 1): `./scripts/setup.sh && python3 scripts/bench.py all` on the M3; fill the startup, threads and JIT `*TBD*` tables
+- [ ] Update interpreter versions in the post (currently 3.15.0rc2); remove the `[DRAFT NOTE]`
+
+### `2026-09-25-postgres-19-repack-concurrently.md` — [PR #28](https://github.com/StevenPG/DemosAndArticleContent/pull/28)
+- [ ] Re-run `python3 scripts/repack_bench.py run --rows 8000000` on the M3 against 19 RC/GA (bump the image tag in `compose.yaml`); fill the `*TBD*` table
+- [ ] Re-run `sql/whats-new-19.sql` on GA — confirm GROUP BY ALL / FOR PORTION OF / SQL/PGQ are still absent before publishing that section
+
+### `2026-09-25-typescript-7-go-compiler-benchmark.md` — [PR #29](https://github.com/StevenPG/DemosAndArticleContent/pull/29)
+- [ ] `npm install && python3 scripts/bench.py prepare && python3 scripts/bench.py run` on the M3; fill the three `*TBD*` tables
+- [ ] Check the "native vs parallel" split holds with more cores (container: native 3.5–4.8x, parallel 1.1–1.35x on 4 cores)
+
+### `2026-09-25-kubernetes-pod-level-resources-jvm.md` — [PR #30](https://github.com/StevenPG/DemosAndArticleContent/pull/30)
+- [ ] Run `./scripts/run.sh` (kind, Kubernetes 1.37) on the M3 — it could not run in the build sandbox; confirm the kubelet sets the unlimited container's `memory.max` to the pod limit and that scenario 03 ends in `OOMKilled`
+- [ ] Record the `PodLevelResources` feature stage that `run.sh` prints; adjust the post's intro wording if needed
+- [ ] Replace the `[DRAFT NOTE]` with the kind results (or note where they differ from the emulation)
+
+### Found along the way (not fixed — this blog repo)
+- [ ] `tsconfig.json` uses `baseUrl` + bare `paths`: `tsc` 6 errors (TS5101) and 7 errors (TS5090). Fix: drop `baseUrl`, prefix paths with `./src/` (see DemosAndArticleContent `blog/typescript-7-go-compiler-benchmark/patches/coding-steve.tsconfig.json`), then check `npm run build`
+- [ ] 3 remaining type errors after `astro sync`: `Buffer` not assignable to `BodyInit` in `og.png.ts`, `posts/[slug]/index.png.ts`, `projects/[slug]/index.png.ts`. (A fourth, in `rss.xml.ts`, was a live bug — every RSS item linked to `/posts/undefined/` — and is fixed on this branch.)
