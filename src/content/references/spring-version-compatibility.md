@@ -23,6 +23,7 @@ ship &mdash; bookmark it. For the official, authoritative matrix, see Spring's
 
 | Spring Boot Version | Compatible Java Versions (Min - Max Targeted) |
 | :------------------ | :-------------------------------------------- |
+| 4.2.x _(upcoming)_  | Java 17 - 27 _(expected)_                     |
 | 4.1.x               | Java 17 - 26                                  |
 | 4.0.x               | Java 17 - 25                                  |
 | 3.5.x               | Java 17 - 25                                  |
@@ -38,31 +39,33 @@ ship &mdash; bookmark it. For the official, authoritative matrix, see Spring's
 | 2.0.x               | Java 8 - 9                                    |
 | 1.5.x               | Java 6 - 8                                    |
 
-Spring Boot 4.x and 3.x baseline on Java 17. As of September 2026, only **4.1.x** (released June 2026) and **4.0.x**
-are in open-source support &mdash; 4.0.x until **December 31, 2026** and 4.1.x until **July 31, 2027**. **3.5.x reached
-OSS end-of-life on June 30, 2026** (commercial support continues). The next feature release, **4.2**, is in milestones
+Rows marked _(upcoming)_ are still in milestones and will be confirmed at GA. Spring Boot 4.x and 3.x baseline on Java
+17. As of September 2026, only **4.1.x** (released June 2026) and **4.0.x** are in open-source support &mdash; 4.0.x
+until **December 31, 2026** and 4.1.x until **July 31, 2027**. **3.5.x reached OSS end-of-life on June 30, 2026**
+(commercial support continues). The next feature release, **4.2**, is in milestones
 ([4.2.0-M2](https://spring.io/blog/2026/09/25/spring-boot-4-2-0-M2-available-now/), September 2026), is the first line
 to target Java 27, and is expected to go GA in November 2026. Source:
 [endoflife.date](https://endoflife.date/spring-boot#java-compatibility).
 
 ## Spring Cloud &harr; Spring Boot
 
-| Spring Cloud Release Train                                                                                  | Corresponding Spring Boot Version                                             |
-| :---------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- |
-| [2025.1.x (Oakwood)](https://spring.io/blog/2025/11/25/spring-cloud-2025-1-0-aka-oakwood-has-been-released) | [Spring Boot 4.0.x / 4.1.x](https://spring.io/blog/2026/06/10/spring-boot-4/) |
-| [2025.0.x (Northfields)](https://spring.io/blog/2025/05/29/spring-cloud-2025-0-0-is-abvailable)             | Spring Boot 3.5.x                                                             |
-| [2024.0.x (Moorgate)](https://spring.io/blog/2024/12/03/spring-cloud-2024-0-0)                              | Spring Boot 3.4.x                                                             |
-| [2023.0.x (Leyton)](https://spring.io/blog/2023/12/06/spring-cloud-2023-0-0-aka-leyton-is-now-available)    | Spring Boot 3.2.x / 3.3.x                                                     |
-| 2022.0.x (Kilburn)                                                                                          | Spring Boot 3.0.x / 3.1.x                                                     |
-| 2021.0.x (Jubilee)                                                                                          | Spring Boot 2.6.x / 2.7.x                                                     |
-| 2020.0.x (Ilford)                                                                                           | Spring Boot 2.4.x / 2.5.x                                                     |
-| Hoxton                                                                                                      | Spring Boot 2.2.x / 2.3.x                                                     |
-| Greenwich                                                                                                   | Spring Boot 2.1.x                                                             |
-| Finchley                                                                                                    | Spring Boot 2.0.x                                                             |
-| Edgware                                                                                                     | Spring Boot 1.5.x                                                             |
+| Spring Cloud Release Train                                                                                          | Corresponding Spring Boot Version                                             |
+| :------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------- |
+| [2026.0.x (Paddington)](https://spring.io/blog/2026/09/24/spring-cloud-2026-0-0-M1-has-been-released/) _(upcoming)_ | Spring Boot 4.2.x                                                             |
+| [2025.1.x (Oakwood)](https://spring.io/blog/2025/11/25/spring-cloud-2025-1-0-aka-oakwood-has-been-released)         | [Spring Boot 4.0.x / 4.1.x](https://spring.io/blog/2026/06/10/spring-boot-4/) |
+| [2025.0.x (Northfields)](https://spring.io/blog/2025/05/29/spring-cloud-2025-0-0-is-abvailable)                     | Spring Boot 3.5.x                                                             |
+| [2024.0.x (Moorgate)](https://spring.io/blog/2024/12/03/spring-cloud-2024-0-0)                                      | Spring Boot 3.4.x                                                             |
+| [2023.0.x (Leyton)](https://spring.io/blog/2023/12/06/spring-cloud-2023-0-0-aka-leyton-is-now-available)            | Spring Boot 3.2.x / 3.3.x                                                     |
+| 2022.0.x (Kilburn)                                                                                                  | Spring Boot 3.0.x / 3.1.x                                                     |
+| 2021.0.x (Jubilee)                                                                                                  | Spring Boot 2.6.x / 2.7.x                                                     |
+| 2020.0.x (Ilford)                                                                                                   | Spring Boot 2.4.x / 2.5.x                                                     |
+| Hoxton                                                                                                              | Spring Boot 2.2.x / 2.3.x                                                     |
+| Greenwich                                                                                                           | Spring Boot 2.1.x                                                             |
+| Finchley                                                                                                            | Spring Boot 2.0.x                                                             |
+| Edgware                                                                                                             | Spring Boot 1.5.x                                                             |
 
-Don't mix trains and Boot versions arbitrarily &mdash; always confirm against the specific release train's docs. As of
-September 2026 the current train is **Oakwood** (latest patch:
+Rows marked _(upcoming)_ are still in milestones and will be confirmed at GA. Don't mix trains and Boot versions
+arbitrarily &mdash; always confirm against the specific release train's docs. As of September 2026 the current train is **Oakwood** (latest patch:
 [2025.1.3](https://spring.io/blog/2026/08/20/spring-cloud-2025-1-3-has-been-released/), August 2026, a
 security-focused release with CVE fixes across Commons, Config, Function, Gateway, and Stream &mdash; upgrade if you're
 on an earlier 2025.1.x). The next train, **2026.0.x (Paddington)**, reached
