@@ -4,7 +4,7 @@ pubDatetime: 2026-07-29T12:00:00.000Z
 title: "Java 26 AOT Cache with ZGC: Leyden Startup Benchmarks, Revisited"
 slug: java-26-aot-cache-zgc-leyden-benchmarks
 featured: false
-draft: true
+draft: false
 ogImage: /assets/default-og-image.png
 tags:
   - software
