@@ -46,9 +46,9 @@ Spring Boot jar on JDK 25, 26 and 27. It changes nothing but the `java` binary, 
 sized the way we actually size pods. Everything is in
 [DemosAndArticleContent/blog/java-27-defaults-benchmark](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/java-27-defaults-benchmark).
 
-> **[DRAFT NOTE: numbers pending]** The probe and object-layout tables below are real output.
-> They're deterministic, so they don't depend on the host. The application benchmark tables are
-> placeholders until the final pass runs on my M3 MacBook Pro.
+The benchmark numbers come from my M3 Pro MacBook, running the containers in Docker Desktop (linux/arm64,
+with 2 CPUs given to the Docker VM) and the load generator on macOS outside the VM. The probe and
+object-layout tables are deterministic, so they hold on any host.
 
 # What the JVM picks, before and after
 
@@ -196,40 +196,53 @@ at 16 client threads, after a warm-up. Three runs per row, medians reported.
 
 | Row            | Collector | Live set MiB | Container MiB (loaded) | req/s | p50 ms | p99 ms | GC pauses / ms |
 | -------------- | --------- | -----------: | ---------------------: | ----: | -----: | -----: | -------------: |
-| `jdk25`        | Serial    |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
-| `jdk25+coh`    | Serial    |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
-| `jdk26`        | Serial    |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
-| `jdk27`        | G1        |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
-| `jdk27-coh`    | G1        |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
-| `jdk27+serial` | Serial    |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
+| `jdk25`        | Serial    |        118.4 |                    383 | 1,550 |    1.9 |   94.5 |       22 / 129 |
+| `jdk25+coh`    | Serial    |        101.2 |                    356 | 1,294 |    2.1 |  103.6 |       20 / 125 |
+| `jdk26`        | Serial    |        118.6 |                    388 | 1,571 |    1.8 |   94.6 |        19 / 49 |
+| `jdk27`        | G1        |        101.4 |                    346 | 1,280 |    2.0 |  107.7 |       29 / 161 |
+| `jdk27-coh`    | G1        |        118.5 |                    363 | 1,131 |    2.0 |  123.5 |       30 / 166 |
+| `jdk27+serial` | Serial    |        101.3 |                    370 | 1,610 |    1.9 |   91.9 |        19 / 79 |
 
 ## `medium`: 2 CPUs, 2 GiB
 
 | Row            | Collector | Live set MiB | Container MiB (loaded) | req/s | p50 ms | p99 ms | GC pauses / ms |
 | -------------- | --------- | -----------: | ---------------------: | ----: | -----: | -----: | -------------: |
-| `jdk25`        | G1        |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
-| `jdk25+coh`    | G1        |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
-| `jdk26`        | G1        |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
-| `jdk27`        | G1        |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
-| `jdk27-coh`    | G1        |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
-| `jdk27+serial` | Serial    |        _TBD_ |                  _TBD_ | _TBD_ |  _TBD_ |  _TBD_ |          _TBD_ |
+| `jdk25`        | G1        |        118.3 |                    447 | 2,203 |    1.4 |   69.1 |        20 / 98 |
+| `jdk25+coh`    | G1        |        101.0 |                    376 | 1,769 |    2.2 |   90.7 |        25 / 96 |
+| `jdk26`        | G1        |        118.4 |                    450 | 2,217 |    1.6 |   72.6 |       20 / 100 |
+| `jdk27`        | G1        |        101.4 |                    393 | 2,152 |    2.0 |   73.2 |       19 / 100 |
+| `jdk27-coh`    | G1        |        118.6 |                    438 | 2,435 |    1.5 |   62.7 |        20 / 97 |
+| `jdk27+serial` | Serial    |        101.3 |                    417 | 2,939 |    1.3 |   51.2 |       36 / 124 |
 
-## What to look for
+Medians of three runs. In the `medium` profile the container had the whole 2-CPU Docker VM to itself.
 
-A preliminary run on a shared 4-core cloud container is too noisy to publish, but it had a clear
-shape. Watch whether the M3 confirms it:
+## What the numbers say
 
-- **The live set drops by the same amount on every JDK that has compact headers.** It was about 15%
-  (119 to 101 MiB), whether the headers came from JDK 27's default or from `-XX:+UseCompactObjectHeaders` on
-  JDK 25. The header change is the same change on 25 and 27. JDK 27 just stops asking you to opt in.
-- **On one CPU, G1 was _slower_ than Serial.** `jdk27` served noticeably fewer requests with a worse
-  p99 than `jdk26`, and `jdk27+serial` recovered it. If that holds on real hardware, then JDK 27's
-  default is a regression for single-CPU pods, even though the header change on its own is a win.
-- **On two CPUs, the defaults agree.** Every default row is G1, so the difference between `jdk26` and `jdk27` is
-  the header change. The surprise was `jdk27+serial`, which beat every G1 row on throughput and p99 at two CPUs too.
-  With a 512 MiB heap and a ~100 MiB live set, Serial's short stop-the-world young collections may simply be
-  cheaper than G1's concurrent bookkeeping. If the M3 agrees, "pick the collector for small heaps deliberately"
-  applies well beyond one-CPU pods.
+**Compact headers: the memory win is exactly what the layout math predicts, every time.** Every row with compact
+headers held the same 2M positions in 101 MiB instead of 118.5 MiB, **14.5% less live set**, on JDK 25 with the flag
+and on JDK 27 by default alike. Container memory under load fell with it: 388 → 346 MiB on one CPU (-11%) and
+450 → 393 MiB on two (-13%) going from `jdk26` to `jdk27`. For memory-limited pods, that's the headline of this release.
+
+**On one CPU, JDK 27's switch to G1 costs throughput.** `jdk26` (Serial) served 1,571 req/s at a p99 of 94.6 ms.
+`jdk27` (G1) served 1,280 at 107.7 ms: **18.5% fewer requests and a 14% worse p99**. It also ran 29 collections
+totalling 161 ms against Serial's 19 and 49 ms. Pinning Serial back (`jdk27+serial`) recovers all of it and a little
+more: 1,610 req/s at 91.9 ms, the best single-CPU row, and also the most consistent (1,606–1,611 req/s across
+three runs). With one core, G1's concurrent refinement and marking threads compete with the application for the only
+CPU there is. JEP 523's "close to Serial" wasn't close for this workload.
+
+**On two CPUs, Serial won by even more.** Every default row is G1 here, and `jdk26` and `jdk27` were within 3% of
+each other. But `jdk27+serial` served **2,939 req/s against 2,152 for the G1 default (+37%) with a p99 of 51 ms
+against 73 ms**, again with tight run-to-run spread. With a 512 MiB heap and a ~100 MiB live set, Serial's short
+stop-the-world young collections are simply cheaper than G1's bookkeeping. G1 earns its keep with bigger heaps and pause
+targets, and this isn't that.
+
+**Compact headers aren't a free throughput win.** On one CPU with G1, compact headers helped: `jdk27` beat `jdk27-coh`
+by 13% and had a better p99. On two CPUs they hurt on both JDKs: `jdk27` served 12% fewer requests than `jdk27-coh`, and
+`jdk25+coh` 20% fewer than `jdk25`. On Serial the picture was mixed: `jdk27+serial` was the best single-CPU row, but
+`jdk25+coh` was also the noisiest row in the whole run (941–1,478 req/s across its three runs). I don't have a
+mechanism I trust for the two-CPU drop. Decoding the class pointer from the mark word costs a little on every type
+check, and this workload serializes a lot of small objects through Jackson, but that's a hypothesis, not a measurement.
+The layout change is deterministic. Its throughput effect depends on the collector, the cores and the workload.
 
 # Post-quantum TLS: probably nothing to do
 
@@ -283,14 +296,17 @@ which in Kubernetes they usually do, it's worth a look.
 
 # What I'd do
 
-**Take compact headers.** It's the same feature that has been production-ready since JDK 25. Amazon
-runs it across hundreds of services. The only question was whether you had turned it on. Measure your
-live set before and after, and expect anything from nothing to 20%+ depending on your object shapes.
+**Pin your collector explicitly, and for small pods, measure Serial.** This is the real lesson of JEP 523. If your
+base image or Helm chart sets `JAVA_TOOL_OPTIONS`, add `-XX:+UseSerialGC` or `-XX:+UseG1GC` so that a JDK upgrade
+can't change the collector under you. For services with a heap of a few hundred MiB, Serial beat G1 here by 26% on
+one CPU and 37% on two, with a better p99 both times. Run this benchmark's profiles against your own service before
+you assume G1 is the right answer at that size.
 
-**Pin your collector explicitly.** This is the real lesson of JEP 523, and it holds whatever the benchmark
-shows. If your base image or Helm chart sets `JAVA_TOOL_OPTIONS`, add `-XX:+UseG1GC` or
-`-XX:+UseSerialGC` so that a JDK upgrade can't change the collector under you. For `--cpus 1` pods,
-run this benchmark's `small` profile against your own service and pick the one that wins.
+**Take compact headers for the memory, and check the throughput.** A 14.5% smaller live set and 11–13% less container
+memory is real money in a fleet of memory-limited pods, and the feature has been production-ready since JDK 25 (Amazon
+runs it across hundreds of services). But throughput moved anywhere from +13% to -20% depending on the collector and
+core count. If a latency-sensitive service gets slower on JDK 27, try `-XX:-UseCompactObjectHeaders` on its own before
+blaming anything else.
 
 **Check your TLS peers**, especially anything that needed `ffdhe6144` or `ffdhe8192`.
 
