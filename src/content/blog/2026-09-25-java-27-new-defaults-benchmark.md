@@ -4,7 +4,7 @@ pubDatetime: 2026-09-25T12:00:00.000Z
 title: "Java 27 Changed Your Defaults: What Happens When You Just Bump the Base Image"
 slug: java-27-new-defaults-benchmark
 featured: false
-draft: true
+draft: false
 ogImage: /assets/default-og-image.png
 tags:
   - software
@@ -23,9 +23,9 @@ description: JDK 27 turns on compact object headers, makes G1 the default collec
 
 JDK 27 went GA on September 15. Most of us will adopt it by changing one line:
 
-```dockerfile
-FROM eclipse-temurin:26-jre
-FROM eclipse-temurin:27-jre
+```diff
+-FROM eclipse-temurin:26-jre
++FROM eclipse-temurin:27-jre
 ```
 
 No new flags and no code changes. Then the service is running under different defaults, because four of
@@ -75,9 +75,8 @@ change is easy to miss if you test on a laptop and deploy to small pods. The dif
 up where JEP 523's old threshold applied.
 
 The last row wasn't in any release summary I read. JDK 27 adds `X25519MLKEM768` at the front **and
-drops `ffdhe6144` and `ffdhe8192`** from the default list. If something you talk to only offers
-large finite-field Diffie-Hellman groups, and some old appliances and HSM front ends do, check it
-before you roll out.
+drops `ffdhe6144` and `ffdhe8192`** from the default list. If anything you talk to only accepts
+those large finite-field Diffie-Hellman groups, check it before you roll out.
 
 # Compact headers: it's not "4 bytes per object"
 
@@ -110,15 +109,18 @@ JDK 25's default (no flag) measures the same as the 12-byte column, to within 0.
 
 Some rules of thumb fall out of this:
 
-- **Small objects with an even number of 4-byte fields win.** `Long`, a two-`int` record, and a
-  linked-list node each drop a full third of their size.
-- **Objects whose fields add up to 4 mod 8 bytes gain nothing.** `Integer` is 12 + 4 = 16 either way.
-  The `Sample` record carries 26 bytes of fields, so it pads to 40 with either header.
+- **The rule is arithmetic.** The old size is 12 + fields rounded up to a multiple of 8, and the new
+  size is 8 + fields rounded up. You save 8 bytes when the fields come to 0, 5, 6 or 7 bytes past a
+  multiple of 8, and nothing when they come to 1–4 past.
+- **Small objects with 8 bytes of fields win big.** `Long`, a two-`int` record and a linked-list node
+  (a compressed reference plus an `int`) each drop a full third of their size.
+- **Plenty of common shapes gain nothing.** `Integer` has 4 bytes of fields: 12 + 4 = 16 either way.
+  The `Sample` record carries 26 bytes of fields (2 past 24), so it pads to 40 with either header.
 - **Strings and small arrays mostly break even.** The array header is 16 bytes, and now 12, but the
   length field and alignment eat the difference for common sizes.
-- **Hash maps are where it adds up.** A `HashMap.Node`, its boxed `Long` key and a small value
-  object each save 8 bytes, which is 24 bytes per entry, or 27%. Caches, session stores, anything that
-  is mostly maps of small objects, is exactly where JEP 534 quotes its 22% heap reduction on SPECjbb.
+- **Hash maps are where it adds up.** A `HashMap.Node` (16 bytes of fields), its boxed `Long` key and a
+  small value object each save 8 bytes, which is 24 bytes per entry, or 27%. Caches, session stores, and
+  anything that's mostly maps of small objects benefit most. (JEP 534 reports 22% less heap on SPECjbb2015.)
 
 The practical upshot: you can't estimate your saving from your object count. You have to
 measure your live set. So that's what the benchmark app does.
@@ -158,7 +160,7 @@ The load generator mixes three requests 70/20/10:
 - `GET /api/stats/altitude-bands`: a scan over every retained position, which is pure pointer chasing
 
 The jar is compiled for release 25 and the same file runs on all three JDKs. Temurin 27 wasn't on
-Docker Hub as an image yet, so the harness downloads Temurin 25, 26 and 27 tarballs and mounts them
+Docker Hub as an image yet when I built this, so the harness downloads Temurin 25, 26 and 27 tarballs and mounts them
 into one `debian:trixie-slim` container. The OS layer is identical for every row.
 
 ## Profiles and rows
@@ -218,23 +220,26 @@ Medians of three runs. In the `medium` profile the container had the whole 2-CPU
 
 ## What the numbers say
 
-**Compact headers: the memory win is exactly what the layout math predicts, every time.** Every row with compact
-headers held the same 2M positions in 101 MiB instead of 118.5 MiB, **14.5% less live set**, on JDK 25 with the flag
-and on JDK 27 by default alike. Container memory under load fell with it: 388 → 346 MiB on one CPU (-11%) and
+**Compact headers: the memory win showed up in every row that had them.** Every row with compact headers held the
+same 2M positions in 101 MiB instead of 118.5 MiB, **14.5% less live set**, on JDK 25 with the flag and on JDK 27 by
+default alike. The layout math accounts for most of it: 2M positions × 8 bytes is about 15 of the 17 MiB saved. The rest
+is Spring's own objects getting smaller too. Container memory under load fell with it: 388 → 346 MiB on one CPU (-11%) and
 450 → 393 MiB on two (-13%) going from `jdk26` to `jdk27`. For memory-limited pods, that's the headline of this release.
 
 **On one CPU, JDK 27's switch to G1 costs throughput.** `jdk26` (Serial) served 1,571 req/s at a p99 of 94.6 ms.
 `jdk27` (G1) served 1,280 at 107.7 ms: **18.5% fewer requests and a 14% worse p99**. It also ran 29 collections
 totalling 161 ms against Serial's 19 and 49 ms. Pinning Serial back (`jdk27+serial`) recovers all of it and a little
 more: 1,610 req/s at 91.9 ms, the best single-CPU row, and also the most consistent (1,606–1,611 req/s across
-three runs). With one core, G1's concurrent refinement and marking threads compete with the application for the only
-CPU there is. JEP 523's "close to Serial" wasn't close for this workload.
+three runs). The likely reason is that with one core, G1's concurrent refinement and marking threads compete with the
+application for the only CPU there is. Either way, JEP 523's "close to Serial" wasn't close for this workload.
 
 **On two CPUs, Serial won by even more.** Every default row is G1 here, and `jdk26` and `jdk27` were within 3% of
 each other. But `jdk27+serial` served **2,939 req/s against 2,152 for the G1 default (+37%) with a p99 of 51 ms
-against 73 ms**, again with tight run-to-run spread. With a 512 MiB heap and a ~100 MiB live set, Serial's short
-stop-the-world young collections are simply cheaper than G1's bookkeeping. G1 earns its keep with bigger heaps and pause
-targets, and this isn't that.
+against 73 ms**, again with tight run-to-run spread. And Serial spent _more_ time in pauses (36 collections, 124 ms,
+against G1's 19 and 100 ms) and still won, so G1's cost here isn't in its pauses. It's in the work G1 does while the
+application runs: heavier write barriers on reference stores, plus concurrent refinement and marking. With a 512 MiB heap
+and a ~100 MiB live set, that overhead buys nothing. G1 earns its keep with bigger heaps and pause-time targets, and this
+isn't that.
 
 **Compact headers aren't a free throughput win.** On one CPU with G1, compact headers helped: `jdk27` beat `jdk27-coh`
 by 13% and had a better p99. On two CPUs they hurt on both JDKs: `jdk27` served 12% fewer requests than `jdk27-coh`, and
@@ -253,7 +258,7 @@ _why_ hybrid key exchange matters (harvest-now-decrypt-later) in
 [the post-quantum cryptography guide](/posts/ultimate-guide-post-quantum-cryptography-tls).
 
 The costs are small but real. The hybrid key share adds about 1.2 KB to the ClientHello (a 1,184-byte
-ML-KEM-768 public key next to the 32-byte X25519 one) and about 1.1 KB to the ServerHello, which pushes
+ML-KEM-768 public key next to the 32-byte X25519 one) and about 1.1 KB to the ServerHello, which usually pushes
 the ClientHello past a single packet. Middleboxes that assume a single-packet
 ClientHello are the historical failure mode here. If you run through an old TLS-inspecting proxy,
 test an outbound call before rolling out. To pin the old behavior per JVM:

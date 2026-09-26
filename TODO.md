@@ -65,7 +65,7 @@ project are shape-only; the posts' `*TBD*` tables need the M3 numbers.
 - [x] `./scripts/fetch-jdks.sh && (cd bench-app && ./gradlew bootJar) && python3 scripts/benchmark.py measure` on the M3; fill both `*TBD*` tables
 - [x] Reconcile "What to look for" with the M3 run: now "What the numbers say" (M3: G1 18.5% slower than Serial on 1 CPU, Serial +37% on 2 CPUs, compact headers -14.5% live set but throughput +13% to -20%)
 - [x] Remove the `[DRAFT NOTE]` callout
-- [ ] Final read-through, merge DemosAndArticleContent PR #25, then flip `draft: false`
+- [x] Final correctness pass; `draft: false` (merge DemosAndArticleContent PR #25 before this branch deploys, or the repo link 404s)
 
 ### `2026-09-25-spring-ai-2-mcp-server-ops-toolbox.md` — [PR #26](https://github.com/StevenPG/DemosAndArticleContent/pull/26)
 - [ ] Connect Claude Code (`claude mcp add --transport http ...`) and the MCP Inspector to the demo; neither client was run yet
