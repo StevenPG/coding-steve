@@ -80,8 +80,9 @@ project are shape-only; the posts' `*TBD*` tables need the M3 numbers.
 - [ ] Re-run `sql/whats-new-19.sql` on GA — confirm GROUP BY ALL / FOR PORTION OF / SQL/PGQ are still absent before publishing that section
 
 ### `2026-09-19-typescript-7-go-compiler-benchmark.md` — [PR #29](https://github.com/StevenPG/DemosAndArticleContent/pull/29)
-- [ ] `npm install && python3 scripts/bench.py prepare && python3 scripts/bench.py run` on the M3; fill the three `*TBD*` tables
-- [ ] Check the "native vs parallel" split holds with more cores (container: native 3.5–4.8x, parallel 1.1–1.35x on 4 cores)
+- [x] `npm install && python3 scripts/bench.py prepare && python3 scripts/bench.py run` on the M3; fill the three `*TBD*` tables
+- [x] Check the "native vs parallel" split holds with more cores — M3 (12 cores): native 3.1–3.9x, parallel 1.4–2.0x, total 5.5–6.8x; added the `--checkers 1` and exit-code (2 → 1) findings
+- [ ] Final read-through, merge DemosAndArticleContent PR #29, then flip `draft: false`
 
 ### `2026-09-23-kubernetes-pod-level-resources-jvm.md` — [PR #30](https://github.com/StevenPG/DemosAndArticleContent/pull/30)
 - [ ] (Optional, post-publish) Run `./scripts/run.sh` (kind, Kubernetes 1.37) on the M3 — it could not run in the build sandbox; confirm the kubelet sets the unlimited container's `memory.max` to the pod limit and that scenario 03 ends in `OOMKilled`

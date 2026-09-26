@@ -37,9 +37,8 @@ the point of view of someone who lives in Java, so this release is interesting t
 So I built a benchmark that separates them. The code is in
 [DemosAndArticleContent/blog/typescript-7-go-compiler-benchmark](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/typescript-7-go-compiler-benchmark).
 
-> **[DRAFT NOTE: numbers pending]** The migration findings and the npm gotcha are real. The timing tables are
-> placeholders until the run on my M3 MacBook Pro. Parallelism results from a 4-core cloud container would undersell
-> TypeScript 7.
+The numbers below are from my M3 Pro MacBook (12 cores, Node 24.16, TypeScript 6.0.3 against 7.0.2), with the median
+of five runs after a warm-up.
 
 # Why Go, and not Rust or C#?
 
@@ -93,48 +92,66 @@ time and peak RSS for each.
 
 | Target         | `tsc 6` | `tsc 7 --singleThreaded` | `tsc 7` (4 checkers) | Native speedup | Parallel speedup | Total |
 | -------------- | ------: | -----------------------: | -------------------: | -------------: | ---------------: | ----: |
-| coding-steve   |   _TBD_ |                    _TBD_ |                _TBD_ |          _TBD_ |            _TBD_ | _TBD_ |
-| cesium-spatial |   _TBD_ |                    _TBD_ |                _TBD_ |          _TBD_ |            _TBD_ | _TBD_ |
-| playwright     |   _TBD_ |                    _TBD_ |                _TBD_ |          _TBD_ |            _TBD_ | _TBD_ |
+| coding-steve   |  0.84 s |                   0.23 s |               0.12 s |           3.7× |             1.9× |  6.8× |
+| cesium-spatial |  1.02 s |                   0.26 s |               0.19 s |           3.9× |             1.4× |  5.5× |
+| playwright     |  5.18 s |                   1.65 s |               0.81 s |           3.1× |             2.0× |  6.4× |
+
+"Native" is `tsc 6` against `tsc 7 --singleThreaded`. "Parallel" is `--singleThreaded` against the default.
 
 ### Scaling with `--checkers` (playwright)
 
 |        Checkers | Wall s | CPU s | Peak RSS MiB |
 | --------------: | -----: | ----: | -----------: |
-| single-threaded |  _TBD_ | _TBD_ |        _TBD_ |
-|               1 |  _TBD_ | _TBD_ |        _TBD_ |
-|               2 |  _TBD_ | _TBD_ |        _TBD_ |
-|     4 (default) |  _TBD_ | _TBD_ |        _TBD_ |
-|               8 |  _TBD_ | _TBD_ |        _TBD_ |
+| single-threaded |   1.65 |  2.22 |          778 |
+|               1 |   1.41 |  2.77 |          763 |
+|               2 |   1.05 |  3.53 |          896 |
+|     4 (default) |   0.81 |  4.12 |        1,102 |
+|               8 |   0.75 |  6.47 |        1,430 |
+
+For comparison, `tsc 6` on the same target: 5.18 s wall, 9.95 s CPU, 1,274 MiB.
 
 ### Memory
 
-| Target         | `tsc 6` peak RSS MiB | `tsc 7` peak RSS MiB |
-| -------------- | -------------------: | -------------------: |
-| coding-steve   |                _TBD_ |                _TBD_ |
-| cesium-spatial |                _TBD_ |                _TBD_ |
-| playwright     |                _TBD_ |                _TBD_ |
+| Target         | `tsc 6` peak RSS MiB | `tsc 7 --singleThreaded` | `tsc 7` (4 checkers) |
+| -------------- | -------------------: | -----------------------: | -------------------: |
+| coding-steve   |                  464 |                      192 |                  220 |
+| cesium-spatial |                  258 |                       80 |                   89 |
+| playwright     |                1,274 |                      778 |                1,102 |
 
-## What to look for
+## What the numbers say
 
-A preliminary run in a 4-core cloud container is too noisy to publish, but it had a clear shape that surprised me.
-Here's what to check against the M3:
+**About 3–4× is just "native code".** With every form of parallelism off, TypeScript 7 was 3.1–3.9× faster than
+TypeScript 6 on all three targets. A preliminary run on a 4-core cloud container got a similar 3.5–4.8×, so this
+part barely depends on the machine. On the two small codebases the absolute times are tiny (0.84 s down to 0.23 s),
+and much of the win is startup: Node has to load and JIT-warm a very large JavaScript compiler before it checks a
+single file, and a Go binary doesn't.
 
-- **Most of the 10× is native code, not threads.** With `--singleThreaded`, TypeScript 7 was already 3.5–4.8×
-  faster than TypeScript 6 on all three targets. Parallelism added another 1.1–1.35× on top, on 4 cores. On the
-  two small codebases most of the win is startup: Node has to load and JIT-warm a very large JavaScript compiler
-  before it checks a single file, and a Go binary doesn't.
-- **Checkers cost memory, and too many cost time.** On Playwright, peak RSS rose from about 750 MiB single-threaded
-  to about 1.1 GiB at the default 4 checkers and about 1.45 GiB at 8. On a 4-core machine, 8 checkers was _slower_
-  than 4. That's the classic oversubscription curve, and a good reason to set `--checkers` from your runner's core
-  count rather than just raising it.
-- **TypeScript 6 spends about twice its wall time in CPU**, on Node's GC and JIT threads. `tsc 7 --singleThreaded`
-  spends about 1.2×. That's the "no JIT warm-up, GC mostly idle" story from Cavanaugh's explanation, visible in `rusage`.
-- **Identical diagnostics everywhere.** Same error count from every configuration on every target. The port claim
-  (same semantics, same answers) held.
+**Parallelism is the other 1.4–2×, and it grows with the codebase.** The default 4 checkers roughly halved Playwright's
+time again (1.65 s to 0.81 s), but only took cesium-spatial from 0.26 s to 0.19 s. There isn't much to split across
+workers in a small program. On the 4-core container, the same step was worth only 1.1–1.35×.
 
-On the M3's performance cores, I expect the parallel share to grow and the total to approach Microsoft's 8–12×.
-The native share shouldn't move much.
+**`--checkers 1` isn't single-threaded.** It was 1.7× faster than `--singleThreaded` on this blog and 1.2× on
+Playwright. `--checkers` only controls _type-checking_ workers, and parsing and binding still fan out across files.
+`--singleThreaded` turns all of it off. If you're benchmarking TypeScript 7 yourself, that's the flag that isolates the
+native-code effect.
+
+**More than 4 checkers bought little and cost a lot.** On Playwright, 8 checkers was 7% faster than 4 (0.75 s against
+0.81 s) for 30% more peak memory (1,430 MiB, _more_ than TypeScript 6 used) and 57% more CPU. The default is close to
+the sweet spot even on a 12-core machine.
+
+**The total is 5.5–6.8×, not 10×, and that's because TypeScript 6 was fast here.** Microsoft's table has Playwright at
+12.8 s → 1.47 s. On the M3 Pro, TypeScript 7 was faster than their result in absolute terms (0.81 s), but TypeScript 6
+on Node 24 was also much faster (5.18 s), so the ratio is smaller. The slower your current CI type-check is, the bigger
+your multiple will be.
+
+**It uses much less CPU in total, not just wall time.** Even with 4 checkers running in parallel, TypeScript 7 used
+4.1 s of CPU on Playwright against TypeScript 6's 10.0 s. TypeScript 6 spends about twice its wall time in CPU,
+on Node's GC and JIT threads. If you pay for CI by the minute, that's the number that matters, and it also means
+`--singleThreaded` (2.2 s of CPU) is a good option on shared runners.
+
+**Identical diagnostics everywhere.** Every configuration reported the same errors as TypeScript 6 on every target:
+4 on this blog (real ones; one turned out to be a broken RSS feed), 0 on cesium-spatial, and 12 on Playwright (modules from a build step the
+benchmark doesn't run). The port claim, same semantics and same answers, held.
 
 # Migrating: my own blog didn't compile
 
@@ -194,13 +211,22 @@ It reproduced on every clean install. Your CI could be "on TypeScript 7" and sti
 `npx tsc --version` after adding the compat package, and call `node_modules/typescript/bin/tsc` directly if you
 need to be sure. The benchmark calls both compilers by path for exactly this reason.
 
+# One more: the exit code changed
+
+When `tsc --noEmit` finds type errors, TypeScript 6 exits with **2** and TypeScript 7 exits with **1**. The benchmark
+records exit codes, and it was the same on every target with errors, on both machines I ran it on. If a CI script
+or git hook checks for a specific status (`if [ $? -eq 2 ]`) rather than for non-zero, it'll behave differently after
+the upgrade. Check for non-zero.
+
 # What I'd do
 
 - **Upgrade CI type-checking first.** It's the easiest win: no API consumers, and the speedup lands on every pull request.
 - **Fix `baseUrl` and friends while you're on 6.** Everything TypeScript 7 rejects, TypeScript 6 already warns or errors on.
 - **Keep TypeScript 6 for tools that need the API**, and check which `tsc` your scripts are actually running.
-- **Look at `--checkers` if your CI runners have more than 4 cores.** The default is 4. The scaling table shows
-  whether more helps your codebase.
+- **Leave `--checkers` at the default unless you've measured.** Going from 4 to 8 bought 7% on a large codebase for
+  30% more memory. On small or memory-tight runners, try lowering it, or `--singleThreaded`, which still gave a
+  3–4× speedup here.
+- **Check exit codes, not just "did it fail".** Scripts that look for exit code 2 need updating.
 
 # Run it yourself
 
