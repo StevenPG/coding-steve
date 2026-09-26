@@ -38,12 +38,10 @@ replace `multiprocessing` for CPU-bound work? And what does the free-threaded bu
 
 Everything is in
 [DemosAndArticleContent/blog/python-3-15-lazy-imports-free-threading](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/python-3-15-lazy-imports-free-threading).
-The interpreters come from `uv` (3.14.7, 3.14.7t, 3.15.0rc2, 3.15.0rc2t). If you haven't moved to uv yet,
-[here's why you should](/posts/python-package-manager-uv).
-
-> **[DRAFT NOTE: numbers pending]** Module counts and the syntax/behavior findings are real, and they don't depend
-> on hardware. The timing tables are placeholders until the final run on my M3 MacBook Pro, and 3.15 should be
-> final (not rc2) by then.
+The interpreters come from `uv`, and the timings are from my M3 Pro MacBook (12 cores). One honest caveat: that
+run used **3.15.0b2** (and 3.14.6), a pre-release, because 3.15.0 final isn't out until October 1. An earlier run in a
+Linux cloud container on 3.15.0rc2 showed the same shape everywhere it overlaps, and I checked the syntax and
+behavior gotchas below on rc2. If you haven't moved to uv yet, [here's why you should](/posts/python-package-manager-uv).
 
 # Lazy imports: three ways to turn them on
 
@@ -96,43 +94,53 @@ the import block.
 
 ## Modules actually imported
 
-This is the deterministic half: count the modules `-X importtime` reports for each command. On 3.15:
+This is the deterministic half: count the modules `-X importtime` reports for each command. On 3.15, on macOS:
 
 | Variant                       | `version` | `summary` | `report` |
 | ----------------------------- | --------: | --------: | -------: |
-| eager                         |       381 |       381 |      387 |
-| `lazy` keyword                |    **64** |    **83** |      385 |
-| `__lazy_modules__`            |    **64** |    **83** |      385 |
+| eager                         |       381 |       381 |      388 |
+| `lazy` keyword                |    **64** |    **83** |      386 |
+| `__lazy_modules__`            |    **64** |    **83** |      386 |
 | eager + `-X lazy_imports=all` |    **60** |    **73** |  **268** |
 
-On 3.14, every variant that runs imports 377–384 modules. The `lazy` keyword variant doesn't run at all
+On Linux the `report` column is one lower (387 and 385), because of platform-specific modules. Everything else is identical.
+
+On 3.14, every variant that runs imports 378–385 modules. The `lazy` keyword variant doesn't run at all
 (`SyntaxError: invalid syntax`), and `__lazy_modules__` quietly behaves exactly like eager. That's the point of it.
 
 The last column is the interesting one. `report` uses every module in the import block, so the per-file variants
 save nothing: all of them get reified. But `-X lazy_imports=all` _also_ defers the imports that `requests` and
-`rich` make internally, and a lot of those are never touched by what `fleetctl` actually calls. That's 117 fewer
-modules for a command that "uses everything."
+`rich` make internally, and a lot of those are never touched by what `fleetctl` actually calls. That's 118 fewer
+modules than the per-file variants, for a command that "uses everything."
 
 ## Startup time
 
-Median wall time of a full process launch, 30 launches after one warm-up (so `.pyc` files exist and the page cache is warm):
+Median wall time of a full process launch, over 30 launches after one warm-up (so `.pyc` files exist and the page
+cache is warm):
 
 | Interpreter | Variant                       | `version` ms | `summary` ms | `report` ms |
 | ----------- | ----------------------------- | -----------: | -----------: | ----------: |
-| 3.14        | eager                         |        _TBD_ |        _TBD_ |       _TBD_ |
-| 3.14        | `__lazy_modules__`            |        _TBD_ |        _TBD_ |       _TBD_ |
-| 3.15        | eager                         |        _TBD_ |        _TBD_ |       _TBD_ |
-| 3.15        | `lazy` keyword                |        _TBD_ |        _TBD_ |       _TBD_ |
-| 3.15        | `__lazy_modules__`            |        _TBD_ |        _TBD_ |       _TBD_ |
-| 3.15        | eager + `-X lazy_imports=all` |        _TBD_ |        _TBD_ |       _TBD_ |
-| 3.15t       | eager                         |        _TBD_ |        _TBD_ |       _TBD_ |
-| 3.15t       | `lazy` keyword                |        _TBD_ |        _TBD_ |       _TBD_ |
+| 3.14        | eager                         |        114.0 |        129.5 |       112.7 |
+| 3.14        | `__lazy_modules__`            |         95.8 |         91.3 |        96.5 |
+| 3.15        | eager                         |         99.9 |        112.3 |       119.8 |
+| 3.15        | `lazy` keyword                |     **25.1** |     **25.8** |       137.7 |
+| 3.15        | `__lazy_modules__`            |     **19.8** |     **28.5** |       117.2 |
+| 3.15        | eager + `-X lazy_imports=all` |     **26.3** |     **23.9** |       116.9 |
+| 3.15t       | eager                         |        151.4 |        109.0 |       115.1 |
+| 3.15t       | `lazy` keyword                |     **23.5** |     **27.7** |       153.7 |
 
-A bare `python -c pass` costs roughly 17–23 ms, so that's the floor for any row.
+A bare `python -c pass` cost 14 ms on 3.15, 17 ms on 3.14 and 25 ms on 3.15t, so that's the floor for any row.
 
-What the preliminary run showed, and what to confirm: on 3.15 `version` went from about 200 ms to about 30 ms,
-**more than 6× faster** and close to the bare-interpreter floor. The two per-file variants were indistinguishable. And
-`report` under `-X lazy_imports=all` was about a quarter faster than eager, even though it does all the work.
+**The headline holds.** On 3.15, `fleetctl version` went from about 100 ms to 20–26 ms, **4–5× faster**, within about 12 ms of the bare-interpreter floor. `summary` improved just as much. All three ways of turning laziness on landed in
+the same place.
+
+**Read the rest of the table with the noise in mind.** On macOS the eager rows were noisy (standard deviations of 13–30 ms, and 111 ms on one row), while the lazy rows varied by only 1–5 ms. The 3.14 rows show
+the size of it: `__lazy_modules__` does nothing on 3.14 and still measured about 20 ms "faster" than eager. The same
+goes for the `report` column. Every per-file variant loads every module the command uses, and the 115–154 ms spread there is
+noise, not a ranking.
+
+**`-X lazy_imports=all` on `report`: fewer modules, not reliably faster.** It loaded 268 modules instead of 388, but on
+3.15 its median was within noise of eager (117 ms against 120 ms). It was 19% faster on 3.15t, and about 23% faster in the Linux container run. It's probably a small win, and not one I'd promise.
 
 ## Gotchas
 
@@ -155,26 +163,25 @@ These are all verified on 3.15.0rc2:
 
 # Free-threading: do threads finally scale?
 
-`threads/scale.py` splits a fixed amount of pure-Python CPU work (total Collatz steps for 1 to 1.5 million)
+`threads/scale.py` splits a fixed amount of pure-Python CPU work (total Collatz steps for 1 to 2 million)
 across 1, 2 and 4 threads, keeps the best of three runs, and runs the same work in a 4-process
 `ProcessPoolExecutor` as the "what you'd do today" baseline. It also checks `sys._is_gil_enabled()` at runtime,
 because importing a C extension that isn't marked free-threading-safe can silently turn the GIL back on.
 
-| Interpreter | GIL | 1 thread | 2 threads | 4 threads | 4 processes |
-| ----------- | --- | -------: | --------: | --------: | ----------: |
-| 3.14        | on  |    _TBD_ |     _TBD_ |     _TBD_ |       _TBD_ |
-| 3.14t       | off |    _TBD_ |     _TBD_ |     _TBD_ |       _TBD_ |
-| 3.15        | on  |    _TBD_ |     _TBD_ |     _TBD_ |       _TBD_ |
-| 3.15t       | off |    _TBD_ |     _TBD_ |     _TBD_ |       _TBD_ |
+| Interpreter | GIL | 1 thread | 2 threads |         4 threads | 4 processes |
+| ----------- | --- | -------: | --------: | ----------------: | ----------: |
+| 3.14        | on  |  12.19 s |   11.78 s |           13.49 s |      3.22 s |
+| 3.14t       | off |  10.74 s |    5.77 s | **3.01 s** (3.6×) |      2.97 s |
+| 3.15        | on  |  11.62 s |   11.55 s |           11.53 s |      3.19 s |
+| 3.15t       | off |  11.64 s |    6.30 s | **3.22 s** (3.6×) |      3.26 s |
 
-The shape to confirm on real hardware:
-
-- **The GIL builds don't scale at all.** 1, 2 and 4 threads all took the same time, which is exactly what the
+- **The GIL builds don't scale at all.** 1, 2 and 4 threads took the same time (or worse), which is exactly what the
   GIL promises for CPU-bound Python.
-- **The free-threaded builds scale nearly linearly.** About 1.8× at 2 threads and 3.6–3.7× at 4. That matched
-  the 4-process pool, **without the pickling, the memory copies or the process startup.**
-- **The single-thread tax is small.** 3.15t was around 5% slower than 3.15 on one thread, and it paid 10–30 ms
-  more at startup.
+- **The free-threaded builds scale nearly linearly.** About 1.8–1.9× at 2 threads and 3.6× at 4. That matched the
+  4-process pool, **without the pickling, the memory copies or the process startup.**
+- **No measurable single-thread tax.** On one thread, 3.15t took 11.64 s against 3.15's 11.62 s. (3.14t was actually
+  faster than 3.14 on one thread, which I can't explain and wouldn't rely on. The Linux container run showed about a
+  5% tax.) Startup is where the free-threaded build still pays: about 11 ms more for a bare interpreter.
 
 For a Java developer, this is the headline. For the first time, a CPU-bound Python service can use a thread pool
 the way a JVM service would. The remaining caveat is extensions. Every C extension you import has to declare
@@ -189,16 +196,18 @@ and drops the row if `sys._jit.is_enabled()` says it didn't engage:
 
 | Interpreter | 1 thread, JIT off | 1 thread, `PYTHON_JIT=1` | 4 processes, JIT off | 4 processes, `PYTHON_JIT=1` |
 | ----------- | ----------------: | -----------------------: | -------------------: | --------------------------: |
-| 3.14        |             _TBD_ |                    _TBD_ |                _TBD_ |                       _TBD_ |
-| 3.15        |             _TBD_ |                    _TBD_ |                _TBD_ |                       _TBD_ |
+| 3.14        |           12.19 s |                  13.17 s |               3.22 s |                      3.10 s |
+| 3.15        |           11.62 s |               **5.45 s** |               3.19 s |                  **1.60 s** |
 
-The shape from the preliminary run is the most surprising result in this post:
+This is the most surprising result in the post:
 
-- **3.15's JIT cut this loop's time by about 40%.** 3.14's JIT managed about 6%. "Significantly upgraded" undersells it.
+- **3.15's JIT cut this loop's time by 53%.** It was 2.1× faster, with no code changes. The rc2 run in the container
+  got about 40%. 3.14's JIT did nothing useful here (8% slower on one thread, a little faster on four). "Significantly upgraded"
+  undersells it.
 - **The JIT isn't available in the free-threaded builds.** On 3.14t and 3.15t it never engaged. You get the JIT
   or free-threading, not both.
-- So, for now, **JIT plus a process pool beat free-threaded threads** for this workload: four JIT-enabled
-  processes finished well ahead of four free-threaded threads.
+- So, for now, **JIT plus a process pool beat free-threaded threads by 2×** for this workload: 1.60 s for four
+  JIT-enabled processes against 3.22 s for four free-threaded threads.
 
 Two caveats. A tight integer loop is the JIT's best case, so don't expect the same on I/O-bound code or code that
 spends its time in C extensions. And it's still labeled experimental.
