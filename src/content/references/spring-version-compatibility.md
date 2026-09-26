@@ -39,8 +39,8 @@ ship &mdash; bookmark it. For the official, authoritative matrix, see Spring's
 | 2.0.x               | Java 8 - 9                                    |
 | 1.5.x               | Java 6 - 8                                    |
 
-Rows marked _(upcoming)_ are still in milestones and will be confirmed at GA. Spring Boot 4.x and 3.x baseline on Java
-17. As of September 2026, only **4.1.x** (released June 2026) and **4.0.x** are in open-source support &mdash; 4.0.x
+Rows marked _(upcoming)_ are still in milestones and will be confirmed at GA. Spring Boot 4.x and 3.x baseline on
+Java 17. As of September 2026, only **4.1.x** (released June 2026) and **4.0.x** are in open-source support &mdash; 4.0.x
 until **December 31, 2026** and 4.1.x until **July 31, 2027**. **3.5.x reached OSS end-of-life on June 30, 2026**
 (commercial support continues). The next feature release, **4.2**, is in milestones
 ([4.2.0-M2](https://spring.io/blog/2026/09/25/spring-boot-4-2-0-M2-available-now/), September 2026), is the first line
