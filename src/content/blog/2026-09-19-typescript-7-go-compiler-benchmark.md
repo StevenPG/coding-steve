@@ -4,7 +4,7 @@ pubDatetime: 2026-09-19T12:00:00.000Z
 title: "TypeScript 7 Is Written in Go: Where the 10x Actually Comes From"
 slug: typescript-7-go-compiler-benchmark
 featured: false
-draft: true
+draft: false
 ogImage: /assets/default-og-image.png
 tags:
   - software
@@ -12,7 +12,7 @@ tags:
   - typescript
   - javascript
   - performance
-description: TypeScript 7 ported the compiler from JavaScript to Go and type-checks 8-12x faster. A benchmark on three real repositories that splits the speedup into "native code" and "parallelism", plus the migration errors my own blog hit and an npm gotcha that makes npx tsc quietly run TypeScript 6.
+description: TypeScript 7 ported the compiler from TypeScript to Go, and Microsoft reports 8-12x faster type-checking. A benchmark on three real repositories that splits the speedup into "native code" and "parallelism", plus the migration errors my own blog hit, an exit code that changed, and an npm gotcha that makes npx tsc quietly run TypeScript 6.
 ---
 
 ## Table of Contents
@@ -139,14 +139,15 @@ native-code effect.
 0.81 s) for 30% more peak memory (1,430 MiB, _more_ than TypeScript 6 used) and 57% more CPU. The default is close to
 the sweet spot even on a 12-core machine.
 
-**The total is 5.5–6.8×, not 10×, and that's because TypeScript 6 was fast here.** Microsoft's table has Playwright at
+**The total is 5.5–6.8×, not 10×, mostly because TypeScript 6 was fast here.** Microsoft's table has Playwright at
 12.8 s → 1.47 s. On the M3 Pro, TypeScript 7 was faster than their result in absolute terms (0.81 s), but TypeScript 6
-on Node 24 was also much faster (5.18 s), so the ratio is smaller. The slower your current CI type-check is, the bigger
+on Node 24 was also much faster (5.18 s), so the ratio is smaller. (My Playwright commit isn't theirs either, so the
+comparison is approximate.) The slower your current CI type-check is, the bigger
 your multiple will be.
 
 **It uses much less CPU in total, not just wall time.** Even with 4 checkers running in parallel, TypeScript 7 used
-4.1 s of CPU on Playwright against TypeScript 6's 10.0 s. TypeScript 6 spends about twice its wall time in CPU,
-on Node's GC and JIT threads. If you pay for CI by the minute, that's the number that matters, and it also means
+4.1 s of CPU on Playwright against TypeScript 6's 10.0 s. TypeScript 6 spends about twice its wall time in CPU, most
+likely on Node's background GC and JIT threads, since the compiler itself is single-threaded. If you pay for CI by the minute, that's the number that matters, and it also means
 `--singleThreaded` (2.2 s of CPU) is a good option on shared runners.
 
 **Identical diagnostics everywhere.** Every configuration reported the same errors as TypeScript 6 on every target:
@@ -221,7 +222,8 @@ the upgrade. Check for non-zero.
 # What I'd do
 
 - **Upgrade CI type-checking first.** It's the easiest win: no API consumers, and the speedup lands on every pull request.
-- **Fix `baseUrl` and friends while you're on 6.** Everything TypeScript 7 rejects, TypeScript 6 already warns or errors on.
+- **Fix `baseUrl` and friends while you're on 6.** TypeScript 6 already flags the options 7 removes as deprecated, so
+  the migration can happen before the upgrade.
 - **Keep TypeScript 6 for tools that need the API**, and check which `tsc` your scripts are actually running.
 - **Leave `--checkers` at the default unless you've measured.** Going from 4 to 8 bought 7% on a large codebase for
   30% more memory. On small or memory-tight runners, try lowering it, or `--singleThreaded`, which still gave a
