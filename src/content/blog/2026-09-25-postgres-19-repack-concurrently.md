@@ -4,7 +4,7 @@ pubDatetime: 2026-09-25T12:00:00.000Z
 title: "PostgreSQL 19's REPACK CONCURRENTLY vs VACUUM FULL: What Your Application Feels"
 slug: postgres-19-repack-concurrently
 featured: false
-draft: true
+draft: false
 ogImage: /assets/default-og-image.png
 tags:
   - software
@@ -41,8 +41,9 @@ That's the claim. This post measures what an application writing to the table ac
 option. Everything is in
 [DemosAndArticleContent/blog/postgres-19-repack-concurrently](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/postgres-19-repack-concurrently).
 
-> **[DRAFT NOTE: numbers pending]** The SQL output and feature findings are real, from `postgres:19beta4`. The
-> benchmark table is a placeholder until the run on my M3, which should also be against 19 GA or RC.
+Everything here ran against `postgres:19beta4`. The benchmark numbers are from my M3 Pro MacBook in Docker Desktop
+(2 CPUs), with an earlier cloud-container run for comparison where the extra table size shows something the M3 run
+couldn't.
 
 # The benchmark
 
@@ -67,31 +68,63 @@ and worst latency. For the seconds the method was running, the harness reports:
 - **seconds with zero commits**: what an exclusive lock looks like from the application
 - **worst single transaction latency**, compared with the worst in the baseline
 - average writer throughput during the rewrite, compared with before
-- heap and index size before and after
+- heap and index size before, and the moment the command returns
 
 ## Results
 
-| Method                  | Duration | Heap MB before → after | Writer tps before → during | Seconds with zero commits | Worst writer latency (baseline) |
-| ----------------------- | -------: | ---------------------: | -------------------------: | ------------------------: | ------------------------------: |
-| `VACUUM FULL`           |    _TBD_ |                  _TBD_ |                      _TBD_ |                     _TBD_ |                           _TBD_ |
-| `REPACK`                |    _TBD_ |                  _TBD_ |                      _TBD_ |                     _TBD_ |                           _TBD_ |
-| `REPACK (CONCURRENTLY)` |    _TBD_ |                  _TBD_ |                      _TBD_ |                     _TBD_ |                           _TBD_ |
+On the M3 Pro, with 2M rows (a 281 MB heap, 70% of it dead) and 8 writers:
 
-What to look for:
+| Method                  | Duration | Writer tps before → during | Seconds with zero commits | Worst writer transaction (baseline) |
+| ----------------------- | -------: | -------------------------: | ------------------------: | ----------------------------------: |
+| `VACUUM FULL`           |    0.8 s |              8,654 → 8,138 |                         0 |                     **706 ms** (22) |
+| `REPACK`                |    0.7 s |            12,915 → 10,980 |                         0 |                     **585 ms** (56) |
+| `REPACK (CONCURRENTLY)` |    1.2 s |            13,728 → 10,384 |                         0 |                      **38 ms** (30) |
 
-- **`VACUUM FULL` and `REPACK` should look identical.** They're the same operation under two names. Every writer
-  queues behind the lock for the whole rewrite, so the zero-commit seconds should roughly equal the duration.
-- **`REPACK (CONCURRENTLY)` should keep committing throughout**, with some throughput loss because it competes for
-  I/O and replays the concurrent changes, and **one latency spike** at the final swap. How big that spike is on
-  real hardware is the number I care about most.
-- **CONCURRENTLY will take longer end to end.** It copies, then catches up, then swaps. You're trading wall-clock
-  time for availability, and that's the right trade for anything user-facing.
+And the space each one gave back, which doesn't depend on the hardware:
 
-A preliminary run on a shared cloud container (8M rows, a 1.1 GB heap) already showed the shape clearly. Under
-`VACUUM FULL` and `REPACK`, the worst writer transaction took as long as the whole rewrite (seconds, against a
-baseline of ~20 ms), and there were whole seconds in which not one transaction committed. Under `CONCURRENTLY`
-there were none. The worst transaction was about 100 ms, consistent with a single short lock at the swap, and
-throughput dipped by about a third while the copy ran. It took a little longer than plain `REPACK`, as expected.
+| Method                  | Heap MB before → after | Indexes MB before → after |
+| ----------------------- | ---------------------: | ------------------------: |
+| `VACUUM FULL`           |               281 → 91 |                  103 → 34 |
+| `REPACK`                |               281 → 92 |                  103 → 34 |
+| `REPACK (CONCURRENTLY)` |               281 → 93 |                  103 → 34 |
+
+A note on that second table. My harness originally recorded the "after" size at the end of the writer's
+measurement window, by which point pgbench had inserted another million rows, so the table looked like it had
+barely shrunk. It now measures the moment the command returns. The sizes above come from a re-run with that fix, in
+the cloud container.
+
+## What the numbers say
+
+**All three reclaim the same space.** 67% off the heap and 67% off the indexes, matching the 70% of rows that were dead.
+Plain `VACUUM` had left all of that in place. `CONCURRENTLY` doesn't give you a worse table for not locking.
+
+**The lock shows up in the worst transaction, not in the averages.** On the M3 each rewrite finished in about a
+second, so there was never a whole second with zero commits. But under `VACUUM FULL` and `REPACK` the unluckiest
+writer waited **0.6–0.7 s**, basically the entire rewrite, against a baseline of 20–60 ms. Under `CONCURRENTLY` the
+worst writer waited **38 ms**, 8 ms over its baseline. That's the whole argument for the feature in two numbers.
+
+**At this size, per-second throughput doesn't rank them.** A lock that lasts 0.7 s lands inside one or two
+one-second buckets, and the queued transactions commit in a burst straight after, so the "during" averages mostly
+measure noise. (The `VACUUM FULL` row also ran first, while the writer was still warming up, which is why its
+baseline is lower.) What the averages do show is that `CONCURRENTLY` costs the writer something while it runs, about
+a quarter of its throughput here, because it's copying the table and replaying changes alongside the load.
+
+**The lock grows with the table.** A run on an 8M-row table (1.1 GB heap) in a 4-core cloud container shows what the
+M3 run was too fast to show:
+
+| Method                  | Duration | Seconds with zero commits | Worst writer transaction (baseline) | Writer tps before → during |
+| ----------------------- | -------: | ------------------------: | ----------------------------------: | -------------------------: |
+| `VACUUM FULL`           |    5.7 s |                         4 |                       5,585 ms (14) |                5,496 → 382 |
+| `REPACK`                |    3.4 s |                         2 |                       3,198 ms (29) |              4,290 → 1,098 |
+| `REPACK (CONCURRENTLY)` |    5.0 s |                     **0** |                     **108 ms** (16) |              5,447 → 3,623 |
+
+With a locking rewrite, the worst write takes as long as the whole command, and whole seconds go by with no commits
+at all. Extrapolate that to the 30 GB table from the opening and you're talking minutes of downtime. `CONCURRENTLY`
+kept its worst transaction around 100 ms, which is the final swap, and never stopped the writer.
+
+**CONCURRENTLY takes longer.** It was 1.2 s against 0.7–0.8 s on the M3, and 5.0 s against 3.4 s for plain `REPACK`
+in the container. It copies, catches up and then swaps. You're trading wall-clock time for availability, which is
+the right trade for anything user-facing.
 
 ## What CONCURRENTLY needs
 
@@ -164,8 +197,8 @@ SET pg_plan_advice.advice = 'JOIN_ORDER(a f) NESTED_LOOP_PLAIN(f) INDEX_SCAN(f f
    NESTED_LOOP_PLAIN(f) /* matched */
 ```
 
-The feedback is the part that makes this better than the hint extensions people have used for years. Advice
-that can't be followed says so, instead of being silently ignored:
+The feedback is the part I like most. Advice that can't be followed says so in `EXPLAIN`, instead of being silently
+ignored:
 
 ```
  Supplied Plan Advice:
@@ -221,8 +254,8 @@ ERROR:  syntax error at or near "FOR"
 LINE 1: UPDATE rate FOR PORTION OF valid FROM '2026-06-01' TO '2026-...
 ```
 
-The same goes for SQL/PGQ property graphs, which were reverted before release: `CREATE PROPERTY GRAPH` is a syntax error on the beta too. When a release is this close, check the
-release notes and the beta, not the preview posts. `sql/whats-new-19.sql` in the repo does that in one command.
+The same goes for SQL/PGQ property graphs, which were reverted before release: `CREATE PROPERTY GRAPH` is a syntax
+error on the beta too. When a release is this close, check the release notes and the beta, not the preview posts. `sql/whats-new-19.sql` in the repo does that in one command.
 
 # Run it yourself
 

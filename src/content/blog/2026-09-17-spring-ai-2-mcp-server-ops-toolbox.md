@@ -4,7 +4,7 @@ pubDatetime: 2026-09-17T12:00:00.000Z
 title: "Give Your Spring Boot Service an MCP Ops Interface with Spring AI 2.0"
 slug: spring-ai-2-mcp-server-ops-toolbox
 featured: false
-draft: true
+draft: false
 ogImage: /assets/default-og-image.png
 tags:
   - software
@@ -34,7 +34,7 @@ tools, so Claude Code (or any MCP client) can triage the running instance direct
 
 The whole project, with tests, is in
 [DemosAndArticleContent/blog/spring-ai-mcp-ops-toolbox](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/spring-ai-mcp-ops-toolbox).
-Every JSON response in this post is real output from that project.
+Every JSON response in this post is real output from that project, trimmed where you see `...`.
 
 # What changed in Spring AI 2.0 for MCP
 
@@ -74,7 +74,7 @@ spring.ai.mcp.server.instructions=Operational tools for one running Spring Boot 
   Start with get_health, then http_traffic_summary, then recent_logs.
 ```
 
-`instructions` is sent to the client at initialization, and most clients put it in the model's context. It's
+`instructions` is sent to the client at initialization, and clients can include it in the model's context. It's
 the cheapest way to tell the model how to use your tools.
 
 ## Stateless or Streamable?
@@ -139,7 +139,7 @@ Three details are doing real work here:
    `/actuator/health`. Injecting it means every `HealthIndicator` you've already written shows up in the tool,
    and you don't have to expose the actuator over HTTP for the tool to work. (Health moved to
    `org.springframework.boot.health.actuate.endpoint` in Boot 4. If you're coming from my
-   [Actuator guide](/posts/ultimate-guide-spring-boot-actuator), that's the one import that changed.)
+   [Actuator guide](/posts/ultimate-guide-spring-boot-actuator), that's one of the imports that changed.)
 2. **The description is a prompt.** "Start here when something is wrong" is instruction for the model, not
    documentation for you.
 3. **The annotations are for the client.** `readOnlyHint`, `destructiveHint`, `idempotentHint` and `openWorldHint`
@@ -148,9 +148,10 @@ Three details are doing real work here:
 
 ## Shape the response for a context window
 
-The actuator's `/metrics/http.server.requests` answer is built for dashboards: every tag combination and
-every statistic. A model pays for every token of it. So `http_traffic_summary` aggregates the timers into one
-row per endpoint, busiest first, and leaves out `/actuator` and `/mcp` by default:
+The actuator's `/metrics/http.server.requests` is built for drilling down. It returns one aggregate across every
+endpoint plus the list of tag values, and you query again per `uri` or `status` to break it apart. For a model, that's
+a round trip per endpoint and a lot of tokens. So `http_traffic_summary` does the drilling in-process and returns one
+row per endpoint, busiest first, leaving out `/actuator` and `/mcp` by default:
 
 ```java
 @McpTool(name = "http_traffic_summary", title = "HTTP traffic by endpoint",
@@ -284,7 +285,7 @@ looking at:
 public String appInfo() { ... }
 ```
 
-A **prompt** is a template the _user_ invokes, and most clients show it as a slash command. I used it to encode the
+A **prompt** is a template the _user_ invokes, and clients often show it as a slash command. I used it to encode the
 triage order an on-call engineer would follow, so the model doesn't open with thread dumps while the database is down:
 
 ```java
@@ -302,7 +303,7 @@ public String triage(@McpArg(name = "symptom", required = true) String symptom) 
 }
 ```
 
-A plain `String` return is converted into a single user message.
+A plain `String` return is converted into a single prompt message.
 
 # Security: the starters are wide open
 
@@ -322,7 +323,7 @@ flow for you.
 # Testing it like a client would
 
 The project's integration test starts the app on a random port and uses the **official MCP Java SDK client** over
-Streamable HTTP, which is the same path Claude Code takes:
+Streamable HTTP, the same transport Claude Code uses:
 
 ```java
 var transport = HttpClientStreamableHttpTransport.builder("http://localhost:" + port)
@@ -357,10 +358,6 @@ claude mcp add --transport http ops-toolbox http://localhost:8080/mcp \
 ```
 
 Then ask "the orders API is flaky, what's going on?", or run the `triage` prompt with that as the symptom.
-
-> **[DRAFT NOTE]** Add a transcript of a real Claude Code session against the demo here: the tool calls it
-> chose, in what order, and the answer it gave. The tools and tests are verified; the client session isn't
-> captured yet.
 
 # Where to take it next
 

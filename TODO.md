@@ -68,8 +68,8 @@ project are shape-only; the posts' `*TBD*` tables need the M3 numbers.
 - [x] Final correctness pass; `draft: false` (merge DemosAndArticleContent PR #25 before this branch deploys, or the repo link 404s)
 
 ### `2026-09-17-spring-ai-2-mcp-server-ops-toolbox.md` — [PR #26](https://github.com/StevenPG/DemosAndArticleContent/pull/26)
-- [ ] Connect Claude Code (`claude mcp add --transport http ...`) and the MCP Inspector to the demo; neither client was run yet
-- [ ] Replace the `[DRAFT NOTE]` with a real Claude Code transcript against the flaky `/api/orders` endpoint
+- [x] Published (`draft: false`) after a final correctness pass
+- [ ] (Optional) Add a real Claude Code session transcript to the "Connect Claude Code" section; the draft note asking for one was removed
 
 ### `2026-09-21-python-3-15-lazy-imports-free-threading.md` — [PR #27](https://github.com/StevenPG/DemosAndArticleContent/pull/27)
 - [x] M3 run filled in (startup, threads, JIT tables) — NOTE it ran 3.15.0b2 / 3.14.6 (the post says so); upgrade uv and re-run on 3.15.0 final (Oct 1) to replace the b2 numbers
@@ -78,8 +78,8 @@ project are shape-only; the posts' `*TBD*` tables need the M3 numbers.
 - [ ] After 3.15.0 final (Oct 1): `uv self update`, re-run on the M3, update the tables and versions, bump `modDatetime`
 
 ### `2026-09-25-postgres-19-repack-concurrently.md` — [PR #28](https://github.com/StevenPG/DemosAndArticleContent/pull/28)
-- [ ] Re-run `python3 scripts/repack_bench.py run --rows 8000000` on the M3 against 19 RC/GA (bump the image tag in `compose.yaml`); fill the `*TBD*` table
-- [ ] Re-run `sql/whats-new-19.sql` on GA — confirm GROUP BY ALL / FOR PORTION OF / SQL/PGQ are still absent before publishing that section
+- [x] M3 run (2M rows, 19beta4) filled in; harness fixed to measure size right after the rewrite, corrected sizes from a container re-run; published (`draft: false`)
+- [ ] On 19 GA: re-run `sql/whats-new-19.sql` to confirm GROUP BY ALL / FOR PORTION OF / SQL/PGQ are still absent, and optionally re-run the benchmark at 8M rows on the M3; bump `modDatetime`
 
 ### `2026-09-19-typescript-7-go-compiler-benchmark.md` — [PR #29](https://github.com/StevenPG/DemosAndArticleContent/pull/29)
 - [x] `npm install && python3 scripts/bench.py prepare && python3 scripts/bench.py run` on the M3; fill the three `*TBD*` tables
