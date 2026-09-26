@@ -84,9 +84,9 @@ project are shape-only; the posts' `*TBD*` tables need the M3 numbers.
 - [ ] Check the "native vs parallel" split holds with more cores (container: native 3.5–4.8x, parallel 1.1–1.35x on 4 cores)
 
 ### `2026-09-23-kubernetes-pod-level-resources-jvm.md` — [PR #30](https://github.com/StevenPG/DemosAndArticleContent/pull/30)
-- [ ] Run `./scripts/run.sh` (kind, Kubernetes 1.37) on the M3 — it could not run in the build sandbox; confirm the kubelet sets the unlimited container's `memory.max` to the pod limit and that scenario 03 ends in `OOMKilled`
+- [ ] (Optional, post-publish) Run `./scripts/run.sh` (kind, Kubernetes 1.37) on the M3 — it could not run in the build sandbox; confirm the kubelet sets the unlimited container's `memory.max` to the pod limit and that scenario 03 ends in `OOMKilled`
 - [ ] Record the `PodLevelResources` feature stage that `run.sh` prints; adjust the post's intro wording if needed
-- [ ] Replace the `[DRAFT NOTE]` with the kind results (or note where they differ from the emulation)
+- [x] Published on the Docker emulation results (`draft: false`); draft note replaced with a methodology note. Merge DemosAndArticleContent PR #30 before this deploys.
 
 ### Found along the way (not fixed — this blog repo)
 - [ ] `tsconfig.json` uses `baseUrl` + bare `paths`: `tsc` 6 errors (TS5101) and 7 errors (TS5090). Fix: drop `baseUrl`, prefix paths with `./src/` (see DemosAndArticleContent `blog/typescript-7-go-compiler-benchmark/patches/coding-steve.tsconfig.json`), then check `npm run build`

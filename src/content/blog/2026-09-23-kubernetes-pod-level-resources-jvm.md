@@ -4,7 +4,7 @@ pubDatetime: 2026-09-23T12:00:00.000Z
 title: "Pod-Level Resources in Kubernetes 1.37: Your JVM Thinks It Owns the Whole Pod"
 slug: kubernetes-pod-level-resources-jvm
 featured: false
-draft: true
+draft: false
 ogImage: /assets/default-og-image.png
 tags:
   - software
@@ -49,10 +49,9 @@ know about it?
 The code is in
 [DemosAndArticleContent/blog/kubernetes-pod-level-resources-jvm](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/kubernetes-pod-level-resources-jvm).
 
-> **[DRAFT NOTE: kind run pending]** The results below come from a plain-Docker reproduction of the exact cgroup
-> layout the KEP specifies, run twice with identical outcomes. The kind-on-1.37 version of the same four scenarios
-> is in the repo but hasn't run yet (the sandbox I built it in can't start pod sandboxes). Confirm on the M3 before
-> publishing.
+The results below come from a plain-Docker reproduction of the exact cgroup layout the KEP specifies. I ran it
+twice, with identical outcomes. The repo also has the same four scenarios as Pod manifests for a kind cluster on
+Kubernetes 1.37, if you'd rather see it on a real kubelet.
 
 # The JVM does see a limit. The wrong one.
 
