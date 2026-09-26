@@ -54,3 +54,43 @@ Flip each post to `draft: false` only after its checklist is complete.
   8. 08-01 Ingress-NGINX part 2
 - [ ] Posts dated in the future relative to publish day: either confirm the site build hides future-dated posts or adjust `pubDatetime` at publish time
 - [ ] The three updated older posts (migration guide, Leyden, ingress part 1) already have `modDatetime` bumps matching their new companion posts — verify the "Update" callout links resolve once the drafts go live
+
+## September 2026 "what's new" series (all `draft: true`)
+
+Each post has a companion project in DemosAndArticleContent with its own PR. Merge the PR before publishing
+the post: the posts link to `tree/main/blog/...` paths that only resolve after merge. Container runs in each
+project are shape-only; the posts' `*TBD*` tables need the M3 numbers.
+
+### `2026-09-15-java-27-new-defaults-benchmark.md` — [PR #25](https://github.com/StevenPG/DemosAndArticleContent/pull/25)
+- [x] `./scripts/fetch-jdks.sh && (cd bench-app && ./gradlew bootJar) && python3 scripts/benchmark.py measure` on the M3; fill both `*TBD*` tables
+- [x] Reconcile "What to look for" with the M3 run: now "What the numbers say" (M3: G1 18.5% slower than Serial on 1 CPU, Serial +37% on 2 CPUs, compact headers -14.5% live set but throughput +13% to -20%)
+- [x] Remove the `[DRAFT NOTE]` callout
+- [x] Final correctness pass; `draft: false` (merge DemosAndArticleContent PR #25 before this branch deploys, or the repo link 404s)
+
+### `2026-09-17-spring-ai-2-mcp-server-ops-toolbox.md` — [PR #26](https://github.com/StevenPG/DemosAndArticleContent/pull/26)
+- [x] Published (`draft: false`) after a final correctness pass
+- [ ] (Optional) Add a real Claude Code session transcript to the "Connect Claude Code" section; the draft note asking for one was removed
+
+### `2026-09-21-python-3-15-lazy-imports-free-threading.md` — [PR #27](https://github.com/StevenPG/DemosAndArticleContent/pull/27)
+- [x] M3 run filled in (startup, threads, JIT tables) — NOTE it ran 3.15.0b2 / 3.14.6 (the post says so); upgrade uv and re-run on 3.15.0 final (Oct 1) to replace the b2 numbers
+- [x] Interpreter versions stated in the post; `[DRAFT NOTE]` replaced with a methodology note
+- [x] Published on the b2 numbers (`draft: false`)
+- [ ] After 3.15.0 final (Oct 1): `uv self update`, re-run on the M3, update the tables and versions, bump `modDatetime`
+
+### `2026-09-25-postgres-19-repack-concurrently.md` — [PR #28](https://github.com/StevenPG/DemosAndArticleContent/pull/28)
+- [x] M3 run (2M rows, 19beta4) filled in; harness fixed to measure size right after the rewrite, corrected sizes from a container re-run; published (`draft: false`)
+- [ ] On 19 GA: re-run `sql/whats-new-19.sql` to confirm GROUP BY ALL / FOR PORTION OF / SQL/PGQ are still absent, and optionally re-run the benchmark at 8M rows on the M3; bump `modDatetime`
+
+### `2026-09-19-typescript-7-go-compiler-benchmark.md` — [PR #29](https://github.com/StevenPG/DemosAndArticleContent/pull/29)
+- [x] `npm install && python3 scripts/bench.py prepare && python3 scripts/bench.py run` on the M3; fill the three `*TBD*` tables
+- [x] Check the "native vs parallel" split holds with more cores — M3 (12 cores): native 3.1–3.9x, parallel 1.4–2.0x, total 5.5–6.8x; added the `--checkers 1` and exit-code (2 → 1) findings
+- [x] Final correctness pass; `draft: false` (merge DemosAndArticleContent PR #29 before this deploys, or the repo link 404s)
+
+### `2026-09-23-kubernetes-pod-level-resources-jvm.md` — [PR #30](https://github.com/StevenPG/DemosAndArticleContent/pull/30)
+- [ ] (Optional, post-publish) Run `./scripts/run.sh` (kind, Kubernetes 1.37) on the M3 — it could not run in the build sandbox; confirm the kubelet sets the unlimited container's `memory.max` to the pod limit and that scenario 03 ends in `OOMKilled`
+- [ ] Record the `PodLevelResources` feature stage that `run.sh` prints; adjust the post's intro wording if needed
+- [x] Published on the Docker emulation results (`draft: false`); draft note replaced with a methodology note. Merge DemosAndArticleContent PR #30 before this deploys.
+
+### Found along the way (not fixed — this blog repo)
+- [ ] `tsconfig.json` uses `baseUrl` + bare `paths`: `tsc` 6 errors (TS5101) and 7 errors (TS5090). Fix: drop `baseUrl`, prefix paths with `./src/` (see DemosAndArticleContent `blog/typescript-7-go-compiler-benchmark/patches/coding-steve.tsconfig.json`), then check `npm run build`
+- [ ] 3 remaining type errors after `astro sync`: `Buffer` not assignable to `BodyInit` in `og.png.ts`, `posts/[slug]/index.png.ts`, `projects/[slug]/index.png.ts`. (A fourth, in `rss.xml.ts`, was a live bug — every RSS item linked to `/posts/undefined/` — and is fixed on this branch.)
