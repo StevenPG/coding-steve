@@ -74,7 +74,8 @@ project are shape-only; the posts' `*TBD*` tables need the M3 numbers.
 ### `2026-09-21-python-3-15-lazy-imports-free-threading.md` — [PR #27](https://github.com/StevenPG/DemosAndArticleContent/pull/27)
 - [x] M3 run filled in (startup, threads, JIT tables) — NOTE it ran 3.15.0b2 / 3.14.6 (the post says so); upgrade uv and re-run on 3.15.0 final (Oct 1) to replace the b2 numbers
 - [x] Interpreter versions stated in the post; `[DRAFT NOTE]` replaced with a methodology note
-- [ ] Decide: publish on the b2 numbers, or re-run on 3.15.0 final first; then merge DemosAndArticleContent PR #27 and flip `draft: false`
+- [x] Published on the b2 numbers (`draft: false`)
+- [ ] After 3.15.0 final (Oct 1): `uv self update`, re-run on the M3, update the tables and versions, bump `modDatetime`
 
 ### `2026-09-25-postgres-19-repack-concurrently.md` — [PR #28](https://github.com/StevenPG/DemosAndArticleContent/pull/28)
 - [ ] Re-run `python3 scripts/repack_bench.py run --rows 8000000` on the M3 against 19 RC/GA (bump the image tag in `compose.yaml`); fill the `*TBD*` table
