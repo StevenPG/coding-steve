@@ -1,6 +1,6 @@
 ---
 author: StevenPG
-pubDatetime: 2026-09-25T15:00:00.000Z
+pubDatetime: 2026-09-25T12:00:00.000Z
 title: "PostgreSQL 19's REPACK CONCURRENTLY vs VACUUM FULL: What Your Application Feels"
 slug: postgres-19-repack-concurrently
 featured: false

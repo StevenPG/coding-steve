@@ -1,6 +1,6 @@
 ---
 author: StevenPG
-pubDatetime: 2026-09-25T12:00:00.000Z
+pubDatetime: 2026-09-15T16:00:00.000Z
 title: "Java 27 Changed Your Defaults: What Happens When You Just Bump the Base Image"
 slug: java-27-new-defaults-benchmark
 featured: false

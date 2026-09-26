@@ -1,6 +1,6 @@
 ---
 author: StevenPG
-pubDatetime: 2026-09-25T16:00:00.000Z
+pubDatetime: 2026-09-19T12:00:00.000Z
 title: "TypeScript 7 Is Written in Go: Where the 10x Actually Comes From"
 slug: typescript-7-go-compiler-benchmark
 featured: false

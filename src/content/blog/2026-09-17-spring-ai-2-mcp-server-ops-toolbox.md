@@ -1,6 +1,6 @@
 ---
 author: StevenPG
-pubDatetime: 2026-09-25T13:00:00.000Z
+pubDatetime: 2026-09-17T12:00:00.000Z
 title: "Give Your Spring Boot Service an MCP Ops Interface with Spring AI 2.0"
 slug: spring-ai-2-mcp-server-ops-toolbox
 featured: false

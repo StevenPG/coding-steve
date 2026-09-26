@@ -61,17 +61,17 @@ Each post has a companion project in DemosAndArticleContent with its own PR. Mer
 the post: the posts link to `tree/main/blog/...` paths that only resolve after merge. Container runs in each
 project are shape-only; the posts' `*TBD*` tables need the M3 numbers.
 
-### `2026-09-25-java-27-new-defaults-benchmark.md` — [PR #25](https://github.com/StevenPG/DemosAndArticleContent/pull/25)
+### `2026-09-15-java-27-new-defaults-benchmark.md` — [PR #25](https://github.com/StevenPG/DemosAndArticleContent/pull/25)
 - [x] `./scripts/fetch-jdks.sh && (cd bench-app && ./gradlew bootJar) && python3 scripts/benchmark.py measure` on the M3; fill both `*TBD*` tables
 - [x] Reconcile "What to look for" with the M3 run: now "What the numbers say" (M3: G1 18.5% slower than Serial on 1 CPU, Serial +37% on 2 CPUs, compact headers -14.5% live set but throughput +13% to -20%)
 - [x] Remove the `[DRAFT NOTE]` callout
 - [x] Final correctness pass; `draft: false` (merge DemosAndArticleContent PR #25 before this branch deploys, or the repo link 404s)
 
-### `2026-09-25-spring-ai-2-mcp-server-ops-toolbox.md` — [PR #26](https://github.com/StevenPG/DemosAndArticleContent/pull/26)
+### `2026-09-17-spring-ai-2-mcp-server-ops-toolbox.md` — [PR #26](https://github.com/StevenPG/DemosAndArticleContent/pull/26)
 - [ ] Connect Claude Code (`claude mcp add --transport http ...`) and the MCP Inspector to the demo; neither client was run yet
 - [ ] Replace the `[DRAFT NOTE]` with a real Claude Code transcript against the flaky `/api/orders` endpoint
 
-### `2026-09-25-python-3-15-lazy-imports-free-threading.md` — [PR #27](https://github.com/StevenPG/DemosAndArticleContent/pull/27)
+### `2026-09-21-python-3-15-lazy-imports-free-threading.md` — [PR #27](https://github.com/StevenPG/DemosAndArticleContent/pull/27)
 - [ ] After 3.15.0 final (Oct 1): `./scripts/setup.sh && python3 scripts/bench.py all` on the M3; fill the startup, threads and JIT `*TBD*` tables
 - [ ] Update interpreter versions in the post (currently 3.15.0rc2); remove the `[DRAFT NOTE]`
 
@@ -79,11 +79,11 @@ project are shape-only; the posts' `*TBD*` tables need the M3 numbers.
 - [ ] Re-run `python3 scripts/repack_bench.py run --rows 8000000` on the M3 against 19 RC/GA (bump the image tag in `compose.yaml`); fill the `*TBD*` table
 - [ ] Re-run `sql/whats-new-19.sql` on GA — confirm GROUP BY ALL / FOR PORTION OF / SQL/PGQ are still absent before publishing that section
 
-### `2026-09-25-typescript-7-go-compiler-benchmark.md` — [PR #29](https://github.com/StevenPG/DemosAndArticleContent/pull/29)
+### `2026-09-19-typescript-7-go-compiler-benchmark.md` — [PR #29](https://github.com/StevenPG/DemosAndArticleContent/pull/29)
 - [ ] `npm install && python3 scripts/bench.py prepare && python3 scripts/bench.py run` on the M3; fill the three `*TBD*` tables
 - [ ] Check the "native vs parallel" split holds with more cores (container: native 3.5–4.8x, parallel 1.1–1.35x on 4 cores)
 
-### `2026-09-25-kubernetes-pod-level-resources-jvm.md` — [PR #30](https://github.com/StevenPG/DemosAndArticleContent/pull/30)
+### `2026-09-23-kubernetes-pod-level-resources-jvm.md` — [PR #30](https://github.com/StevenPG/DemosAndArticleContent/pull/30)
 - [ ] Run `./scripts/run.sh` (kind, Kubernetes 1.37) on the M3 — it could not run in the build sandbox; confirm the kubelet sets the unlimited container's `memory.max` to the pod limit and that scenario 03 ends in `OOMKilled`
 - [ ] Record the `PodLevelResources` feature stage that `run.sh` prints; adjust the post's intro wording if needed
 - [ ] Replace the `[DRAFT NOTE]` with the kind results (or note where they differ from the emulation)

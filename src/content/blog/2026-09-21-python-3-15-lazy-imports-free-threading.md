@@ -1,6 +1,6 @@
 ---
 author: StevenPG
-pubDatetime: 2026-09-25T14:00:00.000Z
+pubDatetime: 2026-09-21T12:00:00.000Z
 title: "Python 3.15 Lazy Imports and Free-Threading: A Benchmark for People Who Write CLIs and Services"
 slug: python-3-15-lazy-imports-free-threading
 featured: false
