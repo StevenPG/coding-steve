@@ -3,7 +3,7 @@ title: Spring Version Compatibility Cheatsheet
 description: A continuously updated reference for aligning Java, Gradle, Spring Boot, and Spring Cloud versions.
 slug: spring-version-compatibility
 pubDatetime: 2025-05-04T12:00:00.000Z
-modDatetime: 2026-08-11T12:00:00.000Z
+modDatetime: 2026-09-26T12:00:00.000Z
 tags:
   - gradle
   - java
@@ -26,8 +26,8 @@ ship &mdash; bookmark it. For the official, authoritative matrix, see Spring's
 | 4.1.x               | Java 17 - 26                                  |
 | 4.0.x               | Java 17 - 25                                  |
 | 3.5.x               | Java 17 - 25                                  |
-| 3.4.x               | Java 17 - 25                                  |
-| 3.3.x               | Java 17 - 25                                  |
+| 3.4.x               | Java 17 - 24                                  |
+| 3.3.x               | Java 17 - 23                                  |
 | 3.0.x - 3.2.x       | Java 17 - 21                                  |
 | 2.7.x               | Java 8 - 21                                   |
 | 2.6.x               | Java 8 - 19                                   |
@@ -38,10 +38,12 @@ ship &mdash; bookmark it. For the official, authoritative matrix, see Spring's
 | 2.0.x               | Java 8 - 9                                    |
 | 1.5.x               | Java 6 - 8                                    |
 
-Spring Boot 4.x and 3.x baseline on Java 17. As of August 2026, only **4.1.x** (released June 2026) and **4.0.x** are in
-open-source support &mdash; 4.0.x until **December 31, 2026** and 4.1.x until **July 31, 2027**. **3.5.x reached OSS
-end-of-life on June 30, 2026** (commercial support continues). The next feature release, **4.2**, is expected in
-November 2026. Source: [endoflife.date](https://endoflife.date/spring-boot#java-compatibility).
+Spring Boot 4.x and 3.x baseline on Java 17. As of September 2026, only **4.1.x** (released June 2026) and **4.0.x**
+are in open-source support &mdash; 4.0.x until **December 31, 2026** and 4.1.x until **July 31, 2027**. **3.5.x reached
+OSS end-of-life on June 30, 2026** (commercial support continues). The next feature release, **4.2**, is in milestones
+([4.2.0-M2](https://spring.io/blog/2026/09/25/spring-boot-4-2-0-M2-available-now/), September 2026), is the first line
+to target Java 27, and is expected to go GA in November 2026. Source:
+[endoflife.date](https://endoflife.date/spring-boot#java-compatibility).
 
 ## Spring Cloud &harr; Spring Boot
 
@@ -60,15 +62,18 @@ November 2026. Source: [endoflife.date](https://endoflife.date/spring-boot#java-
 | Edgware                                                                                                     | Spring Boot 1.5.x                                                             |
 
 Don't mix trains and Boot versions arbitrarily &mdash; always confirm against the specific release train's docs. As of
-August 2026 the current train is **Oakwood** (latest patch:
-[2025.1.2](https://spring.io/blog/2026/06/11/spring-cloud-2025-1-2-aka-oakwood-has-been-released/), June 2026, adding
-Spring Boot 4.1 compatibility); the next train, **2026.0.x (Paddington)**, is in milestones against Spring Boot 4.2 and
-should ship alongside it.
+September 2026 the current train is **Oakwood** (latest patch:
+[2025.1.3](https://spring.io/blog/2026/08/20/spring-cloud-2025-1-3-has-been-released/), August 2026, a
+security-focused release with CVE fixes across Commons, Config, Function, Gateway, and Stream &mdash; upgrade if you're
+on an earlier 2025.1.x). The next train, **2026.0.x (Paddington)**, reached
+[2026.0.0-M1](https://spring.io/blog/2026/09/24/spring-cloud-2026-0-0-M1-has-been-released/) in September 2026 against
+Spring Boot 4.2.0-M2 and should ship alongside Boot 4.2.
 
 ## Gradle &harr; Java
 
 | Gradle Version | Latest Supported Java Version |
 | :------------- | :---------------------------- |
+| 9.8            | Java 27                       |
 | 9.4            | Java 26                       |
 | 9.1            | Java 25                       |
 | 8.14           | Java 24                       |
@@ -82,10 +87,10 @@ should ship alongside it.
 | 7.0            | Java 16                       |
 | 6.7            | Java 15                       |
 
-Shows the Gradle version that _first_ added support for running on each Java release (latest is Gradle 9.7, August
-2026). As of August 2026 no Gradle release runs on Java 27 yet &mdash; the compatibility docs still list JVM 27 as
-unsupported, and Java 27 itself isn't GA until September. You can still compile/test against newer JDKs via toolchains
-while running Gradle itself on Java 17&ndash;26. Source:
+Shows the Gradle version that _first_ added support for running on each Java release (latest is Gradle 9.8, September
+2026). Gradle 9.8 adds full Java 27 support for both toolchains and the daemon, so Gradle itself now runs on Java
+17&ndash;27 (note: Gradle isn't tested on macOS `AMD64` with Java 27+). You can still compile/test against newer JDKs via
+toolchains while running Gradle itself on an older supported JVM. Source:
 [Gradle compatibility docs](https://docs.gradle.org/current/userguide/compatibility.html).
 
 ---
