@@ -72,10 +72,10 @@ project are shape-only; the posts' `*TBD*` tables need the M3 numbers.
 - [ ] (Optional) Add a real Claude Code session transcript to the "Connect Claude Code" section; the draft note asking for one was removed
 
 ### `2026-09-21-python-3-15-lazy-imports-free-threading.md` — [PR #27](https://github.com/StevenPG/DemosAndArticleContent/pull/27)
-- [x] M3 run filled in (startup, threads, JIT tables) — NOTE it ran 3.15.0b2 / 3.14.6 (the post says so); upgrade uv and re-run on 3.15.0 final (Oct 1) to replace the b2 numbers
+- [x] M3 run filled in (startup, threads, JIT tables); the b2 / 3.14.6 numbers have since been replaced by a 3.15.0 final / 3.14.8 re-run
 - [x] Interpreter versions stated in the post; `[DRAFT NOTE]` replaced with a methodology note
 - [x] Published on the b2 numbers (`draft: false`)
-- [ ] After 3.15.0 final (Oct 1): `uv self update`, re-run on the M3, update the tables and versions, bump `modDatetime`
+- [x] After 3.15.0 final (shipped Oct 9): re-ran on the M3 with uv 0.13.1 on 3.15.0 / 3.14.8, replaced every table, bumped `modDatetime`. Three conclusions flipped: `-X lazy_imports=all` on `report` is now reliably faster (22%), the free-threaded single-thread tax is measurable (4–5%, both machines), and 3.14's JIT is a no-op rather than a regression
 
 ### `2026-09-25-postgres-19-repack-concurrently.md` — [PR #28](https://github.com/StevenPG/DemosAndArticleContent/pull/28)
 - [x] M3 run (2M rows, 19beta4) filled in; harness fixed to measure size right after the rewrite, corrected sizes from a container re-run; published (`draft: false`)
