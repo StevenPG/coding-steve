@@ -40,10 +40,15 @@ replace `multiprocessing` for CPU-bound work? And what does the free-threaded bu
 
 Everything is in
 [DemosAndArticleContent/blog/python-3-15-lazy-imports-free-threading](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/python-3-15-lazy-imports-free-threading).
-The interpreters come from `uv`, and every number below is **3.15.0 final against 3.14.8**. The tables are from my
-M3 Pro MacBook (12 cores). I ran the same suite on a 4-core Linux cloud container as a second machine and quote it
-wherever the two tell different stories; the absolute numbers there are 3× slower, so treat it as a check on shape,
-not on speed. If you haven't moved to uv yet, [here's why you should](/posts/python-package-manager-uv).
+The interpreters come from `uv`, and every number below is **3.15.0 final against 3.14.8**. I ran the same suite on
+two machines and give both tables throughout:
+
+- **My M3 Pro MacBook, 12 cores**, macOS arm64.
+- **A shared 4-core x86_64 Linux cloud container**, which is 1.6–3× slower in absolute terms.
+
+Two machines of different speeds and architectures is the cheapest guard against reading a single machine's quirk
+as a property of the release, and in a couple of places below they genuinely disagree — I say so where they do. If
+you haven't moved to uv yet, [here's why you should](/posts/python-package-manager-uv).
 
 # Lazy imports: three ways to turn them on
 
@@ -121,10 +126,13 @@ modules than the per-file variants (266 against 384), for a command that "uses e
 Median wall time of a full process launch, over 30 launches after one warm-up (so `.pyc` files exist and the page
 cache is warm):
 
+**M3 Pro, 12 cores — 3.15.0 and 3.14.8:**
+
 | Interpreter | Variant                       | `version` ms | `summary` ms | `report` ms |
 | ----------- | ----------------------------- | -----------: | -----------: | ----------: |
 | 3.14        | eager                         |         82.3 |         83.2 |        97.7 |
 | 3.14        | `__lazy_modules__`            |         86.4 |         89.3 |        90.4 |
+| 3.14t       | eager                         |         90.3 |         91.1 |        98.7 |
 | 3.15        | eager                         |         81.0 |         81.3 |        88.2 |
 | 3.15        | `lazy` keyword                |     **18.4** |     **21.5** |        90.8 |
 | 3.15        | `__lazy_modules__`            |     **18.6** |     **21.5** |        86.9 |
@@ -133,25 +141,42 @@ cache is warm):
 | 3.15t       | `lazy` keyword                |     **20.5** |     **23.9** |        99.4 |
 | 3.15t       | eager + `-X lazy_imports=all` |     **19.6** |     **22.2** |    **76.6** |
 
-A bare `python -c pass` cost 11.6 ms on 3.15, 11.2 ms on 3.14 and 12.3 ms on 3.15t, so that's the floor for any row.
+A bare `python -c pass` cost 11.6 ms on 3.15, 11.2 ms on 3.14, 12.3 ms on 3.15t and 13.0 ms on 3.14t on the M3.
 
-**The headline holds.** On 3.15, `fleetctl version` went from 81 ms to 18–19 ms, **more than 4× faster**, within
-about 7 ms of the bare-interpreter floor. `summary` went from 81 ms to 20–22 ms. All three ways of turning laziness
-on landed in the same place. The container was more dramatic still: 249 ms down to 36–38 ms, nearly 7×, because a
-slower machine spends more of its startup in the imports you just deferred.
+**Linux container, 4 shared cores — 3.15.0 and 3.14.8:**
 
-**Read the rest of the table with the noise in mind**, though there is much less of it than in my pre-release run.
-The lazy rows now vary by well under a millisecond (standard deviations of 0.2–0.9 ms) and the eager rows by
-1–10 ms. That is tight enough to trust the large gaps and still too loose to rank rows a few milliseconds apart.
-The `report` column is where to be careful: every per-file variant loads every module the command uses, so the
-87–99 ms spread there is noise, not a ranking. `__lazy_modules__` on 3.14 is the built-in control — it does
-nothing on that version, and it still came out 7 ms "ahead" of eager on `report`.
+| Interpreter | Variant                       | `version` ms | `summary` ms | `report` ms |
+| ----------- | ----------------------------- | -----------: | -----------: | ----------: |
+| 3.14        | eager                         |        246.4 |        246.7 |       284.3 |
+| 3.14        | `__lazy_modules__`            |        255.0 |        251.6 |       274.3 |
+| 3.14t       | eager                         |        315.0 |        318.9 |       354.8 |
+| 3.15        | eager                         |        248.9 |        255.0 |       287.5 |
+| 3.15        | `lazy` keyword                |     **38.0** |     **46.9** |       285.5 |
+| 3.15        | `__lazy_modules__`            |     **35.8** |     **44.7** |       285.4 |
+| 3.15        | eager + `-X lazy_imports=all` |     **35.6** |     **40.6** |   **210.9** |
+| 3.15t       | eager                         |        317.4 |        331.7 |       348.8 |
+| 3.15t       | `lazy` keyword                |     **48.1** |     **57.2** |       368.2 |
+| 3.15t       | eager + `-X lazy_imports=all` |     **41.9** |     **50.0** |   **251.4** |
 
-**`-X lazy_imports=all` on `report`: fewer modules, and this time reliably faster.** It loaded 266 modules instead
-of 386 and cut the median from 88 ms to 69 ms on 3.15 — 22% — with 21% on 3.15t and 27–28% on both builds in the
-container. On my pre-release run this was within noise, so I called it a maybe. On 3.15.0 final it is the only
-variant that speeds up the command that uses everything, and it's the reason to consider the process-wide switch
-for a CLI you control end to end.
+A bare `python -c pass` cost 16.1 ms on 3.15, 15.8 ms on 3.14, 23.8 ms on 3.15t and 21.8 ms on 3.14t in the container.
+
+**The headline holds on both machines.** On the M3, `fleetctl version` went from 81 ms to 18–19 ms, **more than
+4× faster**, within about 7 ms of the bare-interpreter floor. In the container it went from 249 ms to 36–38 ms,
+nearly **7×** — a slower machine spends more of its startup inside the imports you just deferred, so it has more
+to gain. `summary` improved just as much in both. All three ways of turning laziness on landed in the same place.
+
+**Read the rest of the tables with the noise in mind.** On the M3 the lazy rows vary by well under a millisecond
+(standard deviations of 0.2–0.9 ms) and the eager rows by 1–10 ms; the container is proportionally noisier. That
+is tight enough to trust the large gaps and too loose to rank rows a few milliseconds apart. `__lazy_modules__` on
+3.14 is the built-in control — it does nothing on that version, and it still lands 7 ms "ahead" of eager on
+`report` on the M3 and 10 ms "ahead" in the container. Treat the `report` column the same way: every per-file
+variant loads every module the command uses, so the spread there is noise, not a ranking.
+
+**`-X lazy_imports=all` on `report`: fewer modules, and this time reliably faster.** It loads 266 modules instead
+of 386 and cut the median from 88 ms to 69 ms on 3.15 on the M3 — 22% — with 21% on 3.15t. The container agrees
+more emphatically: 27% on 3.15 (288 ms to 211 ms) and 28% on 3.15t, against a standard deviation of about 21 ms,
+so it is well outside the noise. On my pre-release run this was within noise and I called it a maybe; on 3.15.0
+final it is the only variant that speeds up the command that uses everything.
 
 ## Gotchas
 
@@ -179,12 +204,23 @@ across 1, 2 and 4 threads, keeps the best of three runs, and runs the same work 
 `ProcessPoolExecutor` as the "what you'd do today" baseline. It also checks `sys._is_gil_enabled()` at runtime,
 because importing a C extension that isn't marked free-threading-safe can silently turn the GIL back on.
 
+**M3 Pro, 12 cores:**
+
 | Interpreter | GIL | 1 thread | 2 threads |         4 threads | 4 processes |
 | ----------- | --- | -------: | --------: | ----------------: | ----------: |
-| 3.14        | on  |  11.27 s |   10.92 s |           10.83 s |      3.09 s |
+| 3.14        | on  |  11.27 s |   10.92 s |    10.83 s (1.0×) |      3.09 s |
 | 3.14t       | off |  11.02 s |    5.90 s | **3.00 s** (3.7×) |      2.99 s |
-| 3.15        | on  |  11.29 s |   11.32 s |           11.29 s |      3.18 s |
+| 3.15        | on  |  11.29 s |   11.32 s |    11.29 s (1.0×) |      3.18 s |
 | 3.15t       | off |  11.73 s |    6.25 s | **3.22 s** (3.6×) |      3.21 s |
+
+**Linux container, 4 shared cores:**
+
+| Interpreter | GIL | 1 thread | 2 threads |         4 threads | 4 processes |
+| ----------- | --- | -------: | --------: | ----------------: | ----------: |
+| 3.14        | on  |  17.49 s |   18.68 s |    19.89 s (0.9×) |      4.85 s |
+| 3.14t       | off |  18.97 s |   10.09 s | **5.16 s** (3.7×) |      5.20 s |
+| 3.15        | on  |  18.41 s |   19.71 s |    20.01 s (0.9×) |      5.01 s |
+| 3.15t       | off |  19.29 s |   10.25 s | **5.48 s** (3.5×) |      5.38 s |
 
 - **The GIL builds don't scale at all.** On the M3, 1, 2 and 4 threads all landed within half a second of 11.3 s.
   On the 4-core container they got _measurably worse_ with more threads (0.9× at four), which is contention cost
@@ -209,10 +245,19 @@ CPython's experimental JIT first shipped as a build-time option in 3.13. The uv-
 it, off by default, and `PYTHON_JIT=1` turns it on. The benchmark runs every interpreter a second time with it set,
 and drops the row if `sys._jit.is_enabled()` says it didn't engage:
 
+**M3 Pro:**
+
 | Interpreter | 1 thread, JIT off | 1 thread, `PYTHON_JIT=1` | 4 processes, JIT off | 4 processes, `PYTHON_JIT=1` |
 | ----------- | ----------------: | -----------------------: | -------------------: | --------------------------: |
 | 3.14        |           11.27 s |                  11.14 s |               3.09 s |                      3.02 s |
 | 3.15        |           11.29 s |               **5.48 s** |               3.18 s |                  **1.61 s** |
+
+**Linux container:**
+
+| Interpreter | 1 thread, JIT off | 1 thread, `PYTHON_JIT=1` | 4 processes, JIT off | 4 processes, `PYTHON_JIT=1` |
+| ----------- | ----------------: | -----------------------: | -------------------: | --------------------------: |
+| 3.14        |           17.49 s |                  18.30 s |               4.85 s |                      4.96 s |
+| 3.15        |           18.41 s |              **10.30 s** |               5.01 s |                  **2.88 s** |
 
 This is the most surprising result in the post:
 
