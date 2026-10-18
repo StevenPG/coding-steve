@@ -3,7 +3,7 @@ title: Java Version Guide
 description: What's new in each Java release from 8 onward, with LTS versions marked and links to release notes.
 slug: java-version-guide
 pubDatetime: 2026-06-26T12:00:00.000Z
-modDatetime: 2026-08-11T12:00:00.000Z
+modDatetime: 2026-10-18T12:00:00.000Z
 tags:
   - java
 order: 1
@@ -21,6 +21,19 @@ highlights and a link to the release notes. For the complete picture of any vers
 ## Releases
 
 <details class="ref-box" open>
+<summary><span class="ref-box-title">Java 27</span><span class="ref-box-date">Sep 2026</span></summary>
+
+- **G1 is now the default garbage collector in all environments** — replaces the serial/parallel picks that used to kick in on small or single-core machines ([JEP 523](https://openjdk.org/jeps/523))
+- **Compact object headers on by default** — smaller per-object overhead across the heap, previously experimental ([JEP 534](https://openjdk.org/jeps/534))
+- **Post-quantum hybrid key exchange for TLS 1.3** — hardens the TLS handshake against future quantum attacks ([JEP 527](https://openjdk.org/jeps/527))
+- **JFR in-process data redaction** — strip sensitive fields from Flight Recorder output before it ever leaves the process ([JEP 536](https://openjdk.org/jeps/536))
+- Still in preview/incubator: lazy constants (3rd preview, [JEP 531](https://openjdk.org/jeps/531)), primitive types in patterns (5th preview, [JEP 532](https://openjdk.org/jeps/532)), structured concurrency (7th preview, [JEP 533](https://openjdk.org/jeps/533)), PEM encodings (3rd preview, [JEP 538](https://openjdk.org/jeps/538)), Vector API (12th incubator, [JEP 537](https://openjdk.org/jeps/537))
+
+[Release notes →](https://openjdk.org/projects/jdk/27/)
+
+</details>
+
+<details class="ref-box">
 <summary><span class="ref-box-title">Java 26</span><span class="ref-box-date">Mar 2026</span></summary>
 
 - **HTTP/3 for the HTTP Client API** — talk to HTTP/3 servers with minimal code change ([JEP 517](https://openjdk.org/jeps/517))
@@ -228,17 +241,15 @@ highlights and a link to the release notes. For the complete picture of any vers
 
 </details>
 
-> **Java 27** (non-LTS) is the next feature release, with GA targeted for **September 15, 2026**. As of early August
-> 2026 it's in Rampdown Phase Two (began July 16) with the feature set frozen at nine JEPs; the initial release
-> candidate slipped from August 6 to **August 20** so it lands after the quarterly Critical Patch Update, leaving about
-> three weeks of RC feedback instead of five. The headliners: **compact object headers on by default**
-> ([JEP 534](https://openjdk.org/jeps/534)), **G1 as the default GC in all environments** ([JEP 523](https://openjdk.org/jeps/523)),
-> **post-quantum hybrid key exchange for TLS 1.3** ([JEP 527](https://openjdk.org/jeps/527)), and **JFR in-process data
-> redaction** ([JEP 536](https://openjdk.org/jeps/536)). The rest are re-runs: lazy constants
-> ([JEP 531](https://openjdk.org/jeps/531)), primitive type patterns ([JEP 532](https://openjdk.org/jeps/532)),
-> structured concurrency ([JEP 533](https://openjdk.org/jeps/533)), PEM encodings ([JEP 538](https://openjdk.org/jeps/538)),
-> and a twelfth Vector API incubation ([JEP 537](https://openjdk.org/jeps/537)). See the
-> [JDK 27 project page](https://openjdk.org/projects/jdk/27/) for the latest.
+> **Java 27 reached GA on September 15, 2026**, shipping the nine JEPs listed above exactly as frozen at Rampdown
+> Phase Two. **Java 28** (non-LTS) is next, targeted for GA on **March 23, 2027**, with feature freeze (Rampdown Phase
+> One) expected in early December 2026. As of October 2026 it carries several targeted JEPs: deprecating the
+> **macOS/x64 port** for removal ([JEP 541](https://openjdk.org/jeps/541)), a **Simple JSON API** incubator
+> ([JEP 540](https://openjdk.org/jeps/540)), finalized **PEM encodings** ([JEP 542](https://openjdk.org/jeps/542)),
+> **strict field initialization in the JVM** (preview, [JEP 539](https://openjdk.org/jeps/539)), **generational
+> Shenandoah by default** ([JEP 535](https://openjdk.org/jeps/535)), and a preview of **value objects**
+> ([JEP 401](https://openjdk.org/jeps/401)) — Project Valhalla's first appearance in a feature release. See the
+> [JDK 28 project page](https://openjdk.org/projects/jdk/28/) for the latest.
 
 ## How Java Support Works
 

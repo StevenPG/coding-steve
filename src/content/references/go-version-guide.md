@@ -3,7 +3,7 @@ title: Go Version Guide
 description: What's new in each major Go release, with support status marked and links to release notes.
 slug: go-version-guide
 pubDatetime: 2026-06-26T12:00:00.000Z
-modDatetime: 2026-08-11T12:00:00.000Z
+modDatetime: 2026-10-18T12:00:00.000Z
 tags:
   - golang
 order: 2
@@ -19,32 +19,35 @@ painless.
 
 ## Release History
 
-| Version                                | Released | Highlights                                                                                                       |
-| :------------------------------------- | :------- | :--------------------------------------------------------------------------------------------------------------- |
-| [1.26](https://go.dev/doc/go1.26)      | Feb 2026 | **Green Tea GC default** (10–40% GC overhead reduction), self-referential generics, `go fix` rewrite with modernizers, `crypto/hpke`, `errors.AsType()`, `log/slog.NewMultiHandler()`, post-quantum TLS hybrids default, ~30% faster cgo calls |
-| [1.25](https://go.dev/doc/go1.25)      | Aug 2025 | Container-aware `GOMAXPROCS`, experimental Green Tea GC, `testing/synctest` graduated, experimental `encoding/json/v2` |
-| [1.24](https://go.dev/doc/go1.24)      | Feb 2025 | Generic type aliases, faster Swiss Table maps, tool dependencies in `go.mod` (`go tool`), `os.Root`, weak pointers, FIPS 140-3 |
-| [1.23](https://go.dev/doc/go1.23)      | Aug 2024 | **Range-over-function iterators** (`iter`), `unique` package, timer/ticker GC improvements                       |
-| [1.22](https://go.dev/doc/go1.22)      | Feb 2024 | **Per-iteration loop variables**, range over integers, enhanced `net/http` routing patterns, `math/rand/v2`      |
-| [1.21](https://go.dev/doc/go1.21)      | Aug 2023 | `min`/`max`/`clear` builtins, `slices`/`maps`/`cmp` packages, structured logging (`log/slog`), PGO GA            |
-| [1.20](https://go.dev/doc/go1.20)      | Feb 2023 | `errors.Join` (wrapping multiple errors), profile-guided optimization (preview)                                  |
-| [1.18](https://go.dev/doc/go1.18)      | Mar 2022 | **Generics (type parameters)**, native fuzzing, multi-module workspaces                                          |
-| [1.16](https://go.dev/doc/go1.16)      | Feb 2021 | `embed` package, modules on by default, `io/fs` abstraction                                                      |
-| [1.13](https://go.dev/doc/go1.13)      | Sep 2019 | Error wrapping (`%w`, `errors.Is`/`errors.As`), new number literal syntax                                        |
-| [1.11](https://go.dev/doc/go1.11)      | Aug 2018 | **Go Modules** (experimental), WebAssembly port                                                                  |
-| [1.7](https://go.dev/doc/go1.7)        | Aug 2016 | `context` package moved into the standard library, SSA compiler backend                                          |
-| [1.5](https://go.dev/doc/go1.5)        | Aug 2015 | Compiler & runtime rewritten in Go, concurrent low-latency GC, `GOMAXPROCS` defaults to all CPUs                 |
-| [1.0](https://go.dev/doc/go1)          | Mar 2012 | First stable release &mdash; the Go 1 compatibility guarantee begins                                             |
+| Version                           | Released | Highlights                                                                                                                                                                                                                                                                         |
+| :-------------------------------- | :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [1.27](https://go.dev/doc/go1.27) | Aug 2026 | **Generic methods** (methods can declare their own type parameters), `encoding/json/v2` & `jsontext` GA, `crypto/mldsa` (post-quantum ML-DSA) and a new `uuid` package, GA goroutine leak profiles, ~30% faster small allocations, experimental `simd` package, macOS 13+ required |
+| [1.26](https://go.dev/doc/go1.26) | Feb 2026 | **Green Tea GC default** (10–40% GC overhead reduction), self-referential generics, `go fix` rewrite with modernizers, `crypto/hpke`, `errors.AsType()`, `log/slog.NewMultiHandler()`, post-quantum TLS hybrids default, ~30% faster cgo calls                                     |
+| [1.25](https://go.dev/doc/go1.25) | Aug 2025 | Container-aware `GOMAXPROCS`, experimental Green Tea GC, `testing/synctest` graduated, experimental `encoding/json/v2`                                                                                                                                                             |
+| [1.24](https://go.dev/doc/go1.24) | Feb 2025 | Generic type aliases, faster Swiss Table maps, tool dependencies in `go.mod` (`go tool`), `os.Root`, weak pointers, FIPS 140-3                                                                                                                                                     |
+| [1.23](https://go.dev/doc/go1.23) | Aug 2024 | **Range-over-function iterators** (`iter`), `unique` package, timer/ticker GC improvements                                                                                                                                                                                         |
+| [1.22](https://go.dev/doc/go1.22) | Feb 2024 | **Per-iteration loop variables**, range over integers, enhanced `net/http` routing patterns, `math/rand/v2`                                                                                                                                                                        |
+| [1.21](https://go.dev/doc/go1.21) | Aug 2023 | `min`/`max`/`clear` builtins, `slices`/`maps`/`cmp` packages, structured logging (`log/slog`), PGO GA                                                                                                                                                                              |
+| [1.20](https://go.dev/doc/go1.20) | Feb 2023 | `errors.Join` (wrapping multiple errors), profile-guided optimization (preview)                                                                                                                                                                                                    |
+| [1.18](https://go.dev/doc/go1.18) | Mar 2022 | **Generics (type parameters)**, native fuzzing, multi-module workspaces                                                                                                                                                                                                            |
+| [1.16](https://go.dev/doc/go1.16) | Feb 2021 | `embed` package, modules on by default, `io/fs` abstraction                                                                                                                                                                                                                        |
+| [1.13](https://go.dev/doc/go1.13) | Sep 2019 | Error wrapping (`%w`, `errors.Is`/`errors.As`), new number literal syntax                                                                                                                                                                                                          |
+| [1.11](https://go.dev/doc/go1.11) | Aug 2018 | **Go Modules** (experimental), WebAssembly port                                                                                                                                                                                                                                    |
+| [1.7](https://go.dev/doc/go1.7)   | Aug 2016 | `context` package moved into the standard library, SSA compiler backend                                                                                                                                                                                                            |
+| [1.5](https://go.dev/doc/go1.5)   | Aug 2015 | Compiler & runtime rewritten in Go, concurrent low-latency GC, `GOMAXPROCS` defaults to all CPUs                                                                                                                                                                                   |
+| [1.0](https://go.dev/doc/go1)     | Mar 2012 | First stable release &mdash; the Go 1 compatibility guarantee begins                                                                                                                                                                                                               |
 
-> **[Go 1.27](https://go.dev/doc/go1.27)** is expected in **August 2026**; as of mid-August the latest stable release
-> is still 1.26.x and **release candidate 2** (July 7) is the newest 1.27 build. Highlights from the draft release
-> notes: **generic methods** (methods can declare their own type parameters), **`encoding/json/v2` GA** &mdash;
-> `encoding/json` is now backed by the v2 implementation, with `GOEXPERIMENT=nojsonv2` as a temporary opt-out &mdash; a
-> new `uuid` package, `crypto/mldsa` (post-quantum ML-DSA), an experimental `simd` package (`GOEXPERIMENT=simd`),
-> generally available goroutine leak profiles, struct literal keys as any field selector, generalized function type
-> inference, `go mod tidy` merging duplicate `require` blocks, the `stdversion` vet check on by default in `go test`,
-> and ~30% faster small allocations. macOS 13 Ventura or later is now required. See the
-> [release history](https://go.dev/doc/devel/release) for published versions and the
+> **[Go 1.27](https://go.dev/doc/go1.27) shipped on schedule in August 2026.** Beyond the table above, it also added
+> response-file (`@file`) support to `compile`/`link`/`asm`/`cgo`/`cover`/`pack`, generalized function type inference,
+> struct literal keys as any field selector, `go mod tidy` merging duplicate `require` blocks, the `stdversion` vet
+> check on by default in `go test`, and bumped the bundled Unicode tables from 15 to 17. `gofmt`'s alignment logic
+> changed slightly, so expect minor whitespace diffs the first time you reformat.
+>
+> **Go 1.28** is next, expected around **February 2027** under the usual six-month cadence. As of October 2026 no
+> feature list has been finalized &mdash; community proposals under discussion include SIMD package graduation,
+> revived generic container types, and changes to the Cgo toolchain, but none are confirmed yet. Track progress via
+> the [draft release notes](https://tip.golang.org/doc/go1.28), the
+> [release history](https://go.dev/doc/devel/release) for published versions, and the
 > [milestone tracker](https://github.com/golang/go/milestones) for what's landing.
 
 ## How Go Support Works
