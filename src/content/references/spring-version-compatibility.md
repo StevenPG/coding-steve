@@ -12,7 +12,7 @@ order: 0
 ---
 
 Quick lookup tables for aligning your JDK, Gradle, Spring Boot, and Spring Cloud versions. Kept current as new versions
-ship &mdash; bookmark it. For the official, authoritative matrix, see Spring's
+ship, so bookmark it. For the official, authoritative matrix, see Spring's
 [Support Mapping](https://spring.io/projects/generations).
 
 **Jump to:** [Spring Boot &harr; Java](#spring-boot--java) &middot;
@@ -40,7 +40,7 @@ ship &mdash; bookmark it. For the official, authoritative matrix, see Spring's
 | 1.5.x               | Java 6 - 8                                    |
 
 Rows marked _(upcoming)_ are still in milestones and will be confirmed at GA. Spring Boot 4.x and 3.x baseline on
-Java 17. As of October 2026, only **4.1.x** (released June 2026) and **4.0.x** are in open-source support &mdash; 4.0.x
+Java 17. As of October 2026, only **4.1.x** (released June 2026) and **4.0.x** are in open-source support: 4.0.x
 until **December 31, 2026** and 4.1.x until **July 31, 2027**. **3.5.x reached OSS end-of-life on June 30, 2026**
 (commercial support continues). The next feature release, **4.2**, is still pre-GA
 ([4.2.0-M2](https://spring.io/blog/2026/09/25/spring-boot-4-2-0-M2-available-now/) shipped September 24&ndash;25,
@@ -66,9 +66,9 @@ to target Java 27, and is expected to go GA in November 2026. Source:
 | Edgware                                                                                                             | Spring Boot 1.5.x                                                             |
 
 Rows marked _(upcoming)_ are still in milestones and will be confirmed at GA. Don't mix trains and Boot versions
-arbitrarily &mdash; always confirm against the specific release train's docs. As of October 2026 the current train is **Oakwood** (latest patch:
+arbitrarily; always confirm against the specific release train's docs. As of October 2026 the current train is **Oakwood** (latest patch:
 [2025.1.3](https://spring.io/blog/2026/08/20/spring-cloud-2025-1-3-has-been-released/), August 2026, a
-security-focused release with 17 CVE fixes across Commons, Config, Function, Gateway, and Stream &mdash; upgrade if
+security-focused release with 17 CVE fixes across Commons, Config, Function, Gateway, and Stream; upgrade if
 you're on an earlier 2025.1.x). The next train, **2026.0.x (Paddington)**, reached
 [2026.0.0-M1](https://spring.io/blog/2026/09/24/spring-cloud-2026-0-0-M1-has-been-released/) in September 2026 against
 Spring Boot 4.2.0-M2 and should ship alongside Boot 4.2; no M2 had been published as of this review.
@@ -92,7 +92,7 @@ Spring Boot 4.2.0-M2 and should ship alongside Boot 4.2; no M2 had been publishe
 | 6.7            | Java 15                       |
 
 Shows the Gradle version that _first_ added support for running on each Java release (latest is Gradle 9.8.1, October
-2026 &mdash; a patch release fixing three high-severity vulnerabilities, recommended over 9.8.0). Gradle 9.8 added full
+2026, a patch release fixing three high-severity vulnerabilities, recommended over 9.8.0). Gradle 9.8 added full
 Java 27 support for both toolchains and the daemon, so Gradle itself now runs on Java 17&ndash;27 (note: Gradle isn't
 tested on macOS `AMD64` with Java 27+). You can still compile/test against newer JDKs via toolchains while running
 Gradle itself on an older supported JVM. Source:
