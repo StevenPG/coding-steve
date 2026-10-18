@@ -21,8 +21,9 @@ description: Python 3.15 adds the lazy keyword for imports (PEP 810), a stable A
 
 # Why this release is worth a benchmark
 
-Python 3.15.0 shipped on October 1. Most releases come with a list of nice things that don't change
-how your code performs. This one ships two things that do:
+[Python 3.15.0](https://www.python.org/downloads/release/python-3150/) was released on **October 9, 2026**, a
+week later than the originally scheduled October 1. Most releases come with a list of nice things that don't
+change how your code performs. This one ships two things that do:
 
 - **[PEP 810](https://peps.python.org/pep-0810/): explicit lazy imports.** `lazy import json` binds the name
   now and runs the import the first time you touch it. Every CLI with a heavy import block can start faster.
