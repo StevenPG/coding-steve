@@ -55,6 +55,13 @@
   tfoot td:first-child {
     padding-left: 0.5714286em;
   }
+  /* On narrow screens a wide table scrolls inside itself instead of
+     making the whole page scroll sideways. */
+  @media (max-width: 639px) {
+    .prose table {
+      @apply block max-w-full overflow-x-auto;
+    }
+  }
   .prose h2#table-of-contents {
     @apply mb-2;
   }
