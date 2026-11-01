@@ -3,7 +3,7 @@ title: Spring Version Compatibility Cheatsheet
 description: A continuously updated reference for aligning Java, Gradle, Spring Boot, and Spring Cloud versions.
 slug: spring-version-compatibility
 pubDatetime: 2025-05-04T12:00:00.000Z
-modDatetime: 2026-10-18T12:00:00.000Z
+modDatetime: 2026-11-01T12:00:00.000Z
 tags:
   - gradle
   - java
@@ -39,45 +39,46 @@ ship, so bookmark it. For the official, authoritative matrix, see Spring's
 | 2.0.x               | Java 8 - 9                                    |
 | 1.5.x               | Java 6 - 8                                    |
 
-Rows marked _(upcoming)_ are still in milestones and will be confirmed at GA. Spring Boot 4.x and 3.x baseline on
-Java 17. As of October 2026, only **4.1.x** (released June 2026) and **4.0.x** are in open-source support: 4.0.x
+Rows marked _(upcoming)_ are still pre-GA and will be confirmed at release. Spring Boot 4.x and 3.x baseline on
+Java 17. As of November 2026, only **4.1.x** (released June 2026) and **4.0.x** are in open-source support: 4.0.x
 until **December 31, 2026** and 4.1.x until **July 31, 2027**. **3.5.x reached OSS end-of-life on June 30, 2026**
-(commercial support continues). The next feature release, **4.2**, is still pre-GA
-([4.2.0-M2](https://spring.io/blog/2026/09/25/spring-boot-4-2-0-M2-available-now/) shipped September 24&ndash;25,
-2026; RC1 is [due around October 22](https://github.com/spring-projects/spring-boot/milestones)), is the first line
-to target Java 27, and is expected to go GA in November 2026. Source:
-[endoflife.date](https://endoflife.date/spring-boot#java-compatibility).
+(commercial support continues). Patch releases **4.1.2** and **4.0.9** shipped October 23, 2026, alongside
+[4.2.0-RC1](https://spring.io/blog/2026/10/23/spring-boot-4-2-0-RC1-available-now/), which swaps in a new default
+Buildpacks builder (`paketobuildpacks/ubuntu-resolute-builder`, on an Ubuntu 26.04 base) ahead of **4.2** going GA.
+The next feature release is the first line to target Java 27 and is still expected to reach GA in November 2026.
+Source: [endoflife.date](https://endoflife.date/spring-boot#java-compatibility).
 
 ## Spring Cloud &harr; Spring Boot
 
-| Spring Cloud Release Train                                                                                          | Corresponding Spring Boot Version                                             |
-| :------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------- |
-| [2026.0.x (Paddington)](https://spring.io/blog/2026/09/24/spring-cloud-2026-0-0-M1-has-been-released/) _(upcoming)_ | Spring Boot 4.2.x                                                             |
-| [2025.1.x (Oakwood)](https://spring.io/blog/2025/11/25/spring-cloud-2025-1-0-aka-oakwood-has-been-released)         | [Spring Boot 4.0.x / 4.1.x](https://spring.io/blog/2026/06/10/spring-boot-4/) |
-| [2025.0.x (Northfields)](https://spring.io/blog/2025/05/29/spring-cloud-2025-0-0-is-abvailable)                     | Spring Boot 3.5.x                                                             |
-| [2024.0.x (Moorgate)](https://spring.io/blog/2024/12/03/spring-cloud-2024-0-0)                                      | Spring Boot 3.4.x                                                             |
-| [2023.0.x (Leyton)](https://spring.io/blog/2023/12/06/spring-cloud-2023-0-0-aka-leyton-is-now-available)            | Spring Boot 3.2.x / 3.3.x                                                     |
-| 2022.0.x (Kilburn)                                                                                                  | Spring Boot 3.0.x / 3.1.x                                                     |
-| 2021.0.x (Jubilee)                                                                                                  | Spring Boot 2.6.x / 2.7.x                                                     |
-| 2020.0.x (Ilford)                                                                                                   | Spring Boot 2.4.x / 2.5.x                                                     |
-| Hoxton                                                                                                              | Spring Boot 2.2.x / 2.3.x                                                     |
-| Greenwich                                                                                                           | Spring Boot 2.1.x                                                             |
-| Finchley                                                                                                            | Spring Boot 2.0.x                                                             |
-| Edgware                                                                                                             | Spring Boot 1.5.x                                                             |
+| Spring Cloud Release Train                                                                                           | Corresponding Spring Boot Version                                             |
+| :------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- |
+| [2026.0.x (Paddington)](https://spring.io/blog/2026/10/23/spring-cloud-2026-0-0-RC1-has-been-released/) _(upcoming)_ | Spring Boot 4.2.x                                                             |
+| [2025.1.x (Oakwood)](https://spring.io/blog/2025/11/25/spring-cloud-2025-1-0-aka-oakwood-has-been-released)          | [Spring Boot 4.0.x / 4.1.x](https://spring.io/blog/2026/06/10/spring-boot-4/) |
+| [2025.0.x (Northfields)](https://spring.io/blog/2025/05/29/spring-cloud-2025-0-0-is-abvailable)                      | Spring Boot 3.5.x                                                             |
+| [2024.0.x (Moorgate)](https://spring.io/blog/2024/12/03/spring-cloud-2024-0-0)                                       | Spring Boot 3.4.x                                                             |
+| [2023.0.x (Leyton)](https://spring.io/blog/2023/12/06/spring-cloud-2023-0-0-aka-leyton-is-now-available)             | Spring Boot 3.2.x / 3.3.x                                                     |
+| 2022.0.x (Kilburn)                                                                                                   | Spring Boot 3.0.x / 3.1.x                                                     |
+| 2021.0.x (Jubilee)                                                                                                   | Spring Boot 2.6.x / 2.7.x                                                     |
+| 2020.0.x (Ilford)                                                                                                    | Spring Boot 2.4.x / 2.5.x                                                     |
+| Hoxton                                                                                                               | Spring Boot 2.2.x / 2.3.x                                                     |
+| Greenwich                                                                                                            | Spring Boot 2.1.x                                                             |
+| Finchley                                                                                                             | Spring Boot 2.0.x                                                             |
+| Edgware                                                                                                              | Spring Boot 1.5.x                                                             |
 
-Rows marked _(upcoming)_ are still in milestones and will be confirmed at GA. Don't mix trains and Boot versions
-arbitrarily; always confirm against the specific release train's docs. As of October 2026 the current train is **Oakwood** (latest patch:
-[2025.1.3](https://spring.io/blog/2026/08/20/spring-cloud-2025-1-3-has-been-released/), August 2026, a
-security-focused release with 17 CVE fixes across Commons, Config, Function, Gateway, and Stream; upgrade if
-you're on an earlier 2025.1.x). The next train, **2026.0.x (Paddington)**, reached
-[2026.0.0-M1](https://spring.io/blog/2026/09/24/spring-cloud-2026-0-0-M1-has-been-released/) in September 2026 against
-Spring Boot 4.2.0-M2 and should ship alongside Boot 4.2; no M2 had been published as of this review.
+Rows marked _(upcoming)_ are still pre-GA and will be confirmed at release. Don't mix trains and Boot versions
+arbitrarily; always confirm against the specific release train's docs. As of November 2026 the current train is **Oakwood** (latest patch:
+[2025.1.4](https://spring.io/blog/2026/10/23/spring-cloud-2025-1-4-has-been-released/), October 23, 2026, a
+bug-fix release built on Spring Boot 4.0.9 that also supports 4.1.2; upgrade if you're on an earlier 2025.1.x). The
+next train, **2026.0.x (Paddington)**, skipped a second milestone and jumped straight from
+[2026.0.0-M1](https://spring.io/blog/2026/09/24/spring-cloud-2026-0-0-M1-has-been-released/) (September 2026) to
+[2026.0.0-RC1](https://spring.io/blog/2026/10/23/spring-cloud-2026-0-0-RC1-has-been-released/) on October 23, 2026,
+and should ship alongside Boot 4.2.
 
 ## Gradle &harr; Java
 
 | Gradle Version | Latest Supported Java Version |
 | :------------- | :---------------------------- |
-| 9.8.1          | Java 27                       |
+| 9.8            | Java 27                       |
 | 9.4            | Java 26                       |
 | 9.1            | Java 25                       |
 | 8.14           | Java 24                       |
@@ -91,11 +92,13 @@ Spring Boot 4.2.0-M2 and should ship alongside Boot 4.2; no M2 had been publishe
 | 7.0            | Java 16                       |
 | 6.7            | Java 15                       |
 
-Shows the Gradle version that _first_ added support for running on each Java release (latest is Gradle 9.8.1, October
-2026, a patch release fixing three high-severity vulnerabilities, recommended over 9.8.0). Gradle 9.8 added full
-Java 27 support for both toolchains and the daemon, so Gradle itself now runs on Java 17&ndash;27 (note: Gradle isn't
-tested on macOS `AMD64` with Java 27+). You can still compile/test against newer JDKs via toolchains while running
-Gradle itself on an older supported JVM. Source:
+Shows the Gradle version that _first_ added support for running on each Java release. Gradle 9.8 added full Java 27
+support for both toolchains and the daemon, so Gradle itself now runs on Java 17&ndash;27 (note: Gradle isn't tested
+on macOS `AMD64` with Java 27+). The latest stable patch is **9.8.2** (October 19, 2026, adding Java 27 toolchain
+fixes, Maven mirror-settings reuse, and linked problem locations in build output); 9.8.1 (October 7, 2026) was a
+security patch for 9.8.0. **9.9.0-RC1** shipped October 30, 2026 with Kotlin DSL compilation performance work and
+test filtering for non-method JUnit Platform tests, but hasn't reached GA yet. You can still compile/test against
+newer JDKs via toolchains while running Gradle itself on an older supported JVM. Source:
 [Gradle compatibility docs](https://docs.gradle.org/current/userguide/compatibility.html).
 
 ---
