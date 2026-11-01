@@ -3,14 +3,14 @@ title: Java Version Guide
 description: What's new in each Java release from 8 onward, with LTS versions marked and links to release notes.
 slug: java-version-guide
 pubDatetime: 2026-06-26T12:00:00.000Z
-modDatetime: 2026-10-18T12:00:00.000Z
+modDatetime: 2026-11-01T12:00:00.000Z
 tags:
   - java
 order: 1
 ---
 
 A "what's new" for every Java feature release since Java 8. Since Java 9, a feature release ships every **six months**
-(March and September). **LTS** (Long-Term Support) releases &mdash; the ones most teams standardize on &mdash; now
+(March and September). **LTS** (Long-Term Support) releases, the ones most teams standardize on, now
 arrive every **two years**; earlier they were three years apart.
 
 **LTS line:** 8 &middot; 11 &middot; 17 &middot; 21 &middot; 25 (next: **29** in September 2027, per
@@ -23,10 +23,10 @@ highlights and a link to the release notes. For the complete picture of any vers
 <details class="ref-box" open>
 <summary><span class="ref-box-title">Java 27</span><span class="ref-box-date">Sep 2026</span></summary>
 
-- **G1 is now the default garbage collector in all environments** — replaces the serial/parallel picks that used to kick in on small or single-core machines ([JEP 523](https://openjdk.org/jeps/523))
-- **Compact object headers on by default** — smaller per-object overhead across the heap, previously experimental ([JEP 534](https://openjdk.org/jeps/534))
-- **Post-quantum hybrid key exchange for TLS 1.3** — hardens the TLS handshake against future quantum attacks ([JEP 527](https://openjdk.org/jeps/527))
-- **JFR in-process data redaction** — strip sensitive fields from Flight Recorder output before it ever leaves the process ([JEP 536](https://openjdk.org/jeps/536))
+- **G1 is now the default garbage collector in all environments**: replaces the serial/parallel picks that used to kick in on small or single-core machines ([JEP 523](https://openjdk.org/jeps/523))
+- **Compact object headers on by default**: smaller per-object overhead across the heap, previously experimental ([JEP 534](https://openjdk.org/jeps/534))
+- **Post-quantum hybrid key exchange for TLS 1.3**: hardens the TLS handshake against future quantum attacks ([JEP 527](https://openjdk.org/jeps/527))
+- **JFR in-process data redaction**: strip sensitive fields from Flight Recorder output before it ever leaves the process ([JEP 536](https://openjdk.org/jeps/536))
 - Still in preview/incubator: lazy constants (3rd preview, [JEP 531](https://openjdk.org/jeps/531)), primitive types in patterns (5th preview, [JEP 532](https://openjdk.org/jeps/532)), structured concurrency (7th preview, [JEP 533](https://openjdk.org/jeps/533)), PEM encodings (3rd preview, [JEP 538](https://openjdk.org/jeps/538)), Vector API (12th incubator, [JEP 537](https://openjdk.org/jeps/537))
 
 [Release notes →](https://openjdk.org/projects/jdk/27/)
@@ -36,10 +36,10 @@ highlights and a link to the release notes. For the complete picture of any vers
 <details class="ref-box">
 <summary><span class="ref-box-title">Java 26</span><span class="ref-box-date">Mar 2026</span></summary>
 
-- **HTTP/3 for the HTTP Client API** — talk to HTTP/3 servers with minimal code change ([JEP 517](https://openjdk.org/jeps/517))
-- **Ahead-of-time object caching with any GC** — Project Leyden's AOT cache now works with ZGC and friends ([JEP 516](https://openjdk.org/jeps/516))
-- **G1 throughput boost** — dual card tables cut synchronization; 5–15% gains for write-heavy apps ([JEP 522](https://openjdk.org/jeps/522))
-- **Warnings for deep-reflection mutation of final fields** — first step toward making `final` really mean final ([JEP 500](https://openjdk.org/jeps/500))
+- **HTTP/3 for the HTTP Client API**: talk to HTTP/3 servers with minimal code change ([JEP 517](https://openjdk.org/jeps/517))
+- **Ahead-of-time object caching with any GC**: Project Leyden's AOT cache now works with ZGC and friends ([JEP 516](https://openjdk.org/jeps/516))
+- **G1 throughput boost**: dual card tables cut synchronization; 5–15% gains for write-heavy apps ([JEP 522](https://openjdk.org/jeps/522))
+- **Warnings for deep-reflection mutation of final fields**: first step toward making `final` really mean final ([JEP 500](https://openjdk.org/jeps/500))
 - The **Applet API is gone** at last ([JEP 504](https://openjdk.org/jeps/504))
 - Still in preview/incubator: lazy constants (formerly stable values, [JEP 526](https://openjdk.org/jeps/526)), structured concurrency ([JEP 525](https://openjdk.org/jeps/525)), primitive types in patterns ([JEP 530](https://openjdk.org/jeps/530)), PEM encodings ([JEP 524](https://openjdk.org/jeps/524)), Vector API ([JEP 529](https://openjdk.org/jeps/529))
 
@@ -50,10 +50,10 @@ highlights and a link to the release notes. For the complete picture of any vers
 <details class="ref-box">
 <summary><span class="ref-box-title">Java 25</span><span class="ref-box-date">Sep 2025</span><span class="ref-box-lts">LTS</span></summary>
 
-- **Flexible constructor bodies** — run statements before `this()`/`super()` ([JEP 513](https://openjdk.org/jeps/513))
-- **Module import declarations** — `import module M` to pull in a module's exported packages ([JEP 511](https://openjdk.org/jeps/511))
-- **Compact source files & instance `main` methods** — much smaller "hello world", great for learning ([JEP 512](https://openjdk.org/jeps/512))
-- **Scoped values** standardized — a safer, immutable alternative to thread-locals ([JEP 506](https://openjdk.org/jeps/506))
+- **Flexible constructor bodies**: run statements before `this()`/`super()` ([JEP 513](https://openjdk.org/jeps/513))
+- **Module import declarations**: `import module M` to pull in a module's exported packages ([JEP 511](https://openjdk.org/jeps/511))
+- **Compact source files & instance `main` methods**: much smaller "hello world", great for learning ([JEP 512](https://openjdk.org/jeps/512))
+- **Scoped values** standardized: a safer, immutable alternative to thread-locals ([JEP 506](https://openjdk.org/jeps/506))
 - Still in preview: primitive types in patterns, structured concurrency, stable values
 
 [Release notes →](https://openjdk.org/projects/jdk/25/)
@@ -63,10 +63,10 @@ highlights and a link to the release notes. For the complete picture of any vers
 <details class="ref-box">
 <summary><span class="ref-box-title">Java 24</span><span class="ref-box-date">Mar 2025</span></summary>
 
-- **Stream Gatherers** standardized — custom intermediate stream operations ([JEP 485](https://openjdk.org/jeps/485))
-- **Class-File API** standardized — parse/generate `.class` files without ASM ([JEP 484](https://openjdk.org/jeps/484))
+- **Stream Gatherers** standardized: custom intermediate stream operations ([JEP 485](https://openjdk.org/jeps/485))
+- **Class-File API** standardized: parse/generate `.class` files without ASM ([JEP 484](https://openjdk.org/jeps/484))
 - Quantum-resistant cryptography: ML-KEM ([JEP 496](https://openjdk.org/jeps/496)) and ML-DSA ([JEP 497](https://openjdk.org/jeps/497))
-- **Ahead-of-time class loading & linking** — faster startup, part of Project Leyden ([JEP 483](https://openjdk.org/jeps/483))
+- **Ahead-of-time class loading & linking**: faster startup, part of Project Leyden ([JEP 483](https://openjdk.org/jeps/483))
 - Compact object headers (experimental); the Security Manager is now permanently disabled
 
 [Release notes →](https://openjdk.org/projects/jdk/24/)
@@ -76,7 +76,7 @@ highlights and a link to the release notes. For the complete picture of any vers
 <details class="ref-box">
 <summary><span class="ref-box-title">Java 23</span><span class="ref-box-date">Sep 2024</span></summary>
 
-- **Markdown in Javadoc** — write doc comments in Markdown ([JEP 467](https://openjdk.org/jeps/467))
+- **Markdown in Javadoc**: write doc comments in Markdown ([JEP 467](https://openjdk.org/jeps/467))
 - Generational ZGC becomes the default mode ([JEP 474](https://openjdk.org/jeps/474))
 - Primitive types in patterns, `instanceof`, and `switch` (preview)
 
@@ -87,7 +87,7 @@ highlights and a link to the release notes. For the complete picture of any vers
 <details class="ref-box">
 <summary><span class="ref-box-title">Java 22</span><span class="ref-box-date">Mar 2024</span></summary>
 
-- **Foreign Function & Memory API** standardized — call native code and manage off-heap memory, no JNI ([JEP 454](https://openjdk.org/jeps/454))
+- **Foreign Function & Memory API** standardized: call native code and manage off-heap memory, no JNI ([JEP 454](https://openjdk.org/jeps/454))
 - **Unnamed variables & patterns** (`_`) standardized ([JEP 456](https://openjdk.org/jeps/456))
 - Multi-file source-code programs via `java` launcher; statements before `super()` (preview)
 
@@ -98,10 +98,10 @@ highlights and a link to the release notes. For the complete picture of any vers
 <details class="ref-box">
 <summary><span class="ref-box-title">Java 21</span><span class="ref-box-date">Sep 2023</span><span class="ref-box-lts">LTS</span></summary>
 
-- **Virtual threads** standardized — cheap, massively scalable concurrency ([JEP 444](https://openjdk.org/jeps/444))
-- **Record patterns** standardized — destructure records in `switch`/`instanceof` ([JEP 440](https://openjdk.org/jeps/440))
+- **Virtual threads** standardized: cheap, massively scalable concurrency ([JEP 444](https://openjdk.org/jeps/444))
+- **Record patterns** standardized: destructure records in `switch`/`instanceof` ([JEP 440](https://openjdk.org/jeps/440))
 - **Pattern matching for `switch`** standardized ([JEP 441](https://openjdk.org/jeps/441))
-- **Sequenced collections** — uniform first/last access ([JEP 431](https://openjdk.org/jeps/431))
+- **Sequenced collections**: uniform first/last access ([JEP 431](https://openjdk.org/jeps/431))
 - Generational ZGC; string templates & unnamed patterns (preview)
 
 [Release notes →](https://openjdk.org/projects/jdk/21/)
@@ -141,7 +141,7 @@ highlights and a link to the release notes. For the complete picture of any vers
 <details class="ref-box">
 <summary><span class="ref-box-title">Java 17</span><span class="ref-box-date">Sep 2021</span><span class="ref-box-lts">LTS</span></summary>
 
-- **Sealed classes** standardized — restrict which types can extend/implement ([JEP 409](https://openjdk.org/jeps/409))
+- **Sealed classes** standardized: restrict which types can extend/implement ([JEP 409](https://openjdk.org/jeps/409))
 - New macOS rendering pipeline (Metal); strong encapsulation of JDK internals
 - The long-time baseline for Spring Boot 3.x and much of the modern ecosystem
 
@@ -162,7 +162,7 @@ highlights and a link to the release notes. For the complete picture of any vers
 <details class="ref-box">
 <summary><span class="ref-box-title">Java 15</span><span class="ref-box-date">Sep 2020</span></summary>
 
-- **Text blocks** standardized — multi-line string literals ([JEP 378](https://openjdk.org/jeps/378))
+- **Text blocks** standardized: multi-line string literals ([JEP 378](https://openjdk.org/jeps/378))
 - Sealed classes (preview); ZGC and Shenandoah become production-ready
 
 [Release notes →](https://openjdk.org/projects/jdk/15/)
@@ -213,7 +213,7 @@ highlights and a link to the release notes. For the complete picture of any vers
 <details class="ref-box">
 <summary><span class="ref-box-title">Java 10</span><span class="ref-box-date">Mar 2018</span></summary>
 
-- **`var`** — local-variable type inference ([JEP 286](https://openjdk.org/jeps/286))
+- **`var`**: local-variable type inference ([JEP 286](https://openjdk.org/jeps/286))
 - Application class-data sharing; parallel full GC for G1
 
 [Release notes →](https://openjdk.org/projects/jdk/10/)
@@ -233,7 +233,7 @@ highlights and a link to the release notes. For the complete picture of any vers
 <details class="ref-box">
 <summary><span class="ref-box-title">Java 8</span><span class="ref-box-date">Mar 2014</span><span class="ref-box-lts">LTS</span></summary>
 
-- **Lambda expressions** and the **Stream API** — the biggest language shift in Java's history
+- **Lambda expressions** and the **Stream API**: the biggest language shift in Java's history
 - The `java.time` (JSR-310) date/time API; default methods on interfaces; `Optional`
 - Still widely deployed; the last LTS before the modular era
 
@@ -242,25 +242,30 @@ highlights and a link to the release notes. For the complete picture of any vers
 </details>
 
 > **Java 27 reached GA on September 15, 2026**, shipping the nine JEPs listed above exactly as frozen at Rampdown
-> Phase Two. **Java 28** (non-LTS) is next, targeted for GA on **March 23, 2027**, with feature freeze (Rampdown Phase
-> One) expected in early December 2026. As of October 2026 it carries several targeted JEPs: deprecating the
-> **macOS/x64 port** for removal ([JEP 541](https://openjdk.org/jeps/541)), a **Simple JSON API** incubator
-> ([JEP 540](https://openjdk.org/jeps/540)), finalized **PEM encodings** ([JEP 542](https://openjdk.org/jeps/542)),
-> **strict field initialization in the JVM** (preview, [JEP 539](https://openjdk.org/jeps/539)), **generational
-> Shenandoah by default** ([JEP 535](https://openjdk.org/jeps/535)), and a preview of **value objects**
-> ([JEP 401](https://openjdk.org/jeps/401)) — Project Valhalla's first appearance in a feature release. See the
-> [JDK 28 project page](https://openjdk.org/projects/jdk/28/) for the latest.
+> Phase Two. **Java 28** (non-LTS) is next, with Rampdown Phase One on December 3, 2026, Rampdown Phase Two on
+> January 14, 2027, and GA now scheduled for **March 9, 2027**, per the [JDK 28 project page](https://openjdk.org/projects/jdk/28/).
+> As of November 2026 it carries ten targeted JEPs: deprecating the **macOS/x64 port** for removal
+> ([JEP 541](https://openjdk.org/jeps/541)), a **Simple JSON API** incubator ([JEP 540](https://openjdk.org/jeps/540)),
+> finalized **PEM encodings** ([JEP 542](https://openjdk.org/jeps/542)), **strict field initialization in the JVM**
+> (preview, [JEP 539](https://openjdk.org/jeps/539)), **generational Shenandoah by default**
+> ([JEP 535](https://openjdk.org/jeps/535)), and a preview of **value objects** ([JEP 401](https://openjdk.org/jeps/401)),
+> Project Valhalla's first appearance in a feature release. Four more JEPs were targeted since our last review:
+> **structured concurrency** finalizing after seven rounds of preview ([JEP 543](https://openjdk.org/jeps/543)),
+> **ahead-of-time code compilation** ([JEP 544](https://openjdk.org/jeps/544), which stores JIT-compiled native code
+> in the AOT cache, see our [benchmark deep-dive](/posts/java-28-aot-code-compilation-jep-544/) for the numbers), and
+> two ZGC improvements for **faster startup and warmup** ([JEP 545](https://openjdk.org/jeps/545)) and **adaptive
+> heap sizing** ([JEP 546](https://openjdk.org/jeps/546)).
 
 ## How Java Support Works
 
 - **Feature releases** ship every 6 months; each is supported only until the next one unless it's an LTS.
-- **LTS releases** (8, 11, 17, 21, 25, …) receive years of updates from OpenJDK distributors &mdash; Adoptium / Eclipse
+- **LTS releases** (8, 11, 17, 21, 25, …) receive years of updates from OpenJDK distributors: Adoptium / Eclipse
   Temurin, Amazon Corretto, Azul Zulu, Microsoft, Red Hat, and others. Most production systems run the latest LTS.
 - **Previews & incubators** are off by default and require `--enable-preview`. They can change or be removed before
-  standardization &mdash; don't ship them to production.
+  standardization, so don't ship them to production.
 
 ## Sources
 
-- [OpenJDK JDK projects](https://openjdk.org/projects/jdk/) &mdash; per-release JEP lists
-- [JEP index](https://openjdk.org/jeps/0) &mdash; every JDK Enhancement Proposal
-- [endoflife.date/java](https://endoflife.date/java) &mdash; support and EOL timelines
+- [OpenJDK JDK projects](https://openjdk.org/projects/jdk/): per-release JEP lists
+- [JEP index](https://openjdk.org/jeps/0): every JDK Enhancement Proposal
+- [endoflife.date/java](https://endoflife.date/java): support and EOL timelines

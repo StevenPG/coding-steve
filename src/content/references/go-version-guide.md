@@ -3,7 +3,7 @@ title: Go Version Guide
 description: What's new in each major Go release, with support status marked and links to release notes.
 slug: go-version-guide
 pubDatetime: 2026-06-26T12:00:00.000Z
-modDatetime: 2026-10-18T12:00:00.000Z
+modDatetime: 2026-11-01T12:00:00.000Z
 tags:
   - golang
 order: 2
@@ -14,7 +14,7 @@ and August) under the [Go 1 compatibility promise](https://go.dev/doc/go1compat)
 painless.
 
 > **Go has no LTS.** The Go team provides security and critical bug fixes for the **two most recent** major releases
-> only. In practice, staying within one or two versions of the latest is the supported path &mdash; there is no
+> only. In practice, staying within one or two versions of the latest is the supported path; there is no
 > long-term branch to pin to. Version numbers below link to the official release notes.
 
 ## Release History
@@ -35,17 +35,23 @@ painless.
 | [1.11](https://go.dev/doc/go1.11) | Aug 2018 | **Go Modules** (experimental), WebAssembly port                                                                                                                                                                                                                                    |
 | [1.7](https://go.dev/doc/go1.7)   | Aug 2016 | `context` package moved into the standard library, SSA compiler backend                                                                                                                                                                                                            |
 | [1.5](https://go.dev/doc/go1.5)   | Aug 2015 | Compiler & runtime rewritten in Go, concurrent low-latency GC, `GOMAXPROCS` defaults to all CPUs                                                                                                                                                                                   |
-| [1.0](https://go.dev/doc/go1)     | Mar 2012 | First stable release &mdash; the Go 1 compatibility guarantee begins                                                                                                                                                                                                               |
+| [1.0](https://go.dev/doc/go1)     | Mar 2012 | First stable release, the Go 1 compatibility guarantee begins                                                                                                                                                                                                                      |
 
 > **[Go 1.27](https://go.dev/doc/go1.27) shipped on schedule in August 2026.** Beyond the table above, it also added
 > response-file (`@file`) support to `compile`/`link`/`asm`/`cgo`/`cover`/`pack`, generalized function type inference,
 > struct literal keys as any field selector, `go mod tidy` merging duplicate `require` blocks, the `stdversion` vet
 > check on by default in `go test`, and bumped the bundled Unicode tables from 15 to 17. `gofmt`'s alignment logic
-> changed slightly, so expect minor whitespace diffs the first time you reformat.
+> changed slightly, so expect minor whitespace diffs the first time you reformat. Security-only patches followed:
+> **go1.27.2** (October 8, 2026, fixes across the `go` command, `crypto/tls`, `html/template`, `net/http`,
+> `net/textproto`, and `os`) and **go1.27.3** (October 19, 2026, a `crypto/x509` fix, paired with **go1.26.10** for
+> anyone still on the 1.26 line).
 >
-> **Go 1.28** is next, expected around **February 2027** under the usual six-month cadence. As of October 2026 no
-> feature list has been finalized &mdash; community proposals under discussion include SIMD package graduation,
-> revived generic container types, and changes to the Cgo toolchain, but none are confirmed yet. Track progress via
+> **Go 1.28** is next, expected around **February 2027** under the usual six-month cadence. As of November 2026 the
+> draft notes have real content: two new `go vet` analyzers (`scannererr`, `sqlrowserr`), a bootstrap requirement of
+> Go 1.26.0 or newer, stricter `crypto/x509` parsing that rejects trailing data, new `flag.FlagSet.All` and
+> `Flag.IsSet` helpers, a `net/url.MustParse` convenience, new `regexp` iterator methods, an `net/http` HTTP/2 server
+> change around idle goroutines, and Landlock policy support in `syscall.SysProcAttr` on Linux, alongside several
+> deprecations (`debug/pe.ImportDirectory`, `go/build.ArchChar`, `net.DNSConfigError`). Track progress via
 > the [draft release notes](https://tip.golang.org/doc/go1.28), the
 > [release history](https://go.dev/doc/devel/release) for published versions, and the
 > [milestone tracker](https://github.com/golang/go/milestones) for what's landing.
@@ -59,6 +65,6 @@ painless.
 
 ## Sources
 
-- [Go release history](https://go.dev/doc/devel/release) &mdash; official notes for every version
-- [Go release policy](https://go.dev/doc/devel/release#policy) &mdash; the two-release support window
-- [endoflife.date/go](https://endoflife.date/go) &mdash; support timelines
+- [Go release history](https://go.dev/doc/devel/release): official notes for every version
+- [Go release policy](https://go.dev/doc/devel/release#policy): the two-release support window
+- [endoflife.date/go](https://endoflife.date/go): support timelines
