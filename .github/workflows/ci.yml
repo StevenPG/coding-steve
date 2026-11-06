@@ -1,0 +1,40 @@
+name: CI
+
+# Cloudflare Pages builds and deploys this site from git (the `stevenpg`
+# project, managed in terraform-cloudflare-configuration): `main` goes to
+# production, every other branch and commit gets a preview URL. This workflow
+# only checks that the site still lints and builds, so a broken change fails
+# on the PR in GitHub as well as in Cloudflare.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Lint and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build

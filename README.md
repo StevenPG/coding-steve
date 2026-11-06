@@ -11,7 +11,7 @@ TailwindCSS, deployed to Cloudflare Pages.
   pieces like search)
 - **Styling** — [TailwindCSS](https://tailwindcss.com/)
 - **Fuzzy search** — [Fuse.js](https://fusejs.io/)
-- **Deployment** — Cloudflare Pages, via GitHub Actions on push to `main`
+- **Deployment** — Cloudflare Pages git builds: `main` deploys to production, every branch and commit gets a preview URL
 
 ## Project Structure
 

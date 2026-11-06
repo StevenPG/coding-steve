@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is **Coding Steve** (stevenpg.com), a personal tech blog and project hub built on **Astro 6** (originally based on the AstroPaper theme, since customized with its own palette, content collections, and homepage structure). It uses React for interactive components, TailwindCSS for styling, and deploys to **Cloudflare Pages** via GitHub Actions on push to `main`.
+This is **Coding Steve** (stevenpg.com), a personal tech blog and project hub built on **Astro 6** (originally based on the AstroPaper theme, since customized with its own palette, content collections, and homepage structure). It uses React for interactive components, TailwindCSS for styling, and is built and deployed by **Cloudflare Pages** from git.
 
 ## Commands
 
@@ -51,4 +51,8 @@ Optional fields: `modDatetime`, `draft` (hides from published), `canonicalURL`.
 
 ## Deployment
 
-Pushing to `main` triggers the GitHub Actions workflow (`.github/workflows/workflow.yml`) which builds with Node 22 and deploys to Cloudflare Pages via Wrangler.
+Cloudflare Pages builds the site from git (the `stevenpg` Pages project, managed in the `terraform-cloudflare-configuration` repo). It runs `npm run build` and serves `dist/`, with Node pinned by `.node-version`.
+
+- Pushing to `main` deploys to production at stevenpg.com.
+- Every other branch gets a preview at `<branch>.stevenpg.pages.dev`, and every commit at `<commit>.stevenpg.pages.dev`. Cloudflare comments the preview link on PRs.
+- `.github/workflows/ci.yml` only lints and builds, on PRs and pushes to `main`. It does not deploy.
