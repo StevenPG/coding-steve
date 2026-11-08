@@ -20,9 +20,9 @@ description: "Can you use Java 28 value classes (JEP 401) as JPA embeddables, ID
 
 # Value classes meet your entity model
 
-<!-- LINK: valhalla post -->
-
-In the main Valhalla post I covered what JDK 28's value classes
+In the main Valhalla post,
+[Java Value Classes Benchmarked: Project Valhalla (JEP 401) on JDK 28 Early Access](/posts/java-28-valhalla-value-classes-benchmark/),
+I covered what JDK 28's value classes
 ([JEP 401](https://openjdk.org/jeps/401)) do to plain Java code. This post asks
 what most Spring Boot developers will want to know next:
 **can I put value classes in my JPA entities, and does Hibernate get any faster?**
@@ -408,10 +408,9 @@ computing `price × quantity`, where you'd expect flattening to help most. The
 results flipped between JVM runs. In one run value records took 100 ms against
 487 ms for identity records. In the next they took 762 ms against 581 ms. That
 loop is a JIT and memory-layout microbenchmark, and a Spring Boot test harness
-can't measure it reliably. I'm not drawing any conclusion from it. The main
-Valhalla post uses JMH for that kind of question.
-
-<!-- LINK: valhalla post -->
+can't measure it reliably. I'm not drawing any conclusion from it. The
+[main Valhalla post](/posts/java-28-valhalla-value-classes-benchmark/) uses JMH
+for that kind of question.
 
 # Should you use value classes in your JPA model?
 
