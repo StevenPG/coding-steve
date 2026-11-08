@@ -29,7 +29,7 @@ My goal is to make posts like this the SIMPLEST place on the internet to learn h
 
 4.1 was "mostly boring." 4.2 is a little less boring. The headline isn't a shiny feature, it's a deprecation: **`RestTemplate` is formally deprecated for removal in Spring Framework 7.1**, and Boot deprecates all of its `RestTemplate` and `TestRestTemplate` support with it. Nothing gets removed yet, but every codebase I've ever worked on uses `RestTemplate` somewhere, so you're going to see warnings. Around that there are a handful of genuinely useful additions (HTTP `QUERY`, problem details for every exception, AMQP 1.0) and a longer-than-usual list of small behavior changes that will show up as failing tests.
 
-I built the same tiny app on 4.1.2 and 4.2.0-RC2 and checked the behavior changes I could reproduce side by side. Those are called out as **verified on RC2** below. Everything else comes straight from the milestone release notes and the Spring Framework 7.1 release notes.
+I built the same tiny app on 4.1.2 and 4.2.0-RC2 and checked the behavior changes I could reproduce side by side. Those are called out as **verified on RC2** below. The sample app, the 4.1/4.2 baseline, and the scripts I used are all on GitHub: [DemosAndArticleContent/blog/spring-boot-4-2-whats-new-what-breaks](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/spring-boot-4-2-whats-new-what-breaks). Everything else comes straight from the milestone release notes and the Spring Framework 7.1 release notes.
 
 If you're still on 4.0, do the [4.1 upgrade](/posts/spring-boot-4-1-whats-new-what-breaks) first. This post assumes you're on 4.1.
 
@@ -192,7 +192,7 @@ If you're building dashboards on top of this, my [Prometheus and Grafana guide](
 
 RC1 reworked how the nested-jar class loader looks things up. Classes and resources are now found directly inside the nested jars, instead of opening a URL connection for every nested jar on every lookup. Reading deflated entries, resolving cached resources, sorting auto-configuration classes, and DevTools restarts all got faster too.
 
-I measured it with the same minimal web + actuator app built against both versions, run with `java -jar`, 12 alternating runs each, on an Apple M3 Pro with Temurin 25:
+I measured it with the same minimal web + actuator app built against both versions, run with `java -jar`, 12 alternating runs each, on an Apple M3 Pro with Temurin 25 (`scripts/compare-startup.sh` in the [sample repo](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/spring-boot-4-2-whats-new-what-breaks)):
 
 |                       | 4.1.2 (median) | 4.2.0-RC2 (median) |
 | --------------------- | -------------- | ------------------ |
@@ -521,6 +521,7 @@ As with 4.1, I'd let the first patch release (4.2.1) land before upgrading produ
 
 - [Spring Boot 4.2 Release Notes](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.2-Release-Notes) <!-- VERIFY AT GA: wiki page filled in (currently links to milestone notes) -->
 - Milestone notes: [M1](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.2.0-M1-Release-Notes), [M2](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.2.0-M2-Release-Notes), [RC1](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.2.0-RC1-Release-Notes), [RC2](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.2.0-RC2-Release-Notes)
+- [Sample code for this post](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/spring-boot-4-2-whats-new-what-breaks)
 - [Spring Framework 7.1 Release Notes](https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-7.1-Release-Notes)
 - [The state of HTTP clients in Spring](https://spring.io/blog/2025/09/30/the-state-of-http-clients-in-spring)
 - [RFC 10008: The HTTP QUERY Method](https://www.rfc-editor.org/info/rfc10008/)
