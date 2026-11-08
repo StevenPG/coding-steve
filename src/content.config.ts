@@ -1,4 +1,4 @@
-import { SITE } from "@config";
+import { EXTERNAL_LINKS, SITE, type ExternalLinkKey } from "@config";
 import { glob } from "astro/loaders";
 import { defineCollection, z } from "astro:content";
 
@@ -29,17 +29,28 @@ const blog = defineCollection({
 const projects = defineCollection({
   type: "content_layer",
   loader: glob({ pattern: "**/*.md", base: "./src/content/projects" }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    url: z.string().url().optional(),
-    image: z.string(),
-    tags: z.array(z.string()).default([]),
-    featured: z.boolean().optional(),
-    draft: z.boolean().optional(),
-    order: z.number().default(0),
-    relatedTag: z.string().optional(),
-  }),
+  schema: z
+    .object({
+      title: z.string(),
+      description: z.string(),
+      url: z.string().url().optional(),
+      image: z.string(),
+      tags: z.array(z.string()).default([]),
+      featured: z.boolean().optional(),
+      draft: z.boolean().optional(),
+      order: z.number().default(0),
+      relatedTag: z.string().optional(),
+      // Key into EXTERNAL_LINKS in src/config.ts; resolves to `url` when set.
+      siteLink: z
+        .enum(
+          Object.keys(EXTERNAL_LINKS) as [ExternalLinkKey, ...ExternalLinkKey[]]
+        )
+        .optional(),
+    })
+    .transform(({ siteLink, ...data }) => ({
+      ...data,
+      url: siteLink ? EXTERNAL_LINKS[siteLink].url : data.url,
+    })),
 });
 
 const references = defineCollection({

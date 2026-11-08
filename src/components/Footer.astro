@@ -2,6 +2,9 @@
 import Hr from "./Hr.astro";
 import Socials from "./Socials.astro";
 import BuyMeACoffee from "./BuyMeACoffee.astro";
+import { EXTERNAL_LINKS } from "@config";
+
+const { goodcat } = EXTERNAL_LINKS;
 
 const currentYear = new Date().getFullYear();
 
@@ -13,7 +16,7 @@ const { noMarginTop = false } = Astro.props;
 ---
 
 <footer class={`${noMarginTop ? "" : "mt-auto"}`}>
-  <BuyMeACoffee/>
+  <BuyMeACoffee />
   <Hr noPadding />
   <div class="demos-link-wrapper">
     <a
@@ -22,6 +25,9 @@ const { noMarginTop = false } = Astro.props;
       rel="noopener noreferrer"
     >
       Demos &amp; article content
+    </a>
+    <a href={goodcat.url} target="_blank" rel="noopener noreferrer">
+      {goodcat.name}
     </a>
   </div>
   <div class="footer-wrapper">
@@ -39,10 +45,10 @@ const { noMarginTop = false } = Astro.props;
     @apply w-full;
   }
   .demos-link-wrapper {
-    @apply pt-4 text-center text-sm;
+    @apply flex flex-wrap justify-center gap-x-6 gap-y-1 pt-4 text-sm;
   }
   .demos-link-wrapper a {
-    @apply opacity-80 underline-offset-4 hover:text-skin-accent hover:underline hover:opacity-100;
+    @apply underline-offset-4 opacity-80 hover:text-skin-accent hover:underline hover:opacity-100;
   }
   .footer-wrapper {
     @apply flex flex-col items-center justify-between py-6 sm:flex-row-reverse sm:py-4;

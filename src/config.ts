@@ -13,6 +13,19 @@ export const SITE: Site = {
   scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
 };
 
+// External sites referenced from multiple places (footer, project entries).
+// Change a URL here and every reference follows. Project entries use these
+// via the `siteLink` frontmatter field instead of a hard-coded `url`.
+export const EXTERNAL_LINKS = {
+  goodcat: {
+    name: "GoodCat LLC",
+    // Temporary host; swap for the real domain when it moves.
+    url: "https://goodcat-llc.pages.dev/",
+  },
+} as const;
+
+export type ExternalLinkKey = keyof typeof EXTERNAL_LINKS;
+
 export const LOCALE = {
   lang: "en", // html lang code. Set this empty and default will be "en"
   langTag: ["en-EN"], // BCP 47 Language Tags. Set this empty [] to use the environment default
