@@ -3,11 +3,12 @@ title: RoundTheCorner2
 description: An Android app that watches your location in the background and sends an SMS, Slack, or Discord message when you arrive within, or leave beyond, a chosen distance of a saved place.
 url: https://github.com/StevenPG/RoundTheCorner2
 image: /assets/projects/roundthecorner2.jpg
+types:
+  - Android App
 tags:
-  - Android
   - Kotlin
 featured: true
-order: 7
+order: 8
 ---
 
 An Android app that watches your location in the background and sends a message when you arrive within, or leave beyond, a chosen distance of a saved place. Save the places you care about, pick who to tell (an SMS contact, a Slack webhook, or a Discord webhook), set a distance, and RoundTheCorner2 sends the message for you, like "Almost home! About 2 mi away."
