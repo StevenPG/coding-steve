@@ -26,6 +26,18 @@ export const EXTERNAL_LINKS = {
 
 export type ExternalLinkKey = keyof typeof EXTERNAL_LINKS;
 
+// The fixed set of project types used by the `types` field on project entries
+// and by the type filter on /projects/. List order is the filter's button order.
+export const PROJECT_TYPES = [
+  "Web App",
+  "Android App",
+  "Library",
+  "Self-hosted",
+  "Company",
+] as const;
+
+export type ProjectType = (typeof PROJECT_TYPES)[number];
+
 export const LOCALE = {
   lang: "en", // html lang code. Set this empty and default will be "en"
   langTag: ["en-EN"], // BCP 47 Language Tags. Set this empty [] to use the environment default

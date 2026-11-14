@@ -1,14 +1,26 @@
 ---
 import { getCollection } from "astro:content";
-import { SITE } from "@config";
+import { PROJECT_TYPES, SITE } from "@config";
 import Breadcrumbs from "@components/Breadcrumbs.astro";
 import Footer from "@components/Footer.astro";
 import Header from "@components/Header.astro";
 import Layout from "@layouts/Layout.astro";
+import { slugifyStr as slugify } from "@utils/slugify";
 
 const projects = (
   await getCollection("projects", ({ data }) => !data.draft)
 ).sort((a, b) => a.data.order - b.data.order);
+
+// Filter options: "All" plus every type that at least one project uses,
+// in PROJECT_TYPES order. The slug is the value of the ?type= query param.
+const typeOptions = [
+  { label: "All", slug: "all", count: projects.length },
+  ...PROJECT_TYPES.map(type => ({
+    label: type,
+    slug: slugify(type),
+    count: projects.filter(({ data }) => data.types.includes(type)).length,
+  })).filter(({ count }) => count > 0),
+];
 ---
 
 <Layout title={`Projects | ${SITE.title}`}>
@@ -17,15 +29,52 @@ const projects = (
   <main id="main-content">
     <section class="mb-28 max-w-5xl">
       <h1 class="text-3xl tracking-wider sm:text-4xl">Projects</h1>
-      <p class="mt-4 mb-10 opacity-80">
+      <p class="mt-4 mb-6 opacity-80">
         Sites and applications I've built and maintain.
       </p>
-      <div class="grid grid-cols-1 gap-8 sm:grid-cols-2">
+
+      {
+        /* Hidden until the script runs, so the page still lists every project without JS. */
+      }
+      <fieldset id="project-filter" class="mb-8" hidden>
+        <legend class="mb-2 text-sm font-medium opacity-80">
+          Filter by project type
+        </legend>
+        <div class="flex flex-wrap gap-2">
+          {
+            typeOptions.map(({ label, slug, count }) => (
+              <label class="cursor-pointer">
+                <input
+                  type="radio"
+                  name="project-type"
+                  value={slug}
+                  checked={slug === "all"}
+                  class="peer sr-only"
+                />
+                <span class="filter-pill">
+                  {label}
+                  <span class="opacity-60" aria-hidden="true">
+                    {count}
+                  </span>
+                  <span class="sr-only">
+                    ({count} {count === 1 ? "project" : "projects"})
+                  </span>
+                </span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <p id="project-filter-status" class="sr-only" aria-live="polite"></p>
+
+      <div id="project-grid" class="grid grid-cols-1 gap-8 sm:grid-cols-2">
         {
           projects.map(project => (
             <a
               href={`/projects/${project.id}/`}
-              class="project-card group block rounded-xl border border-skin-line bg-skin-card p-5 transition-all hover:border-skin-accent/50"
+              data-types={project.data.types.map(slugify).join(" ")}
+              class="project-card group rounded-xl border border-skin-line bg-skin-card p-5 transition-all hover:border-skin-accent/50"
             >
               <div class="overflow-hidden rounded-lg border border-skin-line">
                 <img
@@ -43,6 +92,11 @@ const projects = (
                   {project.data.description}
                 </p>
                 <div class="mt-3 flex flex-wrap gap-2">
+                  {project.data.types.map(type => (
+                    <span class="rounded-full border border-skin-accent/60 px-3 py-0.5 text-xs font-medium text-skin-accent">
+                      {type}
+                    </span>
+                  ))}
                   {project.data.tags.map(tag => (
                     <span class="rounded-full bg-skin-card-muted px-3 py-0.5 text-xs font-medium opacity-90">
                       {tag}
@@ -54,6 +108,21 @@ const projects = (
           ))
         }
       </div>
+
+      <div
+        id="project-filter-empty"
+        class="rounded-xl border border-dashed border-skin-line p-8 text-center"
+        hidden
+      >
+        <p class="opacity-80">No projects of this type yet.</p>
+        <button
+          type="button"
+          id="project-filter-reset"
+          class="focus-outline mt-4 rounded-lg border border-skin-line bg-skin-card px-4 py-2 text-sm font-medium hover:border-skin-accent/50"
+        >
+          Show all projects
+        </button>
+      </div>
     </section>
   </main>
   <Footer />
@@ -61,6 +130,82 @@ const projects = (
 
 <style>
   #main-content {
-    @apply mx-auto max-w-5xl px-4;
+    @apply mx-auto w-full max-w-5xl px-4;
+  }
+  .filter-pill {
+    @apply inline-flex items-center gap-2 rounded-full border border-skin-line bg-skin-card px-3 py-1 text-sm font-medium transition-colors hover:border-skin-accent/50;
+  }
+  input:checked + .filter-pill {
+    @apply border-skin-accent bg-skin-accent text-skin-inverted;
+  }
+  input:focus-visible + .filter-pill {
+    @apply outline-dashed outline-2 outline-offset-2 outline-skin-fill;
   }
 </style>
+
+<script>
+  const PARAM = "type";
+
+  function initProjectFilter() {
+    const filter = document.getElementById("project-filter");
+    if (!(filter instanceof HTMLFieldSetElement)) return;
+
+    const radios = Array.from(
+      filter.querySelectorAll<HTMLInputElement>('input[name="project-type"]')
+    );
+    const cards = Array.from(
+      document.querySelectorAll<HTMLElement>("#project-grid [data-types]")
+    );
+    const empty = document.getElementById("project-filter-empty");
+    const status = document.getElementById("project-filter-status");
+    const reset = document.getElementById("project-filter-reset");
+
+    const apply = (slug: string, announce: boolean) => {
+      let shown = 0;
+      for (const card of cards) {
+        const match =
+          slug === "all" ||
+          (card.dataset.types ?? "").split(" ").includes(slug);
+        card.hidden = !match;
+        if (match) shown++;
+      }
+      if (empty) empty.hidden = shown > 0;
+      if (status && announce) {
+        status.textContent = `Showing ${shown} ${shown === 1 ? "project" : "projects"}.`;
+      }
+
+      // Keep the selection shareable via ?type=, as Search does with ?q=.
+      const params = new URLSearchParams(window.location.search);
+      if (slug === "all") params.delete(PARAM);
+      else params.set(PARAM, slug);
+      const query = params.toString();
+      history.replaceState(
+        history.state,
+        "",
+        window.location.pathname + (query ? `?${query}` : "")
+      );
+    };
+
+    const select = (slug: string, announce: boolean) => {
+      // An unknown ?type= value still selects nothing, which shows the empty state.
+      for (const radio of radios) radio.checked = radio.value === slug;
+      apply(slug, announce);
+    };
+
+    for (const radio of radios) {
+      radio.addEventListener("change", () => {
+        if (radio.checked) select(radio.value, true);
+      });
+    }
+    reset?.addEventListener("click", () => {
+      select("all", true);
+      radios.find(r => r.value === "all")?.focus();
+    });
+
+    filter.hidden = false;
+    const initial = new URLSearchParams(window.location.search).get(PARAM);
+    select(initial || "all", false);
+  }
+
+  document.addEventListener("astro:page-load", initProjectFilter);
+</script>

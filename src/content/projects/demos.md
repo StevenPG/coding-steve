@@ -3,7 +3,7 @@ title: Demos
 description: The landing page for my web UI demos — small, self-contained visualizations and sites built to accompany articles and experiments.
 url: https://demos.stevenpg.com/
 image: /assets/projects/demos.png
-tags:
+types:
   - Web App
 featured: true
 order: 6
