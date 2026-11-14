@@ -3,8 +3,9 @@ title: GoodCat LLC
 description: "My independent software company: PC games, focused SaaS products, and small, sharp tools."
 siteLink: goodcat
 image: /assets/projects/goodcat.png
-tags:
+types:
   - Company
+tags:
   - Games
   - SaaS
 featured: true

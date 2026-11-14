@@ -3,8 +3,9 @@ title: Cesium Spatial
 description: A pair of TypeScript libraries that put H3 hexagons and S2 quadrilaterals on a CesiumJS globe, with a live demo for exploring both grid systems interactively.
 url: https://stevenpg.github.io/cesium-spatial/demo.html
 image: /assets/projects/cesium-spatial.jpg
-tags:
+types:
   - Library
+tags:
   - 3D
   - GIS
 featured: true

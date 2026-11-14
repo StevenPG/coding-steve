@@ -3,8 +3,9 @@ title: Barium
 description: A browser-based tool for building and sharing 4D geospatial scenes — draw entities, import GeoJSON/KML/GPX/CSV/CZML, attach 3D models, and animate it all over time on a CesiumJS globe.
 url: https://bariumstudios.com/
 image: /assets/projects/barium.png
-tags:
+types:
   - Web App
+tags:
   - Geospatial
   - 3D
 featured: true

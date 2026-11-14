@@ -7,6 +7,7 @@ import Footer from "@components/Footer.astro";
 import Header from "@components/Header.astro";
 import Layout from "@layouts/Layout.astro";
 import getPostsByTag from "@utils/getPostsByTag";
+import { slugifyStr } from "@utils/slugify";
 
 export async function getStaticPaths() {
   const projects = await getCollection("projects", ({ data }) => !data.draft);
@@ -18,7 +19,8 @@ export async function getStaticPaths() {
 }
 
 const { project } = Astro.props;
-const { title, description, url, image, tags, relatedTag } = project.data;
+const { title, description, url, image, types, tags, relatedTag } =
+  project.data;
 const { Content } = await render(project);
 
 const ogUrl = new URL(`/projects/${project.id}/index.png`, Astro.url.origin)
@@ -55,6 +57,13 @@ const relatedPosts = relatedTag
     </article>
 
     <ul class="my-8 flex flex-wrap gap-2">
+      {
+        types.map(type => (
+          <li class="rounded-full border border-skin-accent/60 px-3 py-0.5 text-xs font-medium text-skin-accent">
+            <a href={`/projects/?type=${slugifyStr(type)}`}>{type}</a>
+          </li>
+        ))
+      }
       {
         tags.map(tag => (
           <li class="rounded-full bg-skin-card-muted px-3 py-0.5 text-xs font-medium opacity-90">

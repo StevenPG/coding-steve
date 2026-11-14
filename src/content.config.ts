@@ -1,4 +1,9 @@
-import { EXTERNAL_LINKS, SITE, type ExternalLinkKey } from "@config";
+import {
+  EXTERNAL_LINKS,
+  PROJECT_TYPES,
+  SITE,
+  type ExternalLinkKey,
+} from "@config";
 import { glob } from "astro/loaders";
 import { defineCollection, z } from "astro:content";
 
@@ -35,6 +40,9 @@ const projects = defineCollection({
       description: z.string(),
       url: z.string().url().optional(),
       image: z.string(),
+      // One or more of PROJECT_TYPES in src/config.ts; the first is the primary
+      // type. Drives the type filter on /projects/.
+      types: z.array(z.enum(PROJECT_TYPES)).min(1),
       tags: z.array(z.string()).default([]),
       featured: z.boolean().optional(),
       draft: z.boolean().optional(),
