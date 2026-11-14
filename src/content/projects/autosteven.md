@@ -3,7 +3,7 @@ title: AutoSteven
 description: A transmission calculating site for comparing gear ratios, RPM ranges, and final drive configurations across different vehicles and setups.
 url: https://autosteven.com/
 image: /assets/projects/autosteven.png
-tags:
+types:
   - Web App
 featured: true
 order: 2
