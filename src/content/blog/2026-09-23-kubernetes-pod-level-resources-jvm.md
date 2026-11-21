@@ -3,7 +3,7 @@ author: StevenPG
 pubDatetime: 2026-09-23T12:00:00.000Z
 title: "Pod-Level Resources in Kubernetes 1.37: Your JVM Thinks It Owns the Whole Pod"
 slug: kubernetes-pod-level-resources-jvm
-featured: false
+featured: true
 draft: false
 ogImage: /assets/default-og-image.png
 tags:
