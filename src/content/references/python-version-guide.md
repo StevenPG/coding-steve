@@ -3,7 +3,7 @@ title: Python Version Guide
 description: What's new in each Python 3 release, with support status marked and links to the official What's New notes.
 slug: python-version-guide
 pubDatetime: 2026-06-26T12:00:00.000Z
-modDatetime: 2026-11-01T12:00:00.000Z
+modDatetime: 2026-11-21T12:00:00.000Z
 tags:
   - python
 order: 3
@@ -44,10 +44,18 @@ A scannable "what's new" for modern Python 3 releases. Python ships one feature 
 > [What's New in Python 3.15](https://docs.python.org/3/whatsnew/3.15.html) for the complete list.
 >
 > **Python 3.16 development is underway**: [3.16.0a1](https://www.python.org/downloads/release/python-3160a1/) shipped
-> October 13, 2026, and its release schedule is now fixed by [PEP 826](https://peps.python.org/pep-0826/)
-> (release manager: Savannah Ostrowski). 3.16.0a2 is due November 10, 2026, beta begins May 4, 2027, the release
-> candidate lands July 27, 2027, and final release is targeted for **October 5, 2027**. The alpha stage is for
-> infrastructure and testing, not finished features, so a feature list still hasn't been drafted.
+> October 13, 2026, and [3.16.0a2](https://www.python.org/downloads/release/python-3160a2/) followed on schedule
+> November 10, 2026, per the release calendar fixed by [PEP 826](https://peps.python.org/pep-0826/) (release
+> manager: Savannah Ostrowski). A real feature list has started to take shape: the `re` module gains nested
+> character sets, set operations, and matching by Unicode properties; `uuid4()` and `uuid7()` get C implementations
+> roughly 15-30x faster than the pure-Python versions; startup time drops further with optimizations to garbage
+> collection and built-in object construction; `SyntaxError` now suggests Python equivalents for keywords ported
+> from other languages (`match` for `switch x:`, `del` for `delete x`, catching `&&`/`||` too); `ssl` adds Encrypted
+> Client Hello support when built against OpenSSL 4.0+; and CPython can now be built for tvOS, watchOS, and
+> visionOS (not yet official [PEP 11](https://peps.python.org/pep-0011/) tiers). `collections.abc.ByteString` is
+> slated for removal in 3.17, and the `ast` slice classes in 3.21. The next alpha, **3.16.0a3, is due December 15,
+> 2026**; beta begins May 4, 2027, the release candidate lands July 27, 2027, and final release is targeted for
+> **October 5, 2027**. Details can still change before beta freezes the feature set.
 >
 > Meanwhile, **Python 3.13 left its bugfix phase on October 1, 2026** and now receives security-only fixes, and
 > **Python 3.10 reached end of life on October 1, 2026** (final release 3.10.22), a month earlier than the October

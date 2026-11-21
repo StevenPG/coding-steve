@@ -3,7 +3,7 @@ title: Java Version Guide
 description: What's new in each Java release from 8 onward, with LTS versions marked and links to release notes.
 slug: java-version-guide
 pubDatetime: 2026-06-26T12:00:00.000Z
-modDatetime: 2026-11-01T12:00:00.000Z
+modDatetime: 2026-11-21T12:00:00.000Z
 tags:
   - java
 order: 1
@@ -255,6 +255,17 @@ highlights and a link to the release notes. For the complete picture of any vers
 > in the AOT cache, see our [benchmark deep-dive](/posts/java-28-aot-code-compilation-jep-544/) for the numbers), and
 > two ZGC improvements for **faster startup and warmup** ([JEP 545](https://openjdk.org/jeps/545)) and **adaptive
 > heap sizing** ([JEP 546](https://openjdk.org/jeps/546)).
+
+> **Security advisory: patch now.** The November 17, 2026 quarterly Critical Patch Update fixes
+> [CVE-2026-114938](https://nvd.nist.gov/vuln/detail/CVE-2026-114938), nicknamed "Java4Shell": a heap out-of-bounds
+> write in the hardware-accelerated (AVX-512/C2 intrinsic) Base64 decoder that can corrupt memory and, in some
+> application paths, lead to remote code execution without authentication. It affects OpenJDK **17.0.6 and later**,
+> and every **21**, **25**, and **27** build older than the November 2026 patch level (Oracle's fixed baselines are
+> **21.0.13**, **25.0.5**, and **27.0.1**; check your specific distribution, such as Temurin, Corretto, or Zulu, for
+> its matching fixed build). **Java 8 and 11 are not affected**, since they predate the vulnerable intrinsic. Until
+> you can patch, the JVM flag `-XX:-UseBASE64Intrinsics` disables the affected code path as a mitigation. Oracle,
+> OpenJDK, Corretto, and Zulu shipped fixes on November 17; Temurin and some Linux distributions followed within a
+> few days. Confirm your build number against your vendor's own advisory.
 
 ## How Java Support Works
 
