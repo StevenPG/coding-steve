@@ -3,7 +3,7 @@ title: Go Version Guide
 description: What's new in each major Go release, with support status marked and links to release notes.
 slug: go-version-guide
 pubDatetime: 2026-06-26T12:00:00.000Z
-modDatetime: 2026-11-01T12:00:00.000Z
+modDatetime: 2026-11-21T12:00:00.000Z
 tags:
   - golang
 order: 2
@@ -44,7 +44,10 @@ painless.
 > changed slightly, so expect minor whitespace diffs the first time you reformat. Security-only patches followed:
 > **go1.27.2** (October 8, 2026, fixes across the `go` command, `crypto/tls`, `html/template`, `net/http`,
 > `net/textproto`, and `os`) and **go1.27.3** (October 19, 2026, a `crypto/x509` fix, paired with **go1.26.10** for
-> anyone still on the 1.26 line).
+> anyone still on the 1.26 line). A larger security batch followed: **go1.27.4** and **go1.26.11** (November 10, 2026) together fix 12 vulnerabilities, including an HTTP/1 server crash reachable through `MaxBytesReader`
+> (CVE-2026-97054) and a cluster of `cgo` build-flag issues that can lead to arbitrary code execution or file writes
+> at build or link time (CVE-2026-97033 through CVE-2026-97036). Upgrade promptly if your build pipeline runs `cgo`
+> against untrusted source, or if you serve HTTP/1 traffic with `http.MaxBytesReader`.
 >
 > **Go 1.28** is next, expected around **February 2027** under the usual six-month cadence. As of November 2026 the
 > draft notes have real content: two new `go vet` analyzers (`scannererr`, `sqlrowserr`), a bootstrap requirement of
