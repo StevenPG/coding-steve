@@ -9,6 +9,7 @@ export const SITE: Site = {
   ogImage: "og.png",
   lightAndDarkMode: true,
   postPerIndex: 6,
+  featuredPerIndex: 8, // newest N featured posts shown on the homepage
   postPerPage: 6,
   scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
 };

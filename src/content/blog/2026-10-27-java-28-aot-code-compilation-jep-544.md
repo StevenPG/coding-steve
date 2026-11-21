@@ -3,7 +3,7 @@ author: StevenPG
 pubDatetime: 2026-10-27T23:00:00.000Z
 title: "Java 28 AOT Code Compilation (JEP 544): Is the JIT Warmup Tax Finally Dead?"
 slug: java-28-aot-code-compilation-jep-544
-featured: false
+featured: true
 draft: false
 ogImage: /assets/default-og-image.png
 tags:

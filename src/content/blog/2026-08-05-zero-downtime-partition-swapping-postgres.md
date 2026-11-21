@@ -3,7 +3,7 @@ author: StevenPG
 pubDatetime: 2026-08-05T12:00:00.000Z
 title: "Zero-Downtime Partition Swapping in Postgres with Spring Boot 4 and Kafka"
 slug: zero-downtime-partition-swapping-postgres
-featured: false
+featured: true
 ogImage: /assets/default-og-image.png
 tags:
   - software

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" width="1000" height="520" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif">
+<rect width="1000" height="520" rx="14" fill="#0f172a"/>
+<text x="40" y="46" fill="#e2e8f0" font-size="22" font-weight="700">One stray '=' turns a no-op into a 64-byte write</text>
+<text x="40" y="72" fill="#94a3b8" font-size="14">AVX-512 Base64 decode stub, JDK 17, input = 64 × 'A' followed by '='  (example from Calif / JFrog)</text>
+<rect x="40" y="96" width="296" height="70" rx="10" fill="#1e293b" stroke="#334155"/>
+<circle cx="64" cy="131" r="13" fill="#38bdf8"/><text x="64" y="136" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="700">1</text>
+<text x="86" y="126" fill="#e2e8f0" font-size="14">Tail "=" leaves (1 / 4) × 3 − 1 pad</text>
+<text x="86" y="148" fill="#e2e8f0" font-size="14" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">= −1 bytes to write</text>
+<rect x="352" y="96" width="296" height="70" rx="10" fill="#1e293b" stroke="#334155"/>
+<circle cx="376" cy="131" r="13" fill="#38bdf8"/><text x="376" y="136" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="700">2</text>
+<text x="398" y="126" fill="#e2e8f0" font-size="14">BZHI only reads the low 8 bits of −1</text>
+<text x="398" y="148" fill="#f87171" font-size="14" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">= 255 → mask is all ones</text>
+<rect x="664" y="96" width="296" height="70" rx="10" fill="#1e293b" stroke="#334155"/>
+<circle cx="688" cy="131" r="13" fill="#38bdf8"/><text x="688" y="136" text-anchor="middle" fill="#0f172a" font-size="14" font-weight="700">3</text>
+<text x="710" y="126" fill="#e2e8f0" font-size="14">VMOVDQU8 masked store at out[48]</text>
+<text x="710" y="148" fill="#f87171" font-size="14" font-weight="600" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">writes all 64 bytes</text>
+<text x="636.0" y="214" text-anchor="middle" fill="#f87171" font-size="15" font-weight="700">64-byte store</text>
+<path d="M405.6 242 V228 H866.4 V242" fill="none" stroke="#f87171" stroke-width="2.5"/>
+<rect x="60.0" y="262" width="345.6" height="58" fill="#38bdf8" fill-opacity="0.35" stroke="#38bdf8"/>
+<rect x="405.6" y="262" width="14.4" height="58" fill="#f87171" fill-opacity="0.55" stroke="#38bdf8"/>
+<rect x="420.0" y="262" width="446.40000000000003" height="58" fill="#f87171" fill-opacity="0.22" stroke="#f87171" stroke-dasharray="6 4"/>
+<line x1="60.0" y1="320" x2="60.0" y2="326" stroke="#94a3b8"/>
+<text x="60.0" y="340" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="ui-monospace,Menlo,monospace">0</text>
+<line x1="117.6" y1="320" x2="117.6" y2="326" stroke="#94a3b8"/>
+<text x="117.6" y="340" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="ui-monospace,Menlo,monospace">8</text>
+<line x1="175.2" y1="320" x2="175.2" y2="326" stroke="#94a3b8"/>
+<text x="175.2" y="340" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="ui-monospace,Menlo,monospace">16</text>
+<line x1="232.8" y1="320" x2="232.8" y2="326" stroke="#94a3b8"/>
+<text x="232.8" y="340" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="ui-monospace,Menlo,monospace">24</text>
+<line x1="290.4" y1="320" x2="290.4" y2="326" stroke="#94a3b8"/>
+<text x="290.4" y="340" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="ui-monospace,Menlo,monospace">32</text>
+<line x1="348.0" y1="320" x2="348.0" y2="326" stroke="#94a3b8"/>
+<text x="348.0" y="340" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="ui-monospace,Menlo,monospace">40</text>
+<line x1="405.6" y1="320" x2="405.6" y2="326" stroke="#94a3b8"/>
+<text x="405.6" y="340" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="ui-monospace,Menlo,monospace">48</text>
+<line x1="463.2" y1="320" x2="463.2" y2="326" stroke="#94a3b8"/>
+<text x="463.2" y="340" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="ui-monospace,Menlo,monospace">56</text>
+<line x1="520.8" y1="320" x2="520.8" y2="326" stroke="#94a3b8"/>
+<text x="520.8" y="340" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="ui-monospace,Menlo,monospace">64</text>
+<line x1="578.4" y1="320" x2="578.4" y2="326" stroke="#94a3b8"/>
+<text x="578.4" y="340" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="ui-monospace,Menlo,monospace">72</text>
+<line x1="636.0" y1="320" x2="636.0" y2="326" stroke="#94a3b8"/>
+<text x="636.0" y="340" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="ui-monospace,Menlo,monospace">80</text>
+<line x1="693.6" y1="320" x2="693.6" y2="326" stroke="#94a3b8"/>
+<text x="693.6" y="340" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="ui-monospace,Menlo,monospace">88</text>
+<line x1="751.2" y1="320" x2="751.2" y2="326" stroke="#94a3b8"/>
+<text x="751.2" y="340" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="ui-monospace,Menlo,monospace">96</text>
+<line x1="808.8000000000001" y1="320" x2="808.8000000000001" y2="326" stroke="#94a3b8"/>
+<text x="808.8000000000001" y="340" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="ui-monospace,Menlo,monospace">104</text>
+<line x1="866.4" y1="320" x2="866.4" y2="326" stroke="#94a3b8"/>
+<text x="866.4" y="340" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="ui-monospace,Menlo,monospace">112</text>
+<text x="70.0" y="288" fill="#e2e8f0" font-size="14" font-weight="600">byte[] out — 50 bytes</text>
+<text x="70.0" y="308" fill="#e2e8f0" font-size="13">bytes 0–47 already decoded</text>
+<text x="432.0" y="288" fill="#e2e8f0" font-size="14" font-weight="600">next object on the heap</text>
+<text x="432.0" y="308" fill="#e2e8f0" font-size="13">62 bytes overwritten past the array's end</text>
+<line x1="420.0" y1="254" x2="420.0" y2="328" stroke="#e2e8f0" stroke-width="2.5"/>
+<text x="420.0" y="358" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">end of array</text>
+<rect x="60" y="388" width="16" height="16" fill="#38bdf8" fill-opacity="0.35" stroke="#38bdf8"/>
+<text x="84" y="401" fill="#94a3b8" font-size="13">valid output</text>
+<rect x="201.6" y="388" width="16" height="16" fill="#f87171" fill-opacity="0.55" stroke="#f87171"/>
+<text x="225.6" y="401" fill="#94a3b8" font-size="13">2 in-bounds bytes overwritten</text>
+<rect x="467.29999999999995" y="388" width="16" height="16" fill="#f87171" fill-opacity="0.22" stroke="#f87171"/>
+<text x="491.29999999999995" y="401" fill="#94a3b8" font-size="13">out-of-bounds write</text>
+<rect x="40" y="426" width="440" height="66" rx="10" fill="#1e293b" stroke="#334155"/>
+<text x="58" y="454" fill="#e2e8f0" font-size="14" font-weight="600">Then Java throws IllegalArgumentException</text>
+<text x="58" y="476" fill="#94a3b8" font-size="13">The input is rejected, but only after the write has happened.</text>
+<rect x="500" y="426" width="460" height="66" rx="10" fill="#1e293b" stroke="#f87171" stroke-opacity="0.6"/>
+<text x="518" y="454" fill="#e2e8f0" font-size="14" font-weight="600">Calif's chain: overwrite a neighbouring array's length</text>
+<text x="518" y="476" fill="#94a3b8" font-size="13">→ read/write primitive → heap leak → code via the JIT code cache</text>
+</svg>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 340" width="1000" height="340" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif">
+<rect width="1000" height="340" rx="14" fill="#0f172a"/>
+<text x="40" y="46" fill="#e2e8f0" font-size="22" font-weight="700">Java4Shell, week one</text>
+<text x="40" y="72" fill="#94a3b8" font-size="14">CVE-2026-114938, November 2026</text>
+<line x1="80" y1="130" x2="920" y2="130" stroke="#334155" stroke-width="3"/>
+<circle cx="110.0" cy="130" r="9" fill="#38bdf8" stroke="#38bdf8" stroke-width="3"/>
+<text x="110.0" y="108" text-anchor="middle" fill="#e2e8f0" font-size="15" font-weight="700">Nov 17</text>
+<text x="110.0" y="172" text-anchor="middle" fill="#e2e8f0" font-size="13">Oracle CPU + OpenJDK fixes</text>
+<text x="110.0" y="194" text-anchor="middle" fill="#e2e8f0" font-size="13">Calif technical write-up</text>
+<text x="110.0" y="216" text-anchor="middle" fill="#f87171" font-size="13">CISA: patch immediately</text>
+<text x="110.0" y="238" text-anchor="middle" fill="#e2e8f0" font-size="13">Red Hat RHSB-2026-018</text>
+<circle cx="305.0" cy="130" r="9" fill="#38bdf8" stroke="#38bdf8" stroke-width="3"/>
+<text x="305.0" y="108" text-anchor="middle" fill="#e2e8f0" font-size="15" font-weight="700">Nov 18</text>
+<text x="305.0" y="172" text-anchor="middle" fill="#e2e8f0" font-size="13">Canada's Cyber Centre:</text>
+<text x="305.0" y="194" text-anchor="middle" fill="#4ade80" font-size="13">no known attacks</text>
+<circle cx="500.0" cy="130" r="9" fill="#38bdf8" stroke="#38bdf8" stroke-width="3"/>
+<text x="500.0" y="108" text-anchor="middle" fill="#e2e8f0" font-size="15" font-weight="700">Nov 19</text>
+<text x="500.0" y="172" text-anchor="middle" fill="#e2e8f0" font-size="13">Keycloak ships</text>
+<text x="500.0" y="194" text-anchor="middle" fill="#e2e8f0" font-size="13">patched images</text>
+<text x="500.0" y="216" text-anchor="middle" fill="#4ade80" font-size="13">Not on CISA KEV</text>
+<circle cx="695.0" cy="130" r="9" fill="#38bdf8" stroke="#38bdf8" stroke-width="3"/>
+<text x="695.0" y="108" text-anchor="middle" fill="#e2e8f0" font-size="15" font-weight="700">Nov 20</text>
+<text x="695.0" y="172" text-anchor="middle" fill="#e2e8f0" font-size="13">Red Hat bulletin</text>
+<text x="695.0" y="194" text-anchor="middle" fill="#e2e8f0" font-size="13">updated, no errata</text>
+<text x="695.0" y="216" text-anchor="middle" fill="#e2e8f0" font-size="13">listed yet</text>
+<circle cx="890.0" cy="130" r="9" fill="#0f172a" stroke="#38bdf8" stroke-width="3"/>
+<text x="890.0" y="108" text-anchor="middle" fill="#e2e8f0" font-size="15" font-weight="700">Nov 21</text>
+<text x="890.0" y="172" text-anchor="middle" fill="#4ade80" font-size="13">No exploitation</text>
+<text x="890.0" y="194" text-anchor="middle" fill="#4ade80" font-size="13">reported in the wild</text>
+<text x="890.0" y="220" text-anchor="middle" fill="#94a3b8" font-size="12" font-style="italic">(as of publishing)</text>
+<rect x="40" y="258" width="920" height="52" rx="10" fill="#1e293b" stroke="#334155"/>
+<text x="60" y="290" fill="#94a3b8" font-size="14">Severity depends on who you ask:  <tspan fill="#e2e8f0" font-weight="600">8.1</tspan> Oracle / NVD (CVSS 3.1)   ·   <tspan fill="#e2e8f0" font-weight="600">8.8</tspan> Amazon   ·   <tspan fill="#f87171" font-weight="600">9.2</tspan> Calif, preliminary (CVSS 4.0)</text>
+</svg>
