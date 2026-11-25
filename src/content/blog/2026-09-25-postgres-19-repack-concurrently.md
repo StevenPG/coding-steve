@@ -147,9 +147,11 @@ Less than I expected, and a few hard limits:
   you can run. On 19.0, two `CONCURRENTLY` runs on different tables ran side by side, one slot each.
 - **It raises the WAL level while it runs.** 19 can raise the _effective_ WAL level to `logical` on its own when a
   logical slot appears, and REPACK's slot counts. Watching `effective_wal_level` during a run, it went from `replica`
-  to `logical` while the command ran and dropped back to `replica` shortly after it finished. You don't
-  change any configuration, but expect extra WAL (and more for replicas and archiving to absorb) for the length of
-  the repack.
+  to `logical` while the command ran. Going back down isn't tied to the command finishing: the checkpointer does it
+  asynchronously, and the docs only say it "might take some time". Across my runs it took anywhere from under a
+  second to more than two minutes, when it stayed `logical` until I issued a `CHECKPOINT`. You don't change any
+  configuration, but expect extra WAL (and more for replicas and archiving to absorb) for the length of the repack,
+  and possibly for a while after.
 - **A primary key or index-based replica identity is required.** Tables without one are refused.
 - **It isn't for partitioned tables** (repack the partitions), `UNLOGGED` tables, system catalogs or TOAST tables,
   materialized views, or anything that isn't a heap table. It can't run inside a transaction block.
