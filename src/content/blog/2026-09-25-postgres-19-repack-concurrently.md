@@ -1,6 +1,7 @@
 ---
 author: StevenPG
 pubDatetime: 2026-09-25T12:00:00.000Z
+modDatetime: 2026-11-25T12:00:00.000Z
 title: "PostgreSQL 19's REPACK CONCURRENTLY vs VACUUM FULL: What Your Application Feels"
 slug: postgres-19-repack-concurrently
 featured: false
@@ -18,6 +19,12 @@ description: PostgreSQL 19 replaces VACUUM FULL and CLUSTER with REPACK, and REP
 
 [[toc]]
 
+> **Updated for the PostgreSQL 19.0 release (November 19, 2026).** I first wrote this against 19beta4. I've
+> since re-run the container benchmark, the plan-advice demo and the "what's new" checks on `postgres:19`
+> (19.0). The numbers moved a little, the conclusions didn't, and every feature covered here shipped. The GA re-run also turned up one
+> new detail, about what CONCURRENTLY does to the WAL level while it runs. The M3 Pro numbers are still from the
+> beta.
+
 # The table that never shrinks
 
 Every long-lived Postgres database eventually has one: a table that was 30 GB of live data at its peak, lost
@@ -30,7 +37,7 @@ So in practice people installed [`pg_repack`](https://github.com/reorg/pg_repack
 table with triggers and swaps it in at the end. It worked, it was one more extension to keep version-matched
 through upgrades, and it isn't available on every managed service.
 
-PostgreSQL 19 (GA expected in October, Beta 4 out now) moves this into core:
+PostgreSQL 19, released on November 19, 2026, moves this into core:
 
 - **`REPACK`** is a new command that _replaces_ `VACUUM FULL` and `CLUSTER`. `REPACK t` is `VACUUM FULL t`, and
   `REPACK t USING INDEX i` is `CLUSTER t USING i`. The old commands still work.
@@ -41,9 +48,9 @@ That's the claim. This post measures what an application writing to the table ac
 option. Everything is in
 [DemosAndArticleContent/blog/postgres-19-repack-concurrently](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/postgres-19-repack-concurrently).
 
-Everything here ran against `postgres:19beta4`. The benchmark numbers are from my M3 Pro MacBook in Docker Desktop
-(2 CPUs), with an earlier cloud-container run for comparison where the extra table size shows something the M3 run
-couldn't.
+The first benchmark table is from my M3 Pro MacBook in Docker Desktop (2 CPUs), run on 19beta4. Everything else
+was re-run on the 19.0 release in a 4-CPU cloud container, including a bigger table that shows something the M3
+run couldn't.
 
 # The benchmark
 
@@ -72,7 +79,7 @@ and worst latency. For the seconds the method was running, the harness reports:
 
 ## Results
 
-On the M3 Pro, with 2M rows (a 281 MB heap, 70% of it dead) and 8 writers:
+On the M3 Pro (19beta4), with 2M rows (a 281 MB heap, 70% of it dead) and 8 writers:
 
 | Method                  | Duration | Writer tps before → during | Seconds with zero commits | Worst writer transaction (baseline) |
 | ----------------------- | -------: | -------------------------: | ------------------------: | ----------------------------------: |
@@ -85,13 +92,13 @@ And the space each one gave back, which doesn't depend on the hardware:
 | Method                  | Heap MB before → after | Indexes MB before → after |
 | ----------------------- | ---------------------: | ------------------------: |
 | `VACUUM FULL`           |               281 → 91 |                  103 → 34 |
-| `REPACK`                |               281 → 92 |                  103 → 34 |
-| `REPACK (CONCURRENTLY)` |               281 → 93 |                  103 → 34 |
+| `REPACK`                |               281 → 91 |                  103 → 34 |
+| `REPACK (CONCURRENTLY)` |               281 → 92 |                  103 → 34 |
 
 A note on that second table. My harness originally recorded the "after" size at the end of the writer's
 measurement window, by which point pgbench had inserted another million rows, so the table looked like it had
-barely shrunk. It now measures the moment the command returns. The sizes above come from a re-run with that fix, in
-the cloud container.
+barely shrunk. It now measures the moment the command returns. The sizes above come from the 19.0 re-run, which
+has that fix, in the cloud container. They match the beta to within 1 MB.
 
 ## What the numbers say
 
@@ -109,21 +116,23 @@ measure noise. (The `VACUUM FULL` row also ran first, while the writer was still
 baseline is lower.) What the averages do show is that `CONCURRENTLY` costs the writer something while it runs, about
 a quarter of its throughput here, because it's copying the table and replaying changes alongside the load.
 
-**The lock grows with the table.** A run on an 8M-row table (1.1 GB heap) in a 4-core cloud container shows what the
-M3 run was too fast to show:
+**The lock grows with the table.** A run on 19.0 with an 8M-row table (1.1 GB heap) in a 4-CPU cloud container
+shows what the M3 run was too fast to show:
 
 | Method                  | Duration | Seconds with zero commits | Worst writer transaction (baseline) | Writer tps before → during |
 | ----------------------- | -------: | ------------------------: | ----------------------------------: | -------------------------: |
-| `VACUUM FULL`           |    5.7 s |                         4 |                       5,585 ms (14) |                5,496 → 382 |
-| `REPACK`                |    3.4 s |                         2 |                       3,198 ms (29) |              4,290 → 1,098 |
-| `REPACK (CONCURRENTLY)` |    5.0 s |                     **0** |                     **108 ms** (16) |              5,447 → 3,623 |
+| `VACUUM FULL`           |    4.8 s |                         4 |                       4,640 ms (50) |              4,536 → 1,029 |
+| `REPACK`                |    4.5 s |                         3 |                       3,392 ms (12) |              4,910 → 1,480 |
+| `REPACK (CONCURRENTLY)` |    5.0 s |                     **0** |                     **99 ms** (105) |              4,912 → 2,907 |
 
 With a locking rewrite, the worst write takes as long as the whole command, and whole seconds go by with no commits
 at all. Extrapolate that to the 30 GB table from the opening and you're talking minutes of downtime. `CONCURRENTLY`
-kept its worst transaction around 100 ms, which is the final swap, and never stopped the writer.
+kept its worst transaction under 100 ms, no worse than the writer's own baseline, and never stopped it. The 19.0
+re-run at 2M rows in the same container shows the same split: 0.9–1.1 s worst-case writes for `VACUUM FULL` and
+`REPACK`, and 56 ms for `CONCURRENTLY`.
 
-**CONCURRENTLY takes longer.** It was 1.2 s against 0.7–0.8 s on the M3, and 5.0 s against 3.4 s for plain `REPACK`
-in the container. It copies, catches up and then swaps. You're trading wall-clock time for availability, which is
+**CONCURRENTLY takes longer.** It was 1.2 s against 0.7–0.8 s on the M3, and 5.0 s against 4.5 s for plain `REPACK`
+in the container on 19.0. It copies, catches up and then swaps. You're trading wall-clock time for availability, which is
 the right trade for anything user-facing.
 
 ## What CONCURRENTLY needs
@@ -131,11 +140,20 @@ the right trade for anything user-facing.
 Less than I expected, and a few hard limits:
 
 - **`wal_level=replica` is enough.** I assumed that "uses logical decoding" meant switching the cluster to
-  `wal_level=logical`. On 19beta4 it doesn't. REPACK uses its own replication slots, capped by the new
-  `max_repack_replication_slots` (default 5). That cap is also how many concurrent repacks you can run.
+  `wal_level=logical`. On 19.0 it doesn't. REPACK uses its own replication slots, capped by the new
+  `max_repack_replication_slots` (default 5, set at server start). That cap is also how many concurrent repacks
+  you can run. On 19.0, two `CONCURRENTLY` runs on different tables ran side by side, one slot each.
+- **It raises the WAL level while it runs.** 19 can raise the _effective_ WAL level to `logical` on its own when a
+  logical slot appears, and REPACK's slot counts. Watching `effective_wal_level` during a run, it went from `replica`
+  to `logical` while the command ran and dropped back to `replica` shortly after it finished. You don't
+  change any configuration, but expect extra WAL (and more for replicas and archiving to absorb) for the length of
+  the repack.
 - **A primary key or index-based replica identity is required.** Tables without one are refused.
-- **It isn't for partitioned tables** (repack the partitions), `UNLOGGED` tables, system catalogs, or anything
-  that isn't a heap table. It can't run inside a transaction block.
+- **It isn't for partitioned tables** (repack the partitions), `UNLOGGED` tables, system catalogs or TOAST tables,
+  materialized views, or anything that isn't a heap table. It can't run inside a transaction block.
+- **It can fail partway.** The docs say it fails if more than about 104 million rows are updated or deleted
+  while it runs, and DDL on the table from another session can make it fail too. Like `VACUUM FULL`, it also
+  isn't MVCC-safe. On a very hot table, run it when traffic is lower.
 - **It still takes `ACCESS EXCLUSIVE` at the end.** It's brief, but it's a lock. If a long-running transaction is
   holding the table, the swap queues behind it, and every new query queues behind the swap. `lock_timeout` in the
   session running it makes the command give up instead. The catch: it gives up on the _whole_ command, so the copy
@@ -229,7 +247,7 @@ permanent schema feature.
 
 # The smaller changes that will bite someone
 
-From the release notes, confirmed on the beta:
+From the release notes, confirmed on 19.0:
 
 - **JIT is off by default.** It used to switch on based on cost estimates, which the project decided were
   unreliable. If you run big analytical queries and relied on it, set `jit = on` deliberately and measure.
@@ -245,7 +263,7 @@ From the release notes, confirmed on the beta:
 ## Two features that aren't in 19
 
 Several "what's new in PostgreSQL 19" articles list `GROUP BY ALL` and SQL:2011 `UPDATE ... FOR PORTION OF`.
-Neither is in the release notes, and both are syntax errors on 19beta4:
+Neither is in the release notes, and both are still syntax errors on the 19.0 release:
 
 ```
 ERROR:  syntax error at or near ";"
@@ -255,7 +273,8 @@ LINE 1: UPDATE rate FOR PORTION OF valid FROM '2026-06-01' TO '2026-...
 ```
 
 The same goes for SQL/PGQ property graphs, which were reverted before release: `CREATE PROPERTY GRAPH` is a syntax
-error on the beta too. When a release is this close, check the release notes and the beta, not the preview posts. `sql/whats-new-19.sql` in the repo does that in one command.
+error on 19.0 too. Check the release notes and the real server, not the preview posts. `sql/whats-new-19.sql` in
+the repo does that in one command.
 
 # Run it yourself
 
