@@ -20,10 +20,9 @@ description: PostgreSQL 19 replaces VACUUM FULL and CLUSTER with REPACK, and REP
 [[toc]]
 
 > **Updated for the PostgreSQL 19.0 release (November 19, 2026).** I first wrote this against 19beta4. I've
-> since re-run the container benchmark, the plan-advice demo and the "what's new" checks on `postgres:19`
-> (19.0). The numbers moved a little, the conclusions didn't, and every feature covered here shipped. The GA re-run also turned up one
-> new detail, about what CONCURRENTLY does to the WAL level while it runs. The M3 Pro numbers are still from the
-> beta.
+> since re-run every benchmark (on the M3 Pro and in the cloud container), the plan-advice demo and the "what's new"
+> checks on `postgres:19` (19.0). The numbers moved a little, the conclusions didn't, and every feature covered here
+> shipped. The GA re-run also turned up one new detail, about what CONCURRENTLY does to the WAL level while it runs.
 
 # The table that never shrinks
 
@@ -48,9 +47,9 @@ That's the claim. This post measures what an application writing to the table ac
 option. Everything is in
 [DemosAndArticleContent/blog/postgres-19-repack-concurrently](https://github.com/StevenPG/DemosAndArticleContent/tree/main/blog/postgres-19-repack-concurrently).
 
-The first benchmark table is from my M3 Pro MacBook in Docker Desktop (2 CPUs), run on 19beta4. Everything else
-was re-run on the 19.0 release in a 4-CPU cloud container, including a bigger table that shows something the M3
-run couldn't.
+Everything here ran on the 19.0 release. The first benchmark table is from my M3 Pro MacBook in Docker Desktop
+(2 CPUs). The rest comes from a 4-CPU cloud container, including a bigger table that shows something the M3 run
+couldn't.
 
 # The benchmark
 
@@ -79,13 +78,13 @@ and worst latency. For the seconds the method was running, the harness reports:
 
 ## Results
 
-On the M3 Pro (19beta4), with 2M rows (a 281 MB heap, 70% of it dead) and 8 writers:
+On the M3 Pro (19.0), with 2M rows (a 281 MB heap, 70% of it dead) and 8 writers:
 
 | Method                  | Duration | Writer tps before → during | Seconds with zero commits | Worst writer transaction (baseline) |
 | ----------------------- | -------: | -------------------------: | ------------------------: | ----------------------------------: |
-| `VACUUM FULL`           |    0.8 s |              8,654 → 8,138 |                         0 |                     **706 ms** (22) |
-| `REPACK`                |    0.7 s |            12,915 → 10,980 |                         0 |                     **585 ms** (56) |
-| `REPACK (CONCURRENTLY)` |    1.2 s |            13,728 → 10,384 |                         0 |                      **38 ms** (30) |
+| `VACUUM FULL`           |    0.6 s |             14,018 → 6,560 |                         0 |                     **507 ms** (17) |
+| `REPACK`                |    0.6 s |             13,512 → 6,066 |                         0 |                     **484 ms** (22) |
+| `REPACK (CONCURRENTLY)` |    1.2 s |            13,159 → 10,023 |                         0 |                       **65 ms** (7) |
 
 And the space each one gave back, which doesn't depend on the hardware:
 
@@ -98,7 +97,9 @@ And the space each one gave back, which doesn't depend on the hardware:
 A note on that second table. My harness originally recorded the "after" size at the end of the writer's
 measurement window, by which point pgbench had inserted another million rows, so the table looked like it had
 barely shrunk. It now measures the moment the command returns. The sizes above come from the 19.0 re-run, which
-has that fix, in the cloud container. They match the beta to within 1 MB.
+has that fix, in the cloud container. They match the beta to within 1 MB. The M3 ends up at 98–99 MB heap and
+38 MB of indexes. That isn't worse compaction: its writer is three times faster, so it adds about 140k rows during
+the 10-second warm-up, and the rewrite keeps them.
 
 ## What the numbers say
 
@@ -107,14 +108,15 @@ Plain `VACUUM` had left all of that in place. `CONCURRENTLY` doesn't give you a 
 
 **The lock shows up in the worst transaction, not in the averages.** On the M3 each rewrite finished in about a
 second, so there was never a whole second with zero commits. But under `VACUUM FULL` and `REPACK` the unluckiest
-writer waited **0.6–0.7 s**, basically the entire rewrite, against a baseline of 20–60 ms. Under `CONCURRENTLY` the
-worst writer waited **38 ms**, 8 ms over its baseline. That's the whole argument for the feature in two numbers.
+writer waited **about half a second**, basically the entire rewrite, against a baseline of around 20 ms. Under
+`CONCURRENTLY` the worst writer waited **65 ms**. A second run gave the same split, 443–500 ms for the locking
+methods against 133 ms for `CONCURRENTLY`. That's the whole argument for the feature in two numbers.
 
-**At this size, per-second throughput doesn't rank them.** A lock that lasts 0.7 s lands inside one or two
-one-second buckets, and the queued transactions commit in a burst straight after, so the "during" averages mostly
-measure noise. (The `VACUUM FULL` row also ran first, while the writer was still warming up, which is why its
-baseline is lower.) What the averages do show is that `CONCURRENTLY` costs the writer something while it runs, about
-a quarter of its throughput here, because it's copying the table and replaying changes alongside the load.
+**At this size, per-second throughput doesn't rank them.** A lock that lasts 0.6 s lands inside one or two
+one-second buckets, and the queued transactions commit in a burst straight after, so the "during" averages are
+noisy. In the second run, plain `REPACK` held 10,328 tps "during" while `VACUUM FULL` held 6,532, for the same
+work. What the averages do show is that `CONCURRENTLY` costs the writer something while it runs, a quarter to a
+third of its throughput here, because it's copying the table and replaying changes alongside the load.
 
 **The lock grows with the table.** A run on 19.0 with an 8M-row table (1.1 GB heap) in a 4-CPU cloud container
 shows what the M3 run was too fast to show:
@@ -131,7 +133,7 @@ kept its worst transaction under 100 ms, no worse than the writer's own baseline
 re-run at 2M rows in the same container shows the same split: 0.9–1.1 s worst-case writes for `VACUUM FULL` and
 `REPACK`, and 56 ms for `CONCURRENTLY`.
 
-**CONCURRENTLY takes longer.** It was 1.2 s against 0.7–0.8 s on the M3, and 5.0 s against 4.5 s for plain `REPACK`
+**CONCURRENTLY takes longer.** It was 1.2–1.5 s against 0.5–0.6 s on the M3, and 5.0 s against 4.5 s for plain `REPACK`
 in the container on 19.0. It copies, catches up and then swaps. You're trading wall-clock time for availability, which is
 the right trade for anything user-facing.
 
